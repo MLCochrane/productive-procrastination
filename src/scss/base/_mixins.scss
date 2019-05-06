@@ -1,0 +1,12 @@
+@mixin media-query($view) {
+  @media only screen and (min-width: #{$view}){
+    @content;
+  }
+}
+
+@mixin abs-center() {
+  position: absolute;
+  transform: translate(-50%,-50%);
+  top: 50%;
+  left: 50%;
+}
