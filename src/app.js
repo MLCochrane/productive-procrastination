@@ -2,8 +2,7 @@ import './scss/app.scss';
 import barba from '@barba/core';
 import { TimelineLite } from 'gsap';
 
-
-let slider;
+import Loader from './js/loader';
 
 barba.init({
 	transitions: [
@@ -11,7 +10,8 @@ barba.init({
 			sync: true,
 			appear: data => {
 				// Initial load
-				header();
+
+				new Loader('test', 4, 1000, 2000);
 
 				if (data.current.namespace === 'contact') {
 					return;
