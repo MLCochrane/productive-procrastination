@@ -1,0 +1,103 @@
+.header {
+	.sidebar {
+		position: fixed;
+		left: 0;
+		top: 0;
+		z-index: 999;
+		height: 100%;
+		padding: 20px;
+		background: white;
+		&::after {
+			content: '';
+			position: absolute;
+			transform: translateY(-50%);
+			top: 50%;
+			right: 0;
+			background: #000;
+			width: 2px;
+			height: 25%;
+		}
+	}
+	.brand {
+		display: inline-block;
+		vertical-align: middle;
+		@include media-query(700px) {
+			display: block;
+		}
+		&__logo {
+			font-size: 25px;
+			font-weight: 700;
+			text-transform: uppercase;
+		}
+		a {
+			text-transform: capitalize;
+			text-decoration: none;
+			color: #000;
+			font-size: 16px;
+			@include media-query($large) {
+				font-size: 26px;
+			}
+		}
+	}
+	&__nav {
+		position: fixed;
+		width: 0%;
+		height: 100%;
+		opacity: 0;
+		z-index: 99;
+		background: #D6D6D6;
+		transition: width 300ms, opacity 300ms;
+		&.isactive {
+			width: 90%;
+			opacity: 1;
+		}
+	}
+	&__burger {
+		cursor: pointer;
+		@include abs-center();
+			.burger__element {
+				transition: transform 300ms;
+			}
+		&:hover:not(.menu-open) {
+			.burger__element {
+				&--top {
+					transform: translateX(-25%);
+				}
+				&--bottom {
+					transform: translateX(-5%);
+				}
+			}
+		}
+	}
+	&__list {
+		position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+    left: 50%;
+		&-item {
+			display: inline-block;
+			font-family: $mainFont;
+			font-size: 40px;
+			font-weight: 700;
+			text-transform: uppercase;
+			padding: .5em;
+			letter-spacing: .1em;
+			a {
+				text-decoration: none;
+				color: rgba(0,0,0,0.3);
+				-webkit-text-fill-color: #D6D6D6;
+				-webkit-text-stroke-width: 1px;
+				-webkit-text-stroke-color: black;
+				transition: -webkit-text-fill-color 500ms;
+				&:hover {
+					-webkit-text-fill-color: black;
+				}
+			}
+			&.active {
+				a {
+					color: #000;
+				}
+			}
+		}
+	}
+}

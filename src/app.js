@@ -4,6 +4,11 @@ import { TimelineLite } from 'gsap';
 
 import Loader from './js/loader';
 
+import header from './js/global/header';
+
+// Global header logic
+header();
+
 barba.init({
 	transitions: [
 		{
@@ -11,7 +16,7 @@ barba.init({
 			appear: data => {
 				// Initial load
 
-				new Loader('test', 4, 1000, 2000);
+				new Loader('test', 4, 2, 1000, 500);
 
 				if (data.current.namespace === 'contact') {
 					return;
