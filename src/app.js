@@ -2,12 +2,22 @@ import './scss/app.scss';
 import barba from '@barba/core';
 import { TimelineLite } from 'gsap';
 
-import Loader from './js/loader';
+// import Loader from './js/loader';
 
 import header from './js/global/header';
+import Card from './js/global/card';
+import ScrollingProjects from './js/scroll-loop/scroll-loop';
 
 // Global header logic
 header();
+let card;
+
+const sketches = [
+	{
+		"title": "scroll",
+		"init": new ScrollingProjects()
+	}
+]
 
 barba.init({
 	transitions: [
@@ -15,26 +25,19 @@ barba.init({
 			sync: true,
 			appear: data => {
 				// Initial load
+				card = new Card();
+				card.bindEvents(data.current.container);
 
-				new Loader('test', 4, 2, 1000, 500);
-
-				if (data.current.namespace === 'contact') {
-					return;
-				}
 			},
-			enter: data => {
-				if (data.current.namespace === 'contact') {
-					return;
-				}
+			enter: ({current, next}) => {
+				card.bindEvents(next.container);
+				sketches[0].init();
 			},
 			leave: async ({ current, next }) => {
 				// Close drawer if open
-				document.getElementById('MobileNav').classList.remove('active');
+				card.unbindEvents(current.container);
 
 				await pageTransiton(current.container, next.container);
-
-				// Removed after transition done allowing slider events to fire again
-				document.body.classList.replace('is-animating', 'not-animating');
 			}
 		}
 	]
@@ -42,9 +45,6 @@ barba.init({
 
 function pageTransiton(cur, next) {
 	return new Promise(resolve => {
-		// Used to ensure slider events not called between pages when the current Slider class is changing
-		document.body.classList.replace('not-animating', 'is-animating');
-
 		// Animation handles both current and next pages
 		let tl = new TimelineLite();
 		tl

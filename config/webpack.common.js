@@ -50,5 +50,10 @@ module.exports = {
       inject: {},
       template: "src/views/pages/index.hbs"
     }),
+    new HtmlWebpackPlugin({
+      filename: 'scroll-loop/index.html',
+      inject: {},
+      template: "src/views/pages/scroll-loop.hbs"
+    }),
   ]
 }

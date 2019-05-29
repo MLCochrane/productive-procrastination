@@ -1,0 +1,19 @@
+{{#json
+'{
+	"card": {
+    "title": "Infinite Scroll",
+    "date": "Feb 2018",
+    "tags": [
+      "Design"
+    ],
+    "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam facere ratione incidunt nobis dolore excepturi porro repudiandae distinctio quisquam iusto."
+	}
+}'
+}}
+{{#> layout/base title='Scroll Loop' namespace="scroll" }}
+	{{#*inline "body"}}
+		{{> components/sketches/scrolling }}
+		{{> components/sketches/card card=this.card }}
+	{{/inline}}
+{{/layout/base}}
+{{/json}}
