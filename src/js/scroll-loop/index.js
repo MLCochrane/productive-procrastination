@@ -1,14 +1,11 @@
 import { TimelineMax, Power0 } from 'gsap';
 
-const selectors = {
-	projects: document.getElementsByClassName('thing-holder')[0],
-}
-
 export default class ScrollingProjects {
 	constructor() {
 		this.currentOffset = '';
 		this.originOffset = '';
-		this.current = window.getComputedStyle(selectors.projects);
+		this.container = document.querySelector('.thing-holder');
+		this.current = window.getComputedStyle(this.container);
 		
 		// THIS WILL BE WRONG AS THE PAGE LOADS FONT AFTERWARDS
 		// USE onLoad, PROMISE OR OTHER METHOD TO ENSURE TYPEKIT FONT HAS BEEN LOADED AND CORRECT HEIGHT RECORDED
@@ -58,12 +55,12 @@ export default class ScrollingProjects {
 		}
 
 		if (e.wheelDeltaY < 0) { // scrolling down
-			selectors.projects.style.transform = (this.currentOffset > (this.maxHeight * -0.75))
+			this.container.style.transform = (this.currentOffset > (this.maxHeight * -0.75))
 				? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
 				: `translate(-50%, -25%)`;
 		} else {
 			// scrolling up
-			selectors.projects.style.transform = (this.currentOffset < (this.maxHeight * -0.25))
+			this.container.style.transform = (this.currentOffset < (this.maxHeight * -0.25))
 				? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
 				: `translate(-50%, -75%)`;
 		}
@@ -86,9 +83,10 @@ export default class ScrollingProjects {
 	}
 
 	initSliding() {
+		console.log(this);
 		this.tl = new TimelineMax();
 		this.tl.
-			fromTo(selectors.projects, this.loopLength, { x: '-50%', y: '-25%' }, { x: '-50%', y: '-75%', ease: Power0.easeNone }, 0);
+			fromTo(this.container, this.loopLength, { x: '-50%', y: '-25%' }, { x: '-50%', y: '-75%', ease: Power0.easeNone }, 0);
 		this.tl.repeat(2);
 	}
 
