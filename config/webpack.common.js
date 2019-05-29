@@ -8,6 +8,7 @@ module.exports = {
   },
   output: {
     filename: '[name].bundle.js',
+    chunkFilename: '[name].bundle.js',
     path: path.resolve(__dirname, '../dist'),
     publicPath: ''
   },
@@ -54,6 +55,11 @@ module.exports = {
       filename: 'scroll-loop/index.html',
       inject: {},
       template: "src/views/pages/scroll-loop.hbs"
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'floating-text/index.html',
+      inject: {},
+      template: "src/views/pages/floating-text.hbs"
     }),
   ]
 }

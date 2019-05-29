@@ -4,18 +4,21 @@ import { TimelineLite } from 'gsap';
 
 // import Loader from './js/loader';
 
-import header from './js/global/header';
+import { initMenu, closeMenu, } from './js/global/header';
 import Card from './js/global/card';
-import ScrollingProjects from './js/scroll-loop/scroll-loop';
 
 // Global header logic
-header();
+initMenu();
 let card;
 
 const sketches = [
 	{
-		"title": "scroll",
-		"init": new ScrollingProjects()
+		"namespace": "scroll",
+		"path": 'js/scroll-loop/index'
+	},
+	{
+		"namespace": "floating-text",
+		"path": 'js/floating-text/index'
 	}
 ]
 
@@ -27,11 +30,13 @@ barba.init({
 				// Initial load
 				card = new Card();
 				card.bindEvents(data.current.container);
-
+				runSketch(data.current.namespace);
 			},
 			enter: ({current, next}) => {
+				closeMenu();
+
 				card.bindEvents(next.container);
-				sketches[0].init();
+				runSketch(next.namespace);
 			},
 			leave: async ({ current, next }) => {
 				// Close drawer if open
@@ -43,12 +48,22 @@ barba.init({
 	]
 });
 
+async function runSketch(namespace) {
+	const curSketch = sketches.find(el => el.namespace === namespace);
+	if (curSketch) {
+		
+		await import('./' + curSketch.path + '.js').then(result => {
+			return new result.default();
+		});
+	}
+}
+
 function pageTransiton(cur, next) {
 	return new Promise(resolve => {
 		// Animation handles both current and next pages
 		let tl = new TimelineLite();
 		tl
-		.set(next, {autoAlpha: 0, y: -5}, 0)
+		.set(next, {immediateRender: true, autoAlpha: 0, y: -5}, 0)
 		.to(cur, .5, {autoAlpha: 0, y: -5}, 0)
 		.to(next, 1, { autoAlpha: 1, y: 0, onComplete: () => { resolve(); }}, 1);
 	});
