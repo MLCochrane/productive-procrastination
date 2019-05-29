@@ -13,7 +13,7 @@
 			transform: translateY(-50%);
 			top: 50%;
 			right: 0;
-			background: #000;
+			background: $dark-grey;
 			width: 2px;
 			height: 25%;
 		}
@@ -25,14 +25,17 @@
 			display: block;
 		}
 		&__logo {
-			font-size: 25px;
 			font-weight: 700;
 			text-transform: uppercase;
+			img {
+				height: 50px;
+				width: 50px;
+			}
 		}
 		a {
 			text-transform: capitalize;
 			text-decoration: none;
-			color: #000;
+			color: $dark-grey;
 			font-size: 16px;
 			@include media-query($large) {
 				font-size: 26px;
@@ -45,7 +48,7 @@
 		height: 100%;
 		opacity: 0;
 		z-index: 99;
-		background: #D6D6D6;
+		background: $dark-grey;
 		transition: width 300ms, opacity 300ms;
 		&.isactive {
 			width: 90%;
@@ -57,14 +60,30 @@
 		@include abs-center();
 			.burger__element {
 				transition: transform 300ms;
+				&--middle {
+					transform: translateX(100%);
+				}
+			}
+			&.menu-open {
+				.burger__element {
+					&--top {
+						transform: translate(-45%, -4px);
+					}
+					&--middle {
+						transform: translateX(0%);
+					}
+					&--bottom {
+						transform: translate(-15%, 4px);
+					}
+				}
 			}
 		&:hover:not(.menu-open) {
 			.burger__element {
 				&--top {
-					transform: translateX(-25%);
+					transform: translateX(-45%);
 				}
 				&--bottom {
-					transform: translateX(-5%);
+					transform: translateX(-15%);
 				}
 			}
 		}
@@ -75,12 +94,11 @@
     top: 50%;
     left: 50%;
 		&-item {
-			display: inline-block;
 			font-family: $mainFont;
 			font-size: 40px;
 			font-weight: 700;
 			text-transform: uppercase;
-			padding: .5em;
+			padding: .25em;
 			letter-spacing: .1em;
 			a {
 				text-decoration: none;

@@ -1,0 +1,58 @@
+.card	{
+	position: absolute;
+	transform: translateY(-50%) translateX(-20px);
+	top: 50%;
+	right: 50px;
+	width: 300px;
+	padding: 20px;
+	border: 1px solid $dark-grey;
+	opacity: 0;
+	background: white;
+	transition: opacity 300ms, transform 300ms;
+	&.isOpen {
+		opacity: 1;
+		transform: translateY(-50%) translateX(0);
+	}
+	&__title {
+		font-size: 20px;
+		margin-bottom: .25em;
+	}
+	&__tags {
+		margin: 2em 0;
+	}
+	&__tag {
+		display: inline-block;
+		position: relative;
+		font-size: 14px;
+		&:not(:last-of-type) {
+			padding-right: 6px;
+			&::after {
+				content: '•';
+				position: absolute;
+				transform: translateY(-50%);
+				top: 50%;
+				right: 0;
+			}
+		}
+	}
+	&__toggle {
+		cursor: pointer;
+		position: absolute;
+    transform: translate(-50%,-50%);
+    top: 50%;
+		right: 0px;
+		&.isactive {
+			svg {
+				transform: rotate(0deg);
+			}
+		}
+		svg {
+			transform: rotate(45deg);
+			transition: transform 300ms ease-in-out;
+		}
+		circle {
+			fill: none;
+			stroke: $dark-grey;
+		}
+	}
+}
