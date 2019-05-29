@@ -1,0 +1,20 @@
+{{#json
+'{
+	"card": {
+    "title": "Floating Text",
+    "date": "Feb 2018",
+    "tags": [
+			"3D",
+      "Interaction"
+    ],
+    "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam facere ratione incidunt nobis dolore excepturi porro repudiandae distinctio quisquam iusto."
+	}
+}'
+}}
+{{#> layout/base title='Floating Text' namespace="floating-text" }}
+	{{#*inline "body"}}
+		{{> components/sketches/floating-text }}
+		{{> components/sketches/card card=this.card }}
+	{{/inline}}
+{{/layout/base}}
+{{/json}}
