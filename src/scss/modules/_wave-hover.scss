@@ -1,0 +1,15 @@
+.project__display {
+	position: relative;
+	background: black;
+	width: 100%;
+	height: 100%;
+	&-wrapper {
+		width: 100%;
+		height: 100%;
+	}
+	canvas {
+		@include abs-center();
+		height: 512px;
+		width: 512px;
+	}
+}

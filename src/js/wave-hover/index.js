@@ -1,58 +1,68 @@
-// var width = window.offsetWidth;
-// var height = window.offsetHeight;
-// var playground = document.getElementsByClassName('project__display')[0];
+import * as PIXI from 'pixi.js';
 
-// var canvas;
+export default class HoverMap {
+	constructor() {
+		this.app = new PIXI.Application({
+			autoResize: true,
+			width: 512,
+			height: 512,
+			resolution: devicePixelRatio
+		});
+		this.playground = document.getElementsByClassName('project__display')[0];
+		this.container;
 
-// var ratio = 150 / 830;
+		this.displacementSprite;
+		this.displacementFitler;
 
-// var raf;
+		this.delta = {
+			num: 1
+		}
 
+		this.setScene = this.setScene.bind(this);
+		this.removeScene = this.removeScene.bind(this);
 
-// var renderer = PIXI.autoDetectRenderer(512, 512, {
-// 	transparent: true
-// });
-// renderer.autoResize = true;
-// var tp, preview;
-// var displacementSprite,
-// 	displacementFilter,
-// 	stage;
+		this.setScene('./src/assets/hover/GalPal.png');
+	}
 
-// function setScene(url) {
-// 	playground.appendChild(renderer.view);
+	setScene(url) {
+		this.playground.appendChild(this.app.view);
+		this.container = new PIXI.Container();
 
-// 	stage = new PIXI.Container();
+		this.app.stage.addChild(this.container);
 
-// 	tp = PIXI.Texture.fromImage(url);
-// 	preview = new PIXI.Sprite(tp);
+		const tp = PIXI.Texture.from(url);
+		const image = new PIXI.Sprite(tp);
 
-// 	preview.anchor.x = 0;
+		image.anchor.x = 0;
 
-// 	displacementSprite = PIXI.Sprite.fromImage('images/displacement.png');
-// 	displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+		this.displacementSprite = PIXI.Sprite.from('./src/assets/hover/displacement.png');
+		this.displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
+		this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
 
-// 	displacementFilter = new PIXI.filters.DisplacementFilter(displacementSprite);
+		this.container.addChild(this.displacementSprite);
+		this.container.addChild(image);
 
-// 	displacementSprite.scale.y = 1.5;
-// 	displacementSprite.scale.x = 1.5;
+		this.displacementFilter.scale.x = 20;
+		this.displacementFilter.scale.y = 30;
 
+		this.container.filters = [this.displacementFilter];
+		this.animate();
+	}
 
-// 	stage.addChild(displacementSprite);
+	removeScene() {
+		cancelAnimationFrame(raf);
+		app.stage.removeChildren();
+		app.stage.destroy(true);
+		playground.removeChild(this.container);
+	}
 
-// 	stage.addChild(preview);
-
-// 	animate();
-// }
-
-// function removeScene() {
-// 	cancelAnimationFrame(raf);
-// 	stage.removeChildren();
-// 	stage.destroy(true);
-// 	playground.removeChild(canvas);
-// }
-// let timer = '';
-// playground.interactive = true;
-
+	animate() {
+		this.app.ticker.add(() => {
+			this.displacementSprite.x += this.delta.num;
+			this.displacementSprite.y += this.delta.num;
+		});
+	}
+}
 // let tween = function (a) {
 // 	if (a == 'up') {
 // 		TweenLite.to(delta, 1, {
@@ -74,32 +84,3 @@
 // playground.addEventListener('mouseover', () => {
 
 // })
-// var delta = {
-// 	num: 1
-// };
-
-// function animate() {
-// 	raf = requestAnimationFrame(animate);
-
-// 	displacementSprite.x += delta.num;
-// 	displacementSprite.y += delta.num;
-
-// 	stage.filters = [displacementFilter];
-
-// 	renderer.render(stage);
-
-// 	canvas = playground.querySelector('canvas');
-// }
-
-// setScene('images/GalPal.png');
-
-
-// function moveBtn() {
-// 	let el = document.getElementsByClassName('project__button-text')[0];
-// 	el.style.transform = 'translateX(5px)';
-// }
-
-
-export default () => {
-	console.log('this would be the ting!');
-}
