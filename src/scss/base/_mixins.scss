@@ -10,3 +10,16 @@
   top: 50%;
   left: 50%;
 }
+
+@mixin gradient() {
+  background: #cde9cf;
+  /* Old browsers */
+  background: -moz-linear-gradient(top, #cde9cf 0%, #fff6ea 100%);
+  /* FF3.6-15 */
+  background: -webkit-linear-gradient(top, #cde9cf 0%, #fff6ea 100%);
+  /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(to bottom, #cde9cf 0%, #fff6ea 100%);
+  /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#cde9cf', endColorstr='#fff6ea', GradientType=0);
+  /* IE6-9 */
+}

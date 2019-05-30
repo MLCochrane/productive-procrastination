@@ -1,0 +1,84 @@
+.video-wrapper {
+	position: relative;
+	padding-bottom: 56.25%;
+	height: 0;
+	width: 100%;
+
+	iframe {
+		position: absolute;
+		top: 0;
+		left: 0;
+		height: 100%;
+		width: 100%;
+	}
+}
+
+.slider-container {
+	position: relative;
+	height: 321px;
+	background-color: black;
+	background-image: url('https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg');
+	background-position: center;
+	background-repeat: no-repeat;
+	background-size: cover;
+
+	@media only screen and (min-width: 770px) {
+		height: 525px;
+	}
+
+	button {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		width: 100px;
+		height: 68px;
+		background: #cc1f22;
+		border: none;
+		color: white;
+		font-size: 12px;
+		font-family: $mainFont;
+		font-weight: bold;
+		cursor: pointer;
+
+		&.pause,
+		&.play {
+			display: none;
+		}
+	}
+
+	svg {
+		display: none;
+		position: absolute;
+		transform: translate(-50%, -50%);
+		top: 50%;
+		left: 50%;
+		height: 50px;
+		width: 50px;
+		animation: rotate 1s infinite linear;
+	}
+}
+
+.close {
+	position: absolute;
+	top: 5%;
+	right: 5%;
+	color: white;
+	font-size: 30px;
+	line-height: 30px;
+	height: 40px;
+	width: 40px;
+	border: 1px solid white;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+@keyframes rotate {
+	0% {
+		transform: translate(-50%, -50%) rotate(0deg);
+	}
+
+	100% {
+		transform: translate(-50%, -50%) rotate(360deg)
+	}
+}

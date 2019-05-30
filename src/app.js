@@ -13,12 +13,34 @@ let card;
 
 const sketches = [
 	{
-		"namespace": "scroll",
-		"path": 'js/scroll-loop/index'
+		'namespace': 'scroll',
+		'path': 'js/scroll-loop/index',
+		'constructor': []
 	},
 	{
-		"namespace": "floating-text",
-		"path": 'js/floating-text/index'
+		'namespace': 'floating-text',
+		'path': 'js/floating-text/index',
+		'constructor': []
+	},
+	{
+		'namespace': 'wave-hover',
+		'path': 'js/wave-hover/index',
+		'constructor': []
+	},
+	{
+		'namespace': 'cutout-slider',
+		'path': 'js/cutout-slider/index',
+		'constructor': []
+	},
+	{
+		'namespace': 'inverse-scroll',
+		'path': 'js/inverse-scroll/index',
+		'constructor': []
+	},
+	{
+		'namespace': 'custom-player',
+		'path': 'js/custom-player/index',
+		'constructor': 'Cihr9OWsEuk'
 	}
 ]
 
@@ -51,9 +73,8 @@ barba.init({
 async function runSketch(namespace) {
 	const curSketch = sketches.find(el => el.namespace === namespace);
 	if (curSketch) {
-		
 		await import('./' + curSketch.path + '.js').then(result => {
-			return new result.default();
+			return new result.default(curSketch.constructor);
 		});
 	}
 }

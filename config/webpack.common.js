@@ -59,5 +59,25 @@ module.exports = {
       inject: {},
       template: "src/views/pages/floating-text.hbs"
     }),
+    new HtmlWebpackPlugin({
+      filename: 'wave-hover/index.html',
+      inject: {},
+      template: "src/views/pages/wave-hover.hbs"
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'cutout-slider/index.html',
+      inject: {},
+      template: "src/views/pages/cutout-slider.hbs"
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'inverse-scroll/index.html',
+      inject: {},
+      template: "src/views/pages/inverse-scroll.hbs"
+    }),
+    new HtmlWebpackPlugin({
+      filename: 'custom-player/index.html',
+      inject: {},
+      template: "src/views/pages/custom-player.hbs"
+    }),
   ]
 }

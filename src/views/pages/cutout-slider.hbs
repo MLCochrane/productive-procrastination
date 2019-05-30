@@ -1,0 +1,20 @@
+{{#json
+'{
+	"card": {
+    "title": "Cutout Slider",
+    "date": "Feb 2018",
+    "tags": [
+			"SVG",
+      "Interaction"
+    ],
+    "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam facere ratione incidunt nobis dolore excepturi porro repudiandae distinctio quisquam iusto."
+	}
+}'
+}}
+{{#> layout/base title='Cutout Slider' namespace="cutout-slider" }}
+	{{#*inline "body"}}
+		{{> components/sketches/cutout-slider }}
+		{{> components/sketches/card card=this.card }}
+	{{/inline}}
+{{/layout/base}}
+{{/json}}

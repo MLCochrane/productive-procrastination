@@ -1,0 +1,20 @@
+{{#json
+'{
+	"card": {
+    "title": "Wave Hover",
+    "date": "Feb 2018",
+    "tags": [
+      "Graphics",
+			"Interaction"
+    ],
+    "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam facere ratione incidunt nobis dolore excepturi porro repudiandae distinctio quisquam iusto."
+	}
+}'
+}}
+{{#> layout/base title='Wave Hover' namespace="wave-hover" }}
+	{{#*inline "body"}}
+		{{> components/sketches/wave-hover }}
+		{{> components/sketches/card card=this.card }}
+	{{/inline}}
+{{/layout/base}}
+{{/json}}

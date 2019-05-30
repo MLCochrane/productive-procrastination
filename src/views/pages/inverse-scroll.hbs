@@ -1,0 +1,20 @@
+{{#json
+'{
+	"card": {
+    "title": "Inverse Scroll",
+    "date": "Feb 2018",
+    "tags": [
+      "Design",
+			"Interaction"
+    ],
+    "description": "Lorem ipsum dolor, sit amet consectetur adipisicing elit. Aliquam facere ratione incidunt nobis dolore excepturi porro repudiandae distinctio quisquam iusto."
+	}
+}'
+}}
+{{#> layout/base title='Inverse Scroll' namespace="inverse-scroll" }}
+{{#*inline "body"}}
+{{> components/sketches/inverse-scroll }}
+{{> components/sketches/card card=this.card }}
+{{/inline}}
+{{/layout/base}}
+{{/json}}
