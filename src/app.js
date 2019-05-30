@@ -51,18 +51,15 @@ barba.init({
 			appear: data => {
 				// Initial load
 				card = new Card();
-				card.bindEvents(data.current.container);
-				runSketch(data.current.namespace);
+				runSketch(data.current);
 			},
 			enter: ({current, next}) => {
 				closeMenu();
-
-				card.bindEvents(next.container);
-				runSketch(next.namespace);
+				runSketch(next);
 			},
 			leave: async ({ current, next }) => {
 				// Close drawer if open
-				card.unbindEvents(current.container);
+				if (current.namespace !== 'home') card.unbindEvents(current.container);
 
 				await pageTransiton(current.container, next.container);
 			}
@@ -70,13 +67,13 @@ barba.init({
 	]
 });
 
-async function runSketch(namespace) {
-	const curSketch = sketches.find(el => el.namespace === namespace);
-	if (curSketch) {
-		await import('./' + curSketch.path + '.js').then(result => {
-			return new result.default(curSketch.constructor);
-		});
-	}
+async function runSketch(route) {
+	const curSketch = sketches.find(el => el.namespace === route.namespace);
+	if (!curSketch) return;
+	await import('./' + curSketch.path + '.js').then(result => {
+		card.bindEvents(route.container);
+		return new result.default(curSketch.constructor);
+	});
 }
 
 function pageTransiton(cur, next) {
