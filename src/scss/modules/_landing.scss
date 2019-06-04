@@ -1,0 +1,17 @@
+.landing {
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	&__section {
+		width: 70%;
+		margin: 0 auto;
+		&:last-of-type {
+			margin-top: 100px;
+		}
+	}
+	&__copy {
+		font-size: 54px;
+		font-weight: 500;
+	}
+}

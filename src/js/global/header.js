@@ -1,6 +1,6 @@
 const burger = document.getElementById('ToggleNav');
 const menu = document.getElementById('MainNav');
-const page = document.getElementsByClassName('page-main')[0];
+const close = document.querySelector('.header__sec--right');
 
 export function initMenu() {
 	burger.addEventListener('click', e => {
@@ -10,12 +10,8 @@ export function initMenu() {
 		burger.classList.toggle('menu-open');
 	});
 
-	page.addEventListener('click', e => {
-		// WILL ONLY WORK ON FIRST PAGE
-		// Rebind page node on transition
-		
+	close.addEventListener('click', e => {
 		e.stopPropagation();
-
 		closeMenu();
 	});
 }
