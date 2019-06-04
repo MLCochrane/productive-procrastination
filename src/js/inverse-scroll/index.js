@@ -6,6 +6,8 @@ export default class Slider {
 
 		this.leftPanel = $('.content__section--left');
 		this.rightPanel = $('.content__section--right');
+		this.$wrap = $('.content-wrap');
+		this.$container = $('.scrolling-container');
 
 		this.isAnimating = false;
 
@@ -25,25 +27,20 @@ export default class Slider {
 
 		// MAYBE USE LODASH BEBOUNCE?
 		let scrollEnded;
-		$(window).on('scroll', e => {
+		this.$container.on('scroll', e => {
 			e.preventDefault();
-			console.log(this.isAnimating);
-			// if (this.isAnimating) {
-			//   $(this.leftPanel).stop(false, false);
-			//   $(this.rightPanel).stop(false, false);
-			// }
 			clearTimeout(scrollEnded);
 			scrollEnded = setTimeout(() => {
 				this.straightenUp();
 			}, 500);
-			this.scrollPanel($(window).scrollTop() * -1);
+			this.scrollPanel(this.$container.scrollTop() * -1);
 		});
 	}
 
 	setHeights() {
 		this.winHeight = $('.content').innerHeight();
 		$('.panel').height(this.winHeight);
-		$('body').height(this.winHeight * this.slideLength);
+		this.$wrap.height(this.winHeight * this.slideLength);
 	}
 
 	straightenUp() {
@@ -95,10 +92,3 @@ export default class Slider {
 
 	}
 }
-
-// TODO:
-// - cancel animation on scroll
-// - add more content
-// - logo animation
-//   - same same -> same2 -> s2
-// - what else should be included on the site?

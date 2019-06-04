@@ -79,11 +79,10 @@ export default class ScrollingProjects {
 			} else {
 				this.tl.reverse(timelinePosition);
 			}
-		}, 500);
+		}, 300);
 	}
 
 	initSliding() {
-		console.log(this);
 		this.tl = new TimelineMax();
 		this.tl.
 			fromTo(this.container, this.loopLength, { x: '-50%', y: '-25%' }, { x: '-50%', y: '-75%', ease: Power0.easeNone }, 0);

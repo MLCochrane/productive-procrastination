@@ -13,8 +13,18 @@ export default class Player {
 	}
 
 	createMarkup() {
-		$('.content').append(`<div class="slider-container">
-<div class="video-wrapper">              <div id="video-placeholder"></div>            </div>            <button class="start">Watch Now</button>            <button class="play">Play</button>            <button class="pause">Pause</button>            <svg class="loading" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 50 50">            <style type="text/css">            	.st0{fill:#FFFFFF;stroke:#FFFFFF;stroke-miterlimit:10;}            </style><path class="st0" d="M37.1,8.1c0,2.5-1.3,4.7-3.3,5.9c-0.2,0.1-0.5,0.2-0.7,0.1c-1.3-0.3-2.7-0.4-4.1-0.4 c-10.1,0-18.4,7.5-18.4,16.9c0,8.5,6.8,15.5,15.6,16.7c0.1,0,0.1,0.2,0,0.2l-0.1,0C15.9,48,6.3,41.5,3.5,31.5 C-0.8,16.3,10.5,2.6,25,2.6c4.2,0,8.1,1.1,11.4,3.1c0.2,0.1,0.4,0.3,0.5,0.6C37,6.9,37.1,7.5,37.1,8.1z"/><path class="st0" d="M36.7,5.9c0.3,0.7,0.4,1.5,0.4,2.3c0,2.6-1.5,4.9-3.6,6.1"/></svg><div class="close">X</div></div>`)
+		$('.content').append(`
+		<div class="slider-container">
+			<div class="video-wrapper">
+				<div id="video-placeholder"></div>
+			</div>
+			<div class="hover-detective"></div>
+			<button class="start">Watch Now</button>
+			<button class="play">Play</button>
+			<button class="pause">Pause</button>
+			<svg class="loading" viewBox="0 0 50 50"><style type="text/css">.st0{fill:#FFFFFF;stroke:#FFFFFF;stroke-miterlimit:10;}</style><path class="st0" d="M37.1,8.1c0,2.5-1.3,4.7-3.3,5.9c-0.2,0.1-0.5,0.2-0.7,0.1c-1.3-0.3-2.7-0.4-4.1-0.4 c-10.1,0-18.4,7.5-18.4,16.9c0,8.5,6.8,15.5,15.6,16.7c0.1,0,0.1,0.2,0,0.2l-0.1,0C15.9,48,6.3,41.5,3.5,31.5 C-0.8,16.3,10.5,2.6,25,2.6c4.2,0,8.1,1.1,11.4,3.1c0.2,0.1,0.4,0.3,0.5,0.6C37,6.9,37.1,7.5,37.1,8.1z"/><path class="st0" d="M36.7,5.9c0.3,0.7,0.4,1.5,0.4,2.3c0,2.6-1.5,4.9-3.6,6.1"/></svg>
+			<div class="close">X</div>
+		</div>`)
 	}
 
 	getScrollAmt() {
@@ -31,19 +41,23 @@ export default class Player {
 			// Load video and hide button
 			this.loadVideo();
 			$(e.currentTarget).toggle();
+			$('.hover-detective').css('display', 'inherit');
 			$('.loading').toggle();
 		});
 
 		// Custom controls for video
 		$('.play').on('click', () => {
+			$('.hover-detective').css('display', 'inherit');
 			this.player.playVideo();
 		});
 		$('.pause').on('click', () => {
+			$('.hover-detective').css('display', 'none');
 			this.player.pauseVideo();
 		});
 
 		$('.close').on('click', () => {
 			this.transitionPlayer('close', this.origHeight);
+			$('.hover-detective').css('display', 'none');
 			this.player.destroy();
 		});
 
@@ -57,9 +71,14 @@ export default class Player {
 		//   // }, 100);
 		// });
 		//
-		// $('.video-placeholder').on('mousemove', () => {
-		//   console.log('iframe');
-		// });
+		let timeout;
+		$('.hover-detective').on('mousemove', () => {
+			$('.pause').css('display', 'inherit');
+			clearTimeout(timeout);
+			timeout = setTimeout(() => {
+				$('.pause').css('display', 'none');
+			}, 400);
+		});
 
 		// Reset height variables on resize
 		let resizeWindow;
@@ -125,7 +144,7 @@ export default class Player {
 		if (e.data === 1) {
 			// console.log('Playing');
 			$('.play').css('display', 'none');
-			$('.pause').css('display', 'inherit');
+			$('.pause').css('display', 'none');
 		} else if (e.data === 2) {
 			// console.log('Paused');
 			$('.play').css('display', 'inherit');

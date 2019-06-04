@@ -17,10 +17,10 @@
 	position: relative;
 	height: 321px;
 	background-color: black;
-	background-image: url('https://cdn.pixabay.com/photo/2017/08/30/01/05/milky-way-2695569__340.jpg');
 	background-position: center;
 	background-repeat: no-repeat;
 	background-size: cover;
+	overflow: hidden;
 
 	@media only screen and (min-width: 770px) {
 		height: 525px;
@@ -32,8 +32,8 @@
 		left: 50%;
 		transform: translate(-50%, -50%);
 		width: 100px;
-		height: 68px;
-		background: #cc1f22;
+		height: 46px;
+		background: $dark-grey;
 		border: none;
 		color: white;
 		font-size: 12px;
@@ -81,4 +81,13 @@
 	100% {
 		transform: translate(-50%, -50%) rotate(360deg)
 	}
+}
+
+
+.hover-detective {
+	position: absolute;
+	height: 100%;
+	width: 100%;
+	top: 0;
+	display: none;
 }
