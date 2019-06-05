@@ -5,8 +5,11 @@
 		top: 0;
 		z-index: 999;
 		height: 100%;
-		padding: 20px;
+		padding: 5px;
 		background: white;
+		@include media-query($large) {
+			padding: 20px;
+		}
 		&::after {
 			content: '';
 			position: absolute;
@@ -28,8 +31,12 @@
 			font-weight: 700;
 			text-transform: uppercase;
 			img {
-				height: 50px;
-				width: 50px;
+				height: 40px;
+				width: 40px;
+				@include media-query($large) {
+					height: 50px;
+					width: 50px;
+				}
 			}
 		}
 		a {
@@ -57,11 +64,18 @@
 	}
 	&__sec {
 		&--left { 
-			width: 90%;
+			width: 100%;
 			background: $dark-grey;
+			@include media-query($large) {
+				width: 90%;
+			}
 		}
 		&--right {
-			width: 10%;
+			display: none;
+			@include media-query($large) {
+				width: 10%;
+				display: inherit;
+			}
 		}
 	}
 	&__burger {
@@ -106,11 +120,20 @@
 		position: absolute;
     transform: translate(-50%,-50%);
     top: 50%;
-    left: 50%;
+		left: 50%;
+		width: 100%;
+		padding-left: 60px;
+		@include media-query($large) {
+			width: auto;
+			padding: 0;
+		}
 		&-item {
 			font-family: $mainFont;
-			font-size: 40px;
+			font-size: 32px;
 			padding: .25em;
+			@include media-query($large) {
+				font-size: 40px;
+			}
 			a {
 				text-decoration: none;
 				color: #eee;
