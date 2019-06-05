@@ -36,8 +36,8 @@ export default class CutoutSlider {
     });
 
     this.selectors.button1.addEventListener('click', () => {
-    	this.tl.reverse();
-    	// this.tl.pause();
+    	this.tl.time(0);
+    	this.tl.pause();
     });
 
     this.selectors.box.addEventListener('mousemove', () => {
@@ -59,47 +59,47 @@ export default class CutoutSlider {
 	initTimeline() {
 		this.tl
 			.set(this.selectors.title, {x: this.dims.offset})
-			.set(this.selectors.box, {backgroundColor: "rgb(231, 174, 0)"})
-			.set(this.selectors.border, {fill: "rgb(231, 174, 0)"})
+			.set(this.selectors.box, {backgroundColor: "rgb(190,254,251)"})
+			.set(this.selectors.border, {fill: "rgb(190,254,251)"})
       .addPause()
       .to(this.selectors.title, 2, {x: 0, ease:Power3.easeOut})
-      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(2, 120, 254)"}}, 0)
-      .to(this.selectors.border, 1, {fill:"rgb(2, 120, 254)"}, 0)
+      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(13,126,107)"}}, 0)
+      .to(this.selectors.border, 1, {fill:"rgb(13,126,107)"}, 0)
       .to(this.selectors.one, 1, {width: "200px"}, 0)
 			.to(this.selectors.two, 1, {width: "500px", x: "20px"}, 0)
 			.to(this.selectors.three, 1, {width: "200px", x: "100px"}, 0)
-      .to(this.selectors.shade, 1.75, {fill: "rgb(2, 120, 254)", x: "1500px"}, 0)
-      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(2, 120, 254, 0.6)"}, 0)
+      .to(this.selectors.shade, 1.75, {fill: "rgb(13, 126, 107)", x: "1500px"}, 0)
+      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(13, 126, 107, 0.6)"}, 0)
       .set(this.selectors.image, {background: "url(src/assets/images/hp-left-1.jpg)"}, .5)
       .addPause()
       .to(this.selectors.title, 2, {x: -this.dims.offset, ease:Power3.easeOut})
-      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(191, 175, 160)"}}, 2)
-      .to(this.selectors.border, 1, {fill:"rgb(191, 175, 160)"}, 2)
+      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(244,229,94)"}}, 2)
+      .to(this.selectors.border, 1, {fill:"rgb(244,229,94)"}, 2)
       .to(this.selectors.one, 1, {width: "320px", x: "200px"}, 2)
 			.to(this.selectors.two, 1, {width: "400px", x: "-50px"}, 2)
 			.to(this.selectors.three, 1, {width: "500px", x: "0px"}, 2)
-      .to(this.selectors.shade, 1.75, {fill: "rgb(191, 175, 160)", x: "0px"}, 2)
-      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(191, 175, 160, 0.6)"}, 2)
+      .to(this.selectors.shade, 1.75, {fill: "rgb(244,229,94)", x: "0px"}, 2)
+      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(244, 229, 94, 0.6)"}, 2)
       .set(this.selectors.image, {background: "url(src/assets/images/hp-left-2.jpg)"}, 2.5)
       .addPause()
       .to(this.selectors.title, 2, {x: -(2 * this.dims.offset), ease:Power3.easeOut})
-      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(204, 165, 151)"}}, 4)
-      .to(this.selectors.border, 1, {fill:"rgb(204, 165, 151)"}, 4)
+      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(241,50,76)"}}, 4)
+      .to(this.selectors.border, 1, {fill:"rgb(241,50,76)"}, 4)
       .to(this.selectors.one, 1, {width: "200px", x: "50px"}, 4)
 			.to(this.selectors.two, 1, {width: "600px", x: "100px"}, 4)
 			.to(this.selectors.three, 1, {width: "400px", x: "250px"}, 4)
-      .to(this.selectors.shade, 1.75, {fill: "rgb(204, 165, 151)", x: "1500px"}, 4)
-      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(204, 165, 151, 0.6)"}, 4)
+      .to(this.selectors.shade, 1.75, {fill: "rgb(241,50,76)", x: "1500px"}, 4)
+      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(241,50,76, 0.6)"}, 4)
       .set(this.selectors.image, {background: "url(src/assets/images/hp-left-3.jpg)"}, 4.5)
       .addPause()
       .to(this.selectors.title, 2, {x: -(3 * this.dims.offset), ease:Power3.easeOut})
-      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(0, 255, 153)"}}, 6)
-      .to(this.selectors.border, 1, {fill:"rgb(0, 255, 153)"}, 6)
+      .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(26,186,84)"}}, 6)
+      .to(this.selectors.border, 1, {fill:"rgb(26,186,84)"}, 6)
 			.to(this.selectors.one, 1, {width: "200px", x: "10px"}, 6)
 			.to(this.selectors.two, 1, {width: "500px", x: "0px"}, 6)
 			.to(this.selectors.three, 1, {width: "200px", x: "50px"}, 6)
-			.to(this.selectors.shade, 1.75, {fill: "rgb(0, 255, 153)", x: "0px"}, 6)
-      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(0, 255, 153, 0.6)"}, 6)
+			.to(this.selectors.shade, 1.75, {fill: "rgb(26,186,84)", x: "0px"}, 6)
+      .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(26,186,84,0.6)"}, 6)
       .set(this.selectors.image, {background: "url(src/assets/images/hp-left-4.jpg)"}, 6.5);
 	}
 }

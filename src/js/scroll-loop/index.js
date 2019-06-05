@@ -12,7 +12,7 @@ export default class ScrollingProjects {
 		this.maxHeight = (this.current.getPropertyValue('height').split('px'))[0];
 		
 		this.tl = {};
-		this.loopSeconds = 16;
+		this.loopSeconds = 20;
 		this.loopLength = this.loopSeconds * 1920 / window.innerWidth;
 
 		this.start = null;
@@ -86,7 +86,7 @@ export default class ScrollingProjects {
 		this.tl = new TimelineMax();
 		this.tl.
 			fromTo(this.container, this.loopLength, { x: '-50%', y: '-25%' }, { x: '-50%', y: '-75%', ease: Power0.easeNone }, 0);
-		this.tl.repeat(2);
+		this.tl.repeat(5);
 	}
 
 	getYTranslate(el) {
