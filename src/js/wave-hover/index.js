@@ -25,7 +25,7 @@ export default class HoverMap {
 		this.handleMouseover = this.handleMouseover.bind(this);
 		this.handleMouseout = this.handleMouseout.bind(this);
 
-		this.setScene('./src/assets/hover/GalPal.png');
+		this.setScene('./src/assets/hover/Hover-Image.jpg');
 		this.bindEvents();
 	}
 	

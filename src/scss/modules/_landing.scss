@@ -14,4 +14,11 @@
 		font-size: 54px;
 		font-weight: 500;
 	}
+	&__link {
+		color: black;
+		transition: color 300ms;
+		&:hover {
+			color: $brand-yellow;
+		}
+	}
 }

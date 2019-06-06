@@ -139,7 +139,7 @@
 				color: #eee;
 				transition: color 300ms;
 				&:hover {
-					color: #ee8002;
+					color: $brand-yellow;
 				}
 			}
 			&.active {
@@ -148,5 +148,15 @@
 				}
 			}
 		}
+	}
+	&__disclaimer {
+		position: absolute;
+		transform: translateX(-50%);
+		left: 50%;
+		bottom: 0;
+		color: white;
+		width: 70%;
+		padding-bottom: 1em;
+		text-align: center;
 	}
 }
