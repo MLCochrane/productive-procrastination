@@ -1,6 +1,18 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
+const paths = ['scroll-loop', 'floating-text', 'wave-hover', 'cutout-slider', 'inverse-scroll', 'paralax'];
+const pages = paths.map((el) => {
+  return new HtmlWebpackPlugin({ // eslint-disable-line no-new
+    filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
+    inject: {},
+    template: `src/views/pages/${el}.hbs`,
+    templateParameters: {
+      asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
+    }
+  });
+});
+
 module.exports = {
   entry: {
     app: ['@babel/polyfill', './src/app.js']
@@ -9,7 +21,7 @@ module.exports = {
     filename: '[name].bundle.js',
     chunkFilename: '[name].[contenthash].js',
     path: path.resolve(__dirname, '../dist'),
-    publicPath: ''
+    publicPath: '/'
   },
   module: {
     rules: [
@@ -21,14 +33,18 @@ module.exports = {
       {
         test: /\.(png|svg|jpg|gif)$/,
         use: [
-          'file-loader',
           {
+            loader: 'file-loader',
+            options: {
+              name: 'assets/[name].[ext]',
+            },
+          }, {
             loader: 'image-webpack-loader',
             options: {
-              disable: true
-            }
-          }
-        ] 
+              disable: true,
+            },
+          },
+        ]
       },
       {
         test: /\.(hbs|handlebars)/,
@@ -48,36 +64,6 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: {},
       template: "src/views/pages/index.hbs"
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'scroll-loop/index.html',
-      inject: {},
-      template: "src/views/pages/scroll-loop.hbs"
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'floating-text/index.html',
-      inject: {},
-      template: "src/views/pages/floating-text.hbs"
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'wave-hover/index.html',
-      inject: {},
-      template: "src/views/pages/wave-hover.hbs"
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'cutout-slider/index.html',
-      inject: {},
-      template: "src/views/pages/cutout-slider.hbs"
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'inverse-scroll/index.html',
-      inject: {},
-      template: "src/views/pages/inverse-scroll.hbs"
-    }),
-    new HtmlWebpackPlugin({
-      filename: 'custom-player/index.html',
-      inject: {},
-      template: "src/views/pages/custom-player.hbs"
-    }),
-  ]
+    })
+  ].concat(pages),
 }
