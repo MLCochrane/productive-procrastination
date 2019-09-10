@@ -70,7 +70,7 @@ export default class CutoutSlider {
 			.to(this.selectors.three, 1, {width: "200px", x: "100px"}, 0)
       .to(this.selectors.shade, 1.75, {fill: "rgb(13, 126, 107)", x: "1500px"}, 0)
       .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(13, 126, 107, 0.6)"}, 0)
-      .set(this.selectors.image, {background: "url(src/assets/images/hp-left-1.jpg)"}, .5)
+      .set(this.selectors.image, {background: `url(${ASSET_PATH}/assets/images/hp-left-1.jpg)`}, .5)
       .addPause()
       .to(this.selectors.title, 2, {x: -this.dims.offset, ease:Power3.easeOut})
       .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(244,229,94)"}}, 2)
@@ -80,7 +80,7 @@ export default class CutoutSlider {
 			.to(this.selectors.three, 1, {width: "500px", x: "0px"}, 2)
       .to(this.selectors.shade, 1.75, {fill: "rgb(244,229,94)", x: "0px"}, 2)
       .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(244, 229, 94, 0.6)"}, 2)
-      .set(this.selectors.image, {background: "url(src/assets/images/hp-left-2.jpg)"}, 2.5)
+      .set(this.selectors.image, {background: `url(${ASSET_PATH}/assets/images/hp-left-2.jpg)`}, 2.5)
       .addPause()
       .to(this.selectors.title, 2, {x: -(2 * this.dims.offset), ease:Power3.easeOut})
       .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(241,50,76)"}}, 4)
@@ -90,7 +90,7 @@ export default class CutoutSlider {
 			.to(this.selectors.three, 1, {width: "400px", x: "250px"}, 4)
       .to(this.selectors.shade, 1.75, {fill: "rgb(241,50,76)", x: "1500px"}, 4)
       .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(241,50,76, 0.6)"}, 4)
-      .set(this.selectors.image, {background: "url(src/assets/images/hp-left-3.jpg)"}, 4.5)
+      .set(this.selectors.image, {background: `url(${ASSET_PATH}/assets/images/hp-left-3.jpg)`}, 4.5)
       .addPause()
       .to(this.selectors.title, 2, {x: -(3 * this.dims.offset), ease:Power3.easeOut})
       .to(this.selectors.box, 1, {css:{backgroundColor:"rgb(26,186,84)"}}, 6)
@@ -100,6 +100,6 @@ export default class CutoutSlider {
 			.to(this.selectors.three, 1, {width: "200px", x: "50px"}, 6)
 			.to(this.selectors.shade, 1.75, {fill: "rgb(26,186,84)", x: "0px"}, 6)
       .to(this.selectors.circle, 1.75, {backgroundColor: "rgba(26,186,84,0.6)"}, 6)
-      .set(this.selectors.image, {background: "url(src/assets/images/hp-left-4.jpg)"}, 6.5);
+      .set(this.selectors.image, {background: `url(${ASSET_PATH}/assets/images/hp-left-4.jpg)`}, 6.5);
 	}
 }

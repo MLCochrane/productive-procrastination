@@ -12,7 +12,7 @@ export default class FloatingText {
 		this.curY = window.innerHeight;
 		this.canvas = document.getElementById('FloatingText');
 		this.dims = this.canvas.getBoundingClientRect();
-		this.bufferFile = './src/assets/floating-text.json';
+		this.bufferFile = `${ASSET_PATH}/assets/floating-text.json`;
 
 		this.animate = this.animate.bind(this);
 		this.setup = this.setup.bind(this);

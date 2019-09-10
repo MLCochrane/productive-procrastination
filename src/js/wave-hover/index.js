@@ -25,10 +25,10 @@ export default class HoverMap {
 		this.handleMouseover = this.handleMouseover.bind(this);
 		this.handleMouseout = this.handleMouseout.bind(this);
 
-		this.setScene('./src/assets/hover/Hover-Image.jpg');
+		this.setScene(`${ASSET_PATH}/assets/hover/Hover-Image.jpg`);
 		this.bindEvents();
 	}
-	
+
 	bindEvents() {
 		this.container.on('pointerover', this.handleMouseover);
 		this.container.on('pointerout', this.handleMouseout);
@@ -52,7 +52,7 @@ export default class HoverMap {
 
 		image.anchor.x = 0;
 
-		this.displacementSprite = PIXI.Sprite.from('./src/assets/hover/displacement.png');
+		this.displacementSprite = PIXI.Sprite.from(`${ASSET_PATH}/assets/hover/displacement.png`);
 		this.displacementSprite.scale.x = 5;
 		this.displacementSprite.scale.y = 5;
 		this.displacementSprite.anchor.x = 0.5;
@@ -60,7 +60,7 @@ export default class HoverMap {
 		this.displacementSprite.texture.baseTexture.wrapMode = PIXI.WRAP_MODES.REPEAT;
 		this.displacementFilter = new PIXI.filters.DisplacementFilter(this.displacementSprite);
 		this.container.filters = [this.displacementFilter];
-		
+
 		this.container.addChild(this.displacementSprite);
 		this.container.addChild(image);
 

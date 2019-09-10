@@ -78,10 +78,10 @@ export default class Slider {
 
 	fillSlides() {
 		for (let i = 0; i < 4; i++) {
-			this.leftPanel.find('.placeholder').append(`<div class="panel"><img src="./src/assets/images/hp-left-${i + 1}.jpg"></div>`);
+			this.leftPanel.find('.placeholder').append(`<div class="panel"><img src="${ASSET_PATH}/assets/images/hp-left-${i + 1}.jpg"></div>`);
 		}
 		for (let i = 4; i > 0; i--) {
-			this.rightPanel.find('.placeholder').append(`<div class="panel"><img src="./src/assets/images/hp-right-${5 - i}.jpg"></div>`);
+			this.rightPanel.find('.placeholder').append(`<div class="panel"><img src="${ASSET_PATH}/assets/images/hp-right-${5 - i}.jpg"></div>`);
 		}
 
 		this.slideLength = ($('.panel').length / 2);
