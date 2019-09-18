@@ -1,7 +1,13 @@
 import * as PIXI from 'pixi.js';
 
+/*
+ *  Class for simple PixiJS displacement map sketch
+ */
 export default class HoverMap {
 	constructor() {
+		/**
+		 * Initlaizes variables for class instance.
+		 */
 		this.app = new PIXI.Application({
 			autoResize: true,
 			width: 512,
@@ -21,27 +27,26 @@ export default class HoverMap {
 
 		this.setScene = this.setScene.bind(this);
 		this.bindEvents = this.bindEvents.bind(this);
-		this.removeScene = this.removeScene.bind(this);
-		this.handleMouseover = this.handleMouseover.bind(this);
-		this.handleMouseout = this.handleMouseout.bind(this);
 
 		this.setScene(`${ASSET_PATH}/assets/hover/Hover-Image.jpg`);
 		this.bindEvents();
 	}
 
+	/**
+	 * Binds event listeners for DOM events
+	 * @function bindEvents
+	 * @memberof HoverMap.prototype
+	 */
 	bindEvents() {
-		this.container.on('pointerover', this.handleMouseover);
-		this.container.on('pointerout', this.handleMouseout);
+		this.container.on('pointerover', () => this.isHovered = true);
+		this.container.on('pointerout', () => this.isHovered = false);
 	}
 
-	handleMouseover() {
-		this.isHovered = true;
-	}
-
-	handleMouseout() {
-		this.isHovered = false;
-	}
-
+	/**
+	 * Sets up scene, loads assets and starts animation
+	 * @function setScene
+	 * @memberof HoverMap.prototype
+	 */
 	setScene(url) {
 		this.playground.appendChild(this.app.view);
 		this.app.stage.addChild(this.container);
@@ -67,13 +72,11 @@ export default class HoverMap {
 		this.animate();
 	}
 
-	removeScene() {
-		cancelAnimationFrame(raf);
-		app.stage.removeChildren();
-		app.stage.destroy(true);
-		playground.removeChild(this.container);
-	}
-
+	/**
+	 * Updates displacement sprite based on time and hover status
+	 * @function animate
+	 * @memberof HoverMap.prototype
+	 */
 	animate() {
 		this.app.ticker.add((time) => {
 
