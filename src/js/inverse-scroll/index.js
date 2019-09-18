@@ -1,6 +1,12 @@
 import $ from 'jquery';
 
-export default class Slider {
+/*
+ *  Class for scroll inverse scroll sketch
+ */
+export default class InverseScroll {
+	/**
+	 * Initlaizes variables for class instance.
+	 */
 	constructor() {
 		this.animationTime = 400;
 
@@ -14,18 +20,27 @@ export default class Slider {
 		this.init();
 	}
 
+	/**
+	 * Sets order of method calls
+	 * @function init
+	 * @memberof InverseScroll.prototype
+	 */
 	init() {
 		this.fillSlides();
-		this.setHeights();
 		this.bindEvents();
+		this.setHeights();
 	}
 
+	/**
+	 * Binds event listeners for DOM events and defines callback logic
+	 * @function bindEvents
+	 * @memberof InverseScroll.prototype
+	 */
 	bindEvents() {
-		$(window).on('resize', e => {
+		$(window).on('resize', () => {
 			this.setHeights();
 		});
 
-		// MAYBE USE LODASH BEBOUNCE?
 		let scrollEnded;
 		this.$container.on('scroll', e => {
 			e.preventDefault();
@@ -37,12 +52,22 @@ export default class Slider {
 		});
 	}
 
+	/**
+	 * Sets heights for content on page load and resize
+	 * @function setHeights
+	 * @memberof InverseScroll.prototype
+	 */
 	setHeights() {
 		this.winHeight = $('.content').innerHeight();
 		$('.panel').height(this.winHeight);
 		this.$wrap.height(this.winHeight * this.slideLength);
 	}
 
+	/**
+	 * Adjusts height of side panels and resets scroll after user scroll as ended
+	 * @function straightenUp
+	 * @memberof InverseScroll.prototype
+	 */
 	straightenUp() {
 		this.isAnimating = true;
 		// Straightens up both panels after scrolling has ended
@@ -57,7 +82,7 @@ export default class Slider {
 			this.rightPanel.animate({
 				bottom: `-${scrollAmount}px`
 			}, this.animationTime);
-			window.scrollTo(0, scrollAmount);
+			this.$container.scrollTop(scrollAmount);
 			this.animating = false;
 		} else {
 			this.leftPanel.animate({
@@ -66,16 +91,27 @@ export default class Slider {
 			this.rightPanel.animate({
 				bottom: `-${curHeight - diff}px`
 			}, this.animationTime);
-			window.scrollTo(0, (curHeight - diff));
+			this.$container.scrollTop((curHeight - diff));
 			this.animating = false;
 		}
 	}
 
+	/**
+	 * Binds event listeners for DOM events
+	 * @function scrollPanel
+	 * @memberof InverseScroll.prototype
+	 * @param {Number} amt - Number representing pixel value to set panel position at
+	 */
 	scrollPanel(amt) {
 		this.leftPanel.css('top', amt);
 		this.rightPanel.css('bottom', amt);
 	}
 
+	/**
+	 * Appends images to both panel containers
+	 * @function fillSlides
+	 * @memberof InverseScroll.prototype
+	 */
 	fillSlides() {
 		for (let i = 0; i < 4; i++) {
 			this.leftPanel.find('.placeholder').append(`<div class="panel"><img src="${ASSET_PATH}/assets/images/hp-left-${i + 1}.jpg"></div>`);
@@ -85,10 +121,5 @@ export default class Slider {
 		}
 
 		this.slideLength = ($('.panel').length / 2);
-
-		// for(let i = 0; i < this.slideLength; i++) {
-		//   $('.counter').append('<div class="counter__single"></div>')
-		// }
-
 	}
 }
