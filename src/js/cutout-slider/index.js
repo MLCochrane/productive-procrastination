@@ -1,7 +1,13 @@
 import { TimelineLite } from "gsap";
 
+/*
+ *  Class for cutout slider sketch
+ */
 export default class CutoutSlider {
 	constructor() {
+		/**
+		 * Initlaizes variables for class instance and binds methods
+		 */
 		this.selectors = {
 			box: document.getElementsByClassName('wrap')[0],
 			title: document.getElementsByClassName('item'),
@@ -30,6 +36,11 @@ export default class CutoutSlider {
 		this.init();
 	}
 
+	/**
+	 * Binds event listeners for DOM events and defines callbacks
+	 * @function bindEvents
+	 * @memberof CutoutSlider.prototype
+	 */
 	bindEvents() {
     this.selectors.button.addEventListener('click', () => {
     	this.tl.play();
@@ -51,11 +62,21 @@ export default class CutoutSlider {
     });
 	}
 
+	/**
+	 * Calls class methods
+	 * @function init
+	 * @memberof CutoutSlider.prototype
+	 */
 	init() {
 		this.bindEvents();
 		this.initTimeline();
 	}
 
+	/**
+	 * Defines GSAP timeline for slider
+	 * @function initTimeline
+	 * @memberof CutoutSlider.prototype
+	 */
 	initTimeline() {
 		this.tl
 			.set(this.selectors.title, {x: this.dims.offset})
