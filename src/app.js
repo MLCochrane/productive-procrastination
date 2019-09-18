@@ -36,11 +36,6 @@ const sketches = [
 		'namespace': 'inverse-scroll',
 		'path': 'js/inverse-scroll/index',
 		'constructor': []
-	},
-	{
-		'namespace': 'custom-player',
-		'path': 'js/custom-player/index',
-		'constructor': 'Cihr9OWsEuk'
 	}
 ]
 
