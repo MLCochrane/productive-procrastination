@@ -1,16 +1,26 @@
 import { TimelineMax, Power0 } from 'gsap';
 
+/**
+ * @typedef {object} WheelEvent
+ */
+
+/*
+ *  Class for scroll loop sketch
+ */
 export default class ScrollingProjects {
+	/**
+	 * Initlaizes variables for class instance.
+	 */
 	constructor() {
 		this.currentOffset = '';
 		this.originOffset = '';
 		this.container = document.querySelector('.thing-holder');
 		this.current = window.getComputedStyle(this.container);
-		
+
 		// THIS WILL BE WRONG AS THE PAGE LOADS FONT AFTERWARDS
 		// USE onLoad, PROMISE OR OTHER METHOD TO ENSURE TYPEKIT FONT HAS BEEN LOADED AND CORRECT HEIGHT RECORDED
 		this.maxHeight = (this.current.getPropertyValue('height').split('px'))[0];
-		
+
 		this.tl = {};
 		this.loopSeconds = 20;
 		this.loopLength = this.loopSeconds * 1920 / window.innerWidth;
@@ -26,6 +36,11 @@ export default class ScrollingProjects {
 		this.bindEvents();
 	}
 
+	/**
+	 * Binds event listeners for DOM events
+	 * @function bindEvents
+	 * @memberof ScrollingProjects.prototype
+	 */
 	bindEvents() {
 		this.originOffset = this.getYTranslate(this.current);
 
@@ -38,7 +53,12 @@ export default class ScrollingProjects {
 		});
 	}
 
-	handleResize(e) {
+	/**
+	 * Callback passed to resize event to update animation length based on screen size
+	 * @function handleResize
+	 * @memberof ScrollingProjects.prototype
+	 */
+	handleResize() {
 		clearTimeout(this.resizeTimeout);
 		this.resizeTimeout = setTimeout(() => {
 			this.loopLength = this.loopSeconds * 1920 / window.innerWidth;
@@ -46,15 +66,23 @@ export default class ScrollingProjects {
 		}, 100);
 	}
 
+	/**
+	 * Callback passed to wheel event
+	 * @function handleWheel
+	 * @memberof ScrollingProjects.prototype
+	 * @param {WheelEvent} e - Wheel event passed from event handler
+	 */
 	handleWheel(e) {
 		this.currentOffset = this.getYTranslate(this.current);
 		const percentOffset = +((this.currentOffset / this.maxHeight) * 100).toFixed(4);
 
+		// Will pause timeline if currently running to handle next steps
 		if (this.tl.isActive()) {
 			this.tl.pause();
 		}
 
-		if (e.wheelDeltaY < 0) { // scrolling down
+		if (e.wheelDeltaY < 0) {
+			// scrolling down
 			this.container.style.transform = (this.currentOffset > (this.maxHeight * -0.75))
 				? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
 				: `translate(-50%, -25%)`;
@@ -64,6 +92,12 @@ export default class ScrollingProjects {
 				? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
 				: `translate(-50%, -75%)`;
 		}
+
+		/*
+		* Imitating a "debounce" to only update timeline
+		* position in seconds and resume timeline after
+		* user has stopped  scrolling.
+		*/
 
 		clearTimeout(this.loopTimeout);
 		this.loopTimeout = setTimeout(() => {
@@ -82,6 +116,11 @@ export default class ScrollingProjects {
 		}, 300);
 	}
 
+	/**
+	 * Creates timeline and starts normal animation loop
+	 * @function initSliding
+	 * @memberof ScrollingProjects.prototype
+	 */
 	initSliding() {
 		this.tl = new TimelineMax();
 		this.tl.
@@ -89,6 +128,13 @@ export default class ScrollingProjects {
 		this.tl.repeat(5);
 	}
 
+	/**
+	 * Returns current Y translate of element
+	 * @function getYTranslate
+	 * @memberof ScrollingProjects.prototype
+	 * @param {CSSStyleDeclaration} el - object containing element's style declarations
+	 * @returns {string} - String repesenting current translation in Y axis
+	 */
 	getYTranslate(el) {
 		return el.getPropertyValue('transform').replace(/[^0-9\-.,]/g, '').split(',')[5];
 	}
