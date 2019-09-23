@@ -28,12 +28,14 @@ export default class PostProcess {
     this.curX = window.innerWidth;
     this.curY = window.innerHeight;
     this.canvas = document.getElementById('PostProcess');
+    this.video = document.getElementById('Video');
     this.dims = this.canvas.getBoundingClientRect();
     this.bufferFile = `${ASSET_PATH}/assets/floating-text.json`;
-    this.textureFile = `${ASSET_PATH}/assets/hover/displacement.png`;
+    this.textureFile = `${ASSET_PATH}/assets/images/dot-2.jpg`;
 
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
+    this.withVideo = this.withVideo.bind(this);
     this.processing = this.processing.bind(this);
 
     this.bindEvents();
@@ -85,17 +87,9 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   initCamera() {
-    const distance = 3.5;
-    const aspect = (window.innerWidth / 2) / (window.innerWidth / 4);
+    this.camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 50);
 
-    this.camera = new THREE.OrthographicCamera(
-      distance * aspect / -2,
-      distance * aspect / 2,
-      distance / 2,
-      distance / -2, 0.8, 20
-    );
-
-    this.camera.position.z = 8;
+    this.camera.position.z = 3;
     this.scene.add(this.camera);
   }
 
@@ -106,21 +100,19 @@ export default class PostProcess {
    * @param {String} bufferFile - String representing path to buffer geometry file to load
    */
   initText(bufferFile) {
-    const texture = new THREE.TextureLoader().load(this.textureFile);
-    // texture.repeat.set(4,4);
     const loader = new THREE.BufferGeometryLoader();
     loader.load(bufferFile, geo => {
       // Add the loaded object to the scene
       const mat1 = new THREE.MeshBasicMaterial({
         color: 0xffffff,
-        map: texture
       });
       const mat2 = new THREE.MeshBasicMaterial({
-        color: 0x0000ff,
+        color: 0xffffff,
       });
 
       // Materials passed in to group materialIndex
       const object = new THREE.Mesh(geo, [mat1, mat2]);
+      console.log(object);
       this.mesh = object;
       this.scene.add(object);
       this.setup(object);
@@ -129,6 +121,27 @@ export default class PostProcess {
     }, err => {
       console.error(err);
     });
+    // this.video.play();
+    // setTimeout(() => {
+    //   this.withVideo();
+    //   this.setup();
+    // }, 200);
+  }
+
+  /**
+   * Callback passed to resize event to handle updating camera and renderer size
+   * @function withVideo
+   * @memberof PostProcess.prototype
+   */
+  withVideo() {
+    this.vidTexture = new THREE.VideoTexture(this.video);
+    const geo = new THREE.PlaneBufferGeometry(5, 3, 3, 3);
+    const mat = new THREE.MeshBasicMaterial({
+      color: 0xffffff,
+      map: this.vidTexture,
+    });
+    this.mesh = new THREE.Mesh(geo, mat);
+    this.scene.add(this.mesh);
   }
 
   /**
@@ -137,13 +150,12 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   onWindowResize() {
-    this.camera.aspect = (window.innerWidth / 2) / (window.innerWidth / 4);
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth / 2, window.innerWidth / 4);
+    this.renderer.setSize(this.curX, this.curY);
   }
 
   /**
-   *
+   * Sets up renderer, calls any other necessary methods and then starts loop
    * @function setup
    * @memberof PostProcess.prototype
    */
@@ -154,23 +166,28 @@ export default class PostProcess {
       alpha: true
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.dims.width, this.dims.height);
+    this.renderer.setSize(this.curX, this.curY);
     this.processing();
     this.animate();
   }
 
   /**
-   *
+   * Sets up post processing of scene
    * @function processing
    * @memberof PostProcess.prototype
    */
   processing() {
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
-    const pixelPass = new ShaderPass(PixelShader);
+    const pixelPass = new ShaderPass(PixelShader, 'texOne');
     pixelPass.uniforms['resolution'].value = new THREE.Vector2(window.innerWidth, window.innerHeight);
     pixelPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
-    pixelPass.uniforms['pixelSize'].value = 15;
+    pixelPass.uniforms['pixelSize'].value = 10;
+    pixelPass.uniforms['innerRepeatLength'].value = 1;
+    pixelPass.uniforms['texTwo'].value = new THREE.TextureLoader().load(this.textureFile);
+    pixelPass.uniforms['texTwo'].value.wrapS = THREE.RepeatWrapping;
+    pixelPass.uniforms['texTwo'].value.wrapT = THREE.RepeatWrapping;
+    pixelPass.uniforms['texTwo'].value.magFilter = THREE.NearestFilter;
     this.composer.addPass(pixelPass);
   }
 

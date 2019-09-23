@@ -2,7 +2,10 @@ const PixelShader = {
 
   uniforms: {
 
-    "tDiffuse": {
+    "texOne": {
+      value: null
+    },
+    "texTwo": {
       value: null
     },
     "resolution": {
@@ -11,7 +14,9 @@ const PixelShader = {
     "pixelSize": {
       value: 1.
     },
-
+    "innerRepeatLength": {
+      value: 1.
+    },
   },
 
   vertexShader: [
@@ -29,26 +34,28 @@ const PixelShader = {
 
   fragmentShader: [
 
-    "uniform sampler2D tDiffuse;",
+    "uniform sampler2D texOne;",
+    "uniform sampler2D texTwo;",
     "uniform float pixelSize;",
+    "uniform float innerRepeatLength;",
     "uniform vec2 resolution;",
 
     "varying highp vec2 vUv;",
-    "float Circle( in vec2 _st, in float _radius) {",
-      "vec2 dist = _st - vec2(0.5);",
-      "return 1. - smoothstep(_radius - (_radius * 0.01),",
-        "_radius + (_radius * 0.01),",
-        "dot(dist, dist) * 4.0);",
-    "}",
 
     "void main(){",
 
     "vec2 dxy = pixelSize / resolution;",
+    "vec2 newUv = vUv * (resolution / (pixelSize * innerRepeatLength));",
     "vec2 coord = dxy * floor( vUv / dxy );",
-    "vec4 testVec = texture2D(tDiffuse, coord);",
-    "float checkAgainst = (testVec.x + testVec.y + testVec.z + testVec.w) / 4.;",
-    "vec3 leCol = vec3(step(checkAgainst, 0.));",
-    "gl_FragColor = vec4(leCol, 1.0);",
+    "vec4 texel0 = texture2D(texOne, coord);",
+    "vec4 texel1 = texture2D(texTwo, newUv);",
+
+    // Averages RGB values of initial texture and turns to black or white
+    "float checkAgainst = (texel0.x + texel0.y + texel0.z) / 3.;",
+    "vec4 newTex = vec4(vec3(step(0.5, checkAgainst)), step(0.5, texel0.a));",
+
+    "vec4 newCol = mix(newTex, texel1, step(0.5, newTex.a));",
+    "gl_FragColor = vec4(newCol);",
     "}"
 
   ].join("\n")
