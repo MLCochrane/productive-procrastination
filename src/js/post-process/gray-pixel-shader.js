@@ -1,3 +1,10 @@
+/**
+ * Adapted from Pixel Shader in ThreeJS examples by wongbryan / http://wongbryan.github.io
+ *
+ * TODO: Add uniform for picking whites vs blacks and update shader logic to use this
+ *
+ */
+
 const PixelShader = {
 
   uniforms: {
@@ -52,9 +59,9 @@ const PixelShader = {
 
     // Averages RGB values of initial texture and turns to black or white
     "float checkAgainst = (texel0.x + texel0.y + texel0.z) / 3.;",
-    "vec4 newTex = vec4(vec3(step(0.5, checkAgainst)), step(0.5, texel0.a));",
+    "vec4 newTex = vec4(vec3(step(0.5, checkAgainst)), step(0.5, texel0.a));", // flip order of step(checkAgainst, 0.5) for selecting darks
 
-    "vec4 newCol = mix(newTex, texel1, step(0.5, newTex.a));",
+    "vec4 newCol = mix(newTex, texel1, step(checkAgainst, 0.5));", // flip order of step(0.5, checkAgainst) for selecting darks
     "gl_FragColor = vec4(newCol);",
     "}"
 
