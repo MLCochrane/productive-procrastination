@@ -9,10 +9,9 @@
 	border: 1px solid $dark-grey;
 	opacity: 0;
 	background: white;
-	transition: opacity 300ms, transform 300ms;
+	visibility: hidden;
 	&.isOpen {
-		opacity: 1;
-		transform: translateY(-50%) translateX(0);
+		animation: showCard 300ms 1 forwards;
 	}
 	&__title {
 		font-size: 20px;
@@ -55,5 +54,13 @@
 			fill: #fff;
 			stroke: $dark-grey;
 		}
+	}
+}
+
+@keyframes showCard {
+	to {
+		visibility: visible;
+		opacity: 1;
+		transform: translateY(-50%) translateX(0);
 	}
 }

@@ -1,0 +1,20 @@
+{{#json
+'{
+	"card": {
+    "title": "Toon Post Process",
+    "date": "Sept 2019",
+    "tags": [
+			"3D",
+      "Interaction"
+    ],
+    "description": "Proof of concept of an effect Active Theory did for a Bon Iver promotion. Their\'s was obviously more refined but I think the overall effect is similar. Achieved here using a custom shader pass which pixelates, converts to grayscale, pushes each color value to black or white, then mixes repeated texture where first texture is either all black or all white depending on invert toggle."
+	}
+}'
+}}
+{{#> layout/base title='Toon Post Process' namespace="post-process" }}
+	{{#*inline "body"}}
+		{{> components/sketches/post-process }}
+		{{> components/sketches/card card=this.card }}
+	{{/inline}}
+{{/layout/base}}
+{{/json}}

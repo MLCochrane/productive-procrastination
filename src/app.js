@@ -36,7 +36,12 @@ const sketches = [
 		'namespace': 'inverse-scroll',
 		'path': 'js/inverse-scroll/index',
 		'constructor': []
-	}
+	},
+	{
+		'namespace': 'post-process',
+		'path': 'js/post-process/index',
+		'constructor': []
+	},
 ]
 
 barba.init({
