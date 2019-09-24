@@ -12,6 +12,7 @@ import {
   NearestFilter,
   MeshLambertMaterial,
   PointLight,
+  DefaultLoadingManager,
 } from 'three';
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
@@ -59,12 +60,14 @@ export default class PostProcess {
       bigger: document.getElementById('Bigger'),
       invert: document.getElementById('Invert'),
       texture: document.getElementById('Texture'),
+      toggle: document.getElementById('Toggle'),
     }
 
     this.params = {
       pixelSize: 10,
       invert: true,
-      textureIndex: 1
+      textureIndex: 1,
+      enabled: true
     };
 
     this.texturesLoaded = false;
@@ -98,13 +101,17 @@ export default class PostProcess {
     this.buttons.bigger.addEventListener('click', () => {
       if (this.params.pixelSize < 50) this.params.pixelSize += 5;
     });
-    
+
     this.buttons.invert.addEventListener('click', () => {
       this.params.invert = !this.params.invert;
     });
 
     this.buttons.texture.addEventListener('click', () => {
       this.params.textureIndex = this.params.textureIndex === 3 ? 0 : this.params.textureIndex += 1;
+    });
+
+    this.buttons.toggle.addEventListener('click', () => {
+      this.params.enabled = !this.params.enabled;
     });
   }
 
@@ -248,6 +255,10 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   setup() {
+    DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
+      if (itemsLoaded === itemsTotal) this.texturesLoaded = true;
+    };
+
     this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
@@ -279,7 +290,7 @@ export default class PostProcess {
     this.pixelPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
 
     this.updateShader();
-    
+
     this.composer.addPass(this.pixelPass);
   }
 
@@ -289,6 +300,8 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   updateShader() {
+    if (!this.texturesLoaded) return;
+    this.pixelPass.enabled = this.params.enabled;
     this.pixelPass.uniforms['pixelSize'].value = this.params.pixelSize;
     this.pixelPass.uniforms['innerRepeatLength'].value = this.params.textureIndex === 3 ? 5 : 1;
     this.pixelPass.uniforms['invert'].value = this.params.invert;
