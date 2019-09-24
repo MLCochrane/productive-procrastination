@@ -24,6 +24,9 @@ const PixelShader = {
     "innerRepeatLength": {
       value: 1.
     },
+    "invert": {
+      value: false
+    },
   },
 
   vertexShader: [
@@ -46,8 +49,17 @@ const PixelShader = {
     "uniform float pixelSize;",
     "uniform float innerRepeatLength;",
     "uniform vec2 resolution;",
+    "uniform bool invert;",
 
     "varying highp vec2 vUv;",
+
+    "vec2 getRelation(in float check) {",
+    "if (invert) {",
+    "    return vec2(step(0.5, check), step(check, 0.5));",
+    "  } else {",
+    "    return vec2(step(check, 0.5), step(0.5, check));",
+    "  }",
+    "}",
 
     "void main(){",
 
@@ -59,9 +71,10 @@ const PixelShader = {
 
     // Averages RGB values of initial texture and turns to black or white
     "float checkAgainst = (texel0.x + texel0.y + texel0.z) / 3.;",
-    "vec4 newTex = vec4(vec3(step(0.5, checkAgainst)), step(0.5, texel0.a));", // flip order of step(checkAgainst, 0.5) for selecting darks
+    "vec2 res = getRelation(checkAgainst);",
+    "vec4 newTex = vec4(vec3(res.x), step(0.5, texel0.a));", // flip order of step(checkAgainst, 0.5) for selecting darks
 
-    "vec4 newCol = mix(newTex, texel1, step(checkAgainst, 0.5));", // flip order of step(0.5, checkAgainst) for selecting darks
+    "vec4 newCol = mix(newTex, texel1, res.y);", // flip order of step(0.5, checkAgainst) for selecting darks
     "gl_FragColor = vec4(newCol);",
     "}"
 
@@ -71,3 +84,12 @@ const PixelShader = {
 export {
   PixelShader
 };
+
+
+"vec2 getRelation(float check) {"
+"if (invert) {"
+"    return vec2(step(0.5, check), step(check, 0.5));"
+"  } else {"
+"    return vec2(step(check, 0.5), step(0.5, check));"
+"  }"
+"}"
