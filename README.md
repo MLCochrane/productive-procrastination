@@ -21,6 +21,7 @@ Running a development environment is done with:
 ```
 npm run dev
 ```
+
 ### Setting up pages
 
 Without any server-side logic and the handling of routes, [html-webpack-plugin](https://github.com/jantimon/html-webpack-plugin) is used for the creation of our HTML files.
@@ -28,33 +29,41 @@ Without any server-side logic and the handling of routes, [html-webpack-plugin](
 There was a lot of repetition so this is currently being handled like so:
 
 ```javascript
-    const paths = ['scroll-loop', 'floating-text', 'wave-hover', 'cutout-slider', 'inverse-scroll'];
-    const pages = paths.map((el) => {
-      return new HtmlWebpackPlugin({ // eslint-disable-line no-new
-        filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
-        inject: {},
-        template: `src/views/pages/${el}.hbs`,
-        templateParameters: {
-          asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
-        }
-      });
-    });
+const paths = [
+	'scroll-loop',
+	'floating-text',
+	'wave-hover',
+	'cutout-slider',
+	'inverse-scroll'
+];
+const pages = paths.map(el => {
+	return new HtmlWebpackPlugin({
+		// eslint-disable-line no-new
+		filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
+		inject: {},
+		template: `src/views/pages/${el}.hbs`,
+		templateParameters: {
+			asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : ''
+		}
+	});
+});
 ```
+
 It should be noted that this requires the folder and file structure to follow a certain structure.
 
 This is then concatenated like so:
 
 ```javascript
-    ...
-    plugins: [
-    new HtmlWebpackPlugin({
-      inject: {},
-      template: "src/views/pages/index.hbs"
-    })
-  ].concat(pages),
+  ...
+  plugins: [
+  new HtmlWebpackPlugin({
+    inject: {},
+    template: "src/views/pages/index.hbs"
+  })
+].concat(pages),
 ```
 
-* Adding a folder when setting the filename for new page templates ensures that the .html extension is not included in the url.
+-   Adding a folder when setting the filename for new page templates ensures that the .html extension is not included in the url.
 
 ### Handling views
 
@@ -71,6 +80,7 @@ Adding a namespace attribute to your page templates like this:
 {{/layout/base}}
 
 ```
+
 Allows you to reference them in Barba lifecycle hooks like so:
 
 ```javascript
@@ -87,15 +97,15 @@ In this project there is currently a single page transition for all pages, howev
 
 ```javascript
 barba.init({
-	transitions: [
-		{
+  transitions: [
+    {
       name: 'default',
       /*
       *  Other lifecycle hooks would be called here
       */
 			leave: async ({ current, next }) => {
-				await defaultPageTransiton(current.container, next.container);
-			}
+        await defaultPageTransiton(current.container, next.container);
+      }
     },
     {
       name: 'custom',
@@ -106,10 +116,10 @@ barba.init({
         // where rule definitions for where you're going
       }
       leave: async ({ current, next }) => {
-				await customPageTransiton(current.container, next.container);
-			}
+        await customPageTransiton(current.container, next.container);
+      }
     }
-	]
+  ]
 });
 ```
 
@@ -127,18 +137,18 @@ This will create a dist folder with static assets that is ready to be uploaded t
 
 ## Built With
 
-* [handlebars](https://handlebarsjs.com/)
-* [webpack](https://webpack.js.org/)
-* [SCSS](https://sass-lang.com/)
-* [GSAP](https://greensock.com/gsap)
-* [Barba](https://barba.js.org/)
-* [three.js](https://threejs.org/)
-* [Babylon.JS](https://www.babylonjs.com)
-* [PixiJS](https://www.pixijs.com/)
+-   [handlebars](https://handlebarsjs.com/)
+-   [webpack](https://webpack.js.org/)
+-   [SCSS](https://sass-lang.com/)
+-   [GSAP](https://greensock.com/gsap)
+-   [Barba](https://barba.js.org/)
+-   [three.js](https://threejs.org/)
+-   [Babylon.JS](https://www.babylonjs.com)
+-   [PixiJS](https://www.pixijs.com/)
 
 ## Authors
 
-* **Luke Cochrane** [MLCochrane](https://github.com/MLCochrane/)
+-   **Luke Cochrane** [MLCochrane](https://github.com/MLCochrane/)
 
 ## License
 
