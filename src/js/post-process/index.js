@@ -125,13 +125,6 @@ export default class PostProcess {
     this.initCamera();
     this.initBackground();
     this.initLights();
-    // this.withImage();
-    // this.video.play().then(() => {
-    //     this.withVideo();
-    //   })
-    //   .catch(error => {
-    //     console.error(error);
-    //   });
     this.initModel(this.bufferFile);
   }
 
@@ -189,39 +182,6 @@ export default class PostProcess {
     }, err => {
       console.error(err);
     });
-  }
-
-  /**
-   * Adds plane with video texture
-   * @function withVideo
-   * @memberof PostProcess.prototype
-   */
-  withVideo() {
-    this.vidTexture = new VideoTexture(this.video);
-    const geo = new PlaneBufferGeometry(5, 3, 3, 3);
-    const mat = new MeshBasicMaterial({
-      color: 0xffffff,
-      map: this.vidTexture,
-    });
-    this.mesh = new Mesh(geo, mat);
-    this.scene.add(this.mesh);
-    this.setup();
-  }
-
-  /**
-   * Callback passed to resize event to handle updating camera and renderer size
-   * @function withImage
-   * @memberof PostProcess.prototype
-   */
-  withImage() {
-    const texture = new TextureLoader().load(this.imageFile);
-    const geo = new PlaneBufferGeometry(5, 3, 3, 3);
-    const mat = new MeshBasicMaterial({
-      color: 0xffffff,
-      map: texture,
-    });
-    this.mesh = new Mesh(geo, mat);
-    this.scene.add(this.mesh);
   }
 
   /**
@@ -305,7 +265,6 @@ export default class PostProcess {
     this.pixelPass.uniforms['pixelSize'].value = this.params.pixelSize;
     this.pixelPass.uniforms['innerRepeatLength'].value = this.params.textureIndex === 3 ? 5 : 1;
     this.pixelPass.uniforms['invert'].value = this.params.invert;
-    // SHOULD ADD CHECK FOR TEXTURES TO BE LOADED BEFORE CALLING BUT IT'S TIME FOR BED SO DO IT LATER
     this.pixelPass.uniforms['texTwo'].value = this.textures[this.params.textureIndex];
     this.pixelPass.uniforms['texTwo'].value.needsUpdate = true;
     this.pixelPass.uniforms['texTwo'].value.wrapS = RepeatWrapping;
@@ -333,7 +292,6 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   render() {
-    // this.renderer.render(this.scene, this.camera);
     this.composer.render();
   }
 }
