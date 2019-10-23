@@ -103,7 +103,7 @@ barba.init({
       /*
       *  Other lifecycle hooks would be called here
       */
-			leave: async ({ current, next }) => {
+      leave: async ({ current, next }) => {
         await defaultPageTransiton(current.container, next.container);
       }
     },
