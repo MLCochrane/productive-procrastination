@@ -18,9 +18,6 @@ const GlowShaderVert = {
     "resolution": {
       value: null
     },
-    "u_kernel": {
-      value: []
-    },
   },
 
   vertexShader: [
@@ -37,33 +34,36 @@ const GlowShaderVert = {
   ].join("\n"),
 
   fragmentShader: [
-
+    "#define PI 3.141592653589793",
+    "#define E 2.718281828459045",
     "uniform sampler2D texOne;",
     "uniform sampler2D texTwo;",
     "uniform vec2 resolution;",
-    "uniform float u_kernel[25];",
-    "const float samples = 50.;",
 
     "varying highp vec2 vUv;",
+    "float calcGauss(in float x, in float std) {",
+      "float stdSq = std * std;",
+      "return (1. / sqrt(2. * PI * stdSq)) * pow(E, -(x * x) / (2. * stdSq));",
+    "}",
 
     "void main(){",
 
     "vec2 onePixel = vec2(1.0, 1.0) / resolution;",
     "vec4 init = texture2D(texTwo, vUv);",
     "vec4 texel0 = texture2D(texOne, vUv);",
-    // "vec4 test = texture2D(texOne, vec2(vUv.x + .2, vUv.y + .2));",
     "vec4 col = vec4(vec3(0.), 1.);",
 
-    "for (float index = 0.; index < samples; index++) {",
-      "vec2 theUv = vUv + vec2(0., (index/samples - 0.5) * 0.1);\
-      col += texture2D(texOne, theUv);\
-    }",
+    "float sum = 0.;",
 
-    //"gl_FragColor = vec4(texel0);",
-    "col/=samples;",
-    //"gl_FragColor = vec4(gl_FragColor.a) * gl_FragColor + vec4(1.0 - gl_FragColor.a) * col;",
-    //"gl_FragColor = col;",
-    "gl_FragColor = col;",
+    "for (float index = 0.; index < 50.; index++) {",
+    "float offset = (index/50. - 0.5);",
+    "vec2 theUv = vUv + vec2(0., offset * 0.1 * (resolution.y / resolution.x));\
+      float spot = offset - 25.;\
+      float gauss = calcGauss(offset, 0.3);\
+      col += texture2D(texOne, theUv) * gauss;\
+      sum += gauss;\
+    }",
+    "gl_FragColor = vec4(col/sum);",
     "}"
 
   ].join("\n")

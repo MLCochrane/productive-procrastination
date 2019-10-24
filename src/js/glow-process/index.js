@@ -179,28 +179,11 @@ export default class GlowProcess {
   }
 
   /**
-   * Calculates gaussian distributions
-   * @function calcGauss
-   * @memberof GlowProcess.prototype
-   * @param {Number} std - Standard deviation to be used for gaussian function
-   * @param {Number} x - Represents value along x axis to calculate
-   * @returns {Number} - Returns y value of function at given x
-   */
-  calcGauss(std, x) {
-    const stdSq = std * std;
-    return (1 / Math.sqrt(2 * Math.PI * stdSq)) * Math.pow(Math.E, -(x * x) / (2 * stdSq));
-  }
-
-  /**
    * Sets up post processing of scene
    * @function processing
    * @memberof GlowProcess.prototype
    */
   processing() {
-    const kernel = [];
-    for (let i = 0; i < 25; i++) {
-      kernel.push(this.calcGauss(0.3, i / 25));
-    }
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
 
@@ -208,13 +191,11 @@ export default class GlowProcess {
     this.glowPass = new ShaderPass(GlowShaderHori, 'texOne');
     this.glowPass.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
     this.glowPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
-    this.glowPass.uniforms['u_kernel'].value = kernel;
 
     this.glowPassVert = new ShaderPass(GlowShaderVert, 'texOne');
     this.glowPassVert.uniforms['texTwo'].value = initRenderRes.texture;
     this.glowPassVert.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
     this.glowPassVert.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
-    this.glowPassVert.uniforms['u_kernel'].value = kernel;
 
     // this.updateShader();
 
@@ -250,7 +231,8 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   render() {
-    // this.mesh.rotation.x += 0.01;
+    this.mesh.rotation.x += 0.01;
+    this.mesh.rotation.z += 0.01;
 
     this.camera.layers.set(1);
     this.composer.render();
