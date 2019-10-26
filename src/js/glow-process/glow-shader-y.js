@@ -8,11 +8,7 @@
 const GlowShaderVert = {
 
   uniforms: {
-
     "texOne": {
-      value: null
-    },
-    "texTwo": {
       value: null
     },
     "resolution": {
@@ -37,7 +33,6 @@ const GlowShaderVert = {
     "#define PI 3.141592653589793",
     "#define E 2.718281828459045",
     "uniform sampler2D texOne;",
-    "uniform sampler2D texTwo;",
     "uniform vec2 resolution;",
 
     "varying highp vec2 vUv;",
@@ -49,7 +44,6 @@ const GlowShaderVert = {
     "void main(){",
 
     "vec2 onePixel = vec2(1.0, 1.0) / resolution;",
-    "vec4 init = texture2D(texTwo, vUv);",
     "vec4 texel0 = texture2D(texOne, vUv);",
     "vec4 col = vec4(vec3(0.), 1.);",
 

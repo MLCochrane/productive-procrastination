@@ -32,6 +32,9 @@ import {
 import {
   GlowShaderVert
 } from './glow-shader-y';
+import {
+  FinalShaderPass
+} from './final-pass-shader';
 
 /*
  *  Class for loading and rendering 3D text
@@ -52,6 +55,9 @@ export default class GlowProcess {
     this.curY = window.innerHeight;
     this.canvas = document.getElementById('GlowProcess');
     this.dims = this.canvas.getBoundingClientRect();
+
+    this.SCENE_LAYER = 0;
+    this.GLOW_LAYER = 1;
 
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
@@ -134,12 +140,12 @@ export default class GlowProcess {
     const geo = new BoxBufferGeometry(5, 5, 5, 5);
     const mat = new MeshBasicMaterial({color: 0xf23232});
     this.mesh = new Mesh(geo, mat);
-    this.mesh.layers.enable(1);
+    this.mesh.layers.enable(this.GLOW_LAYER);
 
 
     this.scene.add(this.mesh);
 
-    const geo2 = new PlaneBufferGeometry(7, 7, 5, 5);
+    const geo2 = new PlaneBufferGeometry(12, 12, 5, 5);
     const mat2 = new MeshBasicMaterial({color: 0x434b53});
     this.mesh2 = new Mesh(geo2, mat2);
 
@@ -169,7 +175,7 @@ export default class GlowProcess {
       canvas: this.canvas,
       // alpha: true
     });
-    this.renderer.autoClear = false;
+    // this.renderer.autoClear = false;
 
     this.renderTarget = new WebGLRenderTarget(this.curX, this.curY);
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -184,24 +190,36 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   processing() {
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    const {
+      renderer,
+      camera,
+      scene
+    } = this;
 
-    const initRenderRes = this.composer.readBuffer;
-    this.glowPass = new ShaderPass(GlowShaderHori, 'texOne');
-    this.glowPass.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
-    this.glowPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
+    this.glowComposer = new EffectComposer(renderer);
+    const renderPass = new RenderPass(scene, camera);
+    this.glowComposer.addPass(renderPass);
 
-    this.glowPassVert = new ShaderPass(GlowShaderVert, 'texOne');
-    this.glowPassVert.uniforms['texTwo'].value = initRenderRes.texture;
-    this.glowPassVert.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
-    this.glowPassVert.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
+    const glowPass = new ShaderPass(GlowShaderHori, 'texOne');
+    glowPass.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
+    glowPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
+
+    const glowPassVert = new ShaderPass(GlowShaderVert, 'texOne');
+    glowPassVert.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
+    glowPassVert.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
 
     // this.updateShader();
+    this.glowComposer.renderToScreen = false;
+    this.glowComposer.addPass(glowPass);
+    this.glowComposer.addPass(glowPassVert);
 
-    this.composer.addPass(this.glowPass);
-    this.composer.addPass(this.glowPassVert);
-    // this.composer.addPass(this.combinePass);
+    const finalPass = new ShaderPass(FinalShaderPass, 'texOne');
+    finalPass.uniforms['glowTexture'].value = this.glowComposer.renderTarget2.texture;
+    finalPass.needsSwap = true;
+
+    this.finalComposer = new EffectComposer(renderer);
+    this.finalComposer.addPass(renderPass);
+    this.finalComposer.addPass(finalPass);
   }
 
   /**
@@ -234,7 +252,9 @@ export default class GlowProcess {
     this.mesh.rotation.x += 0.01;
     this.mesh.rotation.z += 0.01;
 
-    this.camera.layers.set(1);
-    this.composer.render();
+    this.camera.layers.set(this.GLOW_LAYER);
+    this.glowComposer.render();
+    this.camera.layers.set(this.SCENE_LAYER);
+    this.finalComposer.render();
   }
 }
