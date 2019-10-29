@@ -4,19 +4,21 @@ import {
   MeshBasicMaterial,
   Mesh,
   PlaneBufferGeometry,
-  VideoTexture,
-  TextureLoader,
   WebGLRenderer,
   Vector2,
-  RepeatWrapping,
-  NearestFilter,
   MeshLambertMaterial,
   PointLight,
-  DefaultLoadingManager,
-  BoxBufferGeometry,
   MeshNormalMaterial,
   WebGLRenderTarget,
+  DoubleSide,
+  AmbientLight
 } from 'three';
+import {
+  GLTFLoader
+} from 'three/examples/jsm/loaders/GLTFLoader';
+import {
+  DRACOLoader
+} from 'three/examples/jsm/loaders/DRACOLoader';
 import {
   EffectComposer
 } from 'three/examples/jsm/postprocessing/EffectComposer.js';
@@ -55,6 +57,7 @@ export default class GlowProcess {
     this.curY = window.innerHeight;
     this.canvas = document.getElementById('GlowProcess');
     this.dims = this.canvas.getBoundingClientRect();
+    this.bufferFile = `${ASSET_PATH}/assets/neon.glb`;
 
     this.SCENE_LAYER = 0;
     this.GLOW_LAYER = 1;
@@ -79,10 +82,10 @@ export default class GlowProcess {
       this.onWindowResize();
     });
 
-    // window.addEventListener('mousemove', e => {
-    //   this.xVal = (e.clientX / window.innerWidth) - 0.5;
-    //   this.yVal = (e.clientY / window.innerHeight) - 0.5;
-    // });
+    window.addEventListener('mousemove', e => {
+      this.xVal = (e.clientX / window.innerWidth) - 0.5;
+      this.yVal = (e.clientY / window.innerHeight) - 0.5;
+    });
   }
 
   /**
@@ -91,6 +94,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   init() {
+    this.bindEvents();
     this.initScene();
     this.initCamera();
     this.initLights();
@@ -114,7 +118,7 @@ export default class GlowProcess {
   initCamera() {
     this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 50);
 
-    this.camera.position.z = 15;
+    this.camera.position.z = 40;
     this.camera.layers.enable(1);
     this.scene.add(this.camera);
   }
@@ -125,10 +129,20 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initLights() {
-    this.light = new PointLight(0xffffff, 10, 10, 2);
-    this.light.position.set(-5, 5, 5);
-    this.light.lookAt(0, 0, 0);
+    this.light = new PointLight(0xf57d7d, .2, 20, .1);
+    this.light2 = new PointLight(0xf57d7d, .2, 20, .1);
+
+    this.light.position.set(0.5, 0, 2);
+    this.light2.position.set(-0.5, 0, 2);
+
+    this.light.lookAt(0.5, 0, 0);
+    this.light2.lookAt(-0.5, 0, 0);
+
     this.scene.add(this.light);
+    this.scene.add(this.light2);
+
+    this.light3 = new AmbientLight(0xf57d7d, 0.1);
+    // this.scene.add(this.light3);
   }
 
   /**
@@ -137,21 +151,53 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initModel() {
-    const geo = new BoxBufferGeometry(5, 5, 5, 5);
-    const mat = new MeshBasicMaterial({color: 0xf23232});
-    this.mesh = new Mesh(geo, mat);
-    this.mesh.layers.enable(this.GLOW_LAYER);
+    const {
+      bufferFile,
+      scene,
+    } = this;
 
+    const loader = new GLTFLoader();
 
-    this.scene.add(this.mesh);
+    const dracoLoader = new DRACOLoader();
+    dracoLoader.setDecoderPath('three/examples/js/libs/draco');
+    loader.setDRACOLoader(dracoLoader);
 
-    const geo2 = new PlaneBufferGeometry(12, 12, 5, 5);
-    const mat2 = new MeshBasicMaterial({color: 0x434b53});
-    this.mesh2 = new Mesh(geo2, mat2);
+    loader.load(bufferFile, res => {
+      this.mainTubes = res.scene.children.find(el => el.name === 'TopTubes');
+      this.mainTubes.material = new MeshBasicMaterial({
+        color: 0xf23232,
+      });
 
-    this.scene.add(this.mesh2);
+      // Should probably just correct rotations in Blender but here we are
+      this.mainTubes.rotation.x = 1.567;
 
-    this.setup();
+      // Need to ensure meshs that should recieve effect are on separate layer
+      this.mainTubes.layers.enable(this.GLOW_LAYER);
+      scene.add(this.mainTubes);
+
+      this.bottomTubes = res.scene.children.find(el => el.name === 'BottomTubes');
+      this.bottomTubes.material = new MeshLambertMaterial({
+        color: 0xd6d6d6,
+        side: DoubleSide,
+      });
+      this.bottomTubes.rotation.x = 1.567;
+      scene.add(this.bottomTubes);
+
+      const geo2 = new PlaneBufferGeometry(60, 30, 5, 5);
+      const mat2 = new MeshLambertMaterial({ color: 0xdedbb1 });
+      this.mesh2 = new Mesh(geo2, mat2);
+      this.mesh2.position.z = -1;
+      this.mesh2.position.y = 1;
+
+      this.scene.add(this.mesh2);
+
+      this.setup();
+    }, xhr => {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+
+    }, err => {
+      console.error(err);
+    });
   }
 
   /**
@@ -160,8 +206,9 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   onWindowResize() {
+    this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.curX, this.curY);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
   /**
@@ -173,9 +220,7 @@ export default class GlowProcess {
     this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
-      // alpha: true
     });
-    // this.renderer.autoClear = false;
 
     this.renderTarget = new WebGLRenderTarget(this.curX, this.curY);
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -239,7 +284,11 @@ export default class GlowProcess {
   animate() {
     requestAnimationFrame(this.animate);
 
-    // this.updateShader();
+    this.camera.position.x = 40 * Math.sin(this.xVal);
+    this.camera.position.z = 40 * Math.cos(this.xVal);
+    this.camera.position.y = 10 * this.yVal;
+    this.camera.lookAt(0,0,0);
+
     this.render();
   }
 
@@ -249,9 +298,6 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   render() {
-    this.mesh.rotation.x += 0.01;
-    this.mesh.rotation.z += 0.01;
-
     this.camera.layers.set(this.GLOW_LAYER);
     this.glowComposer.render();
     this.camera.layers.set(this.SCENE_LAYER);
