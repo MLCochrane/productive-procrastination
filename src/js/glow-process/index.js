@@ -9,9 +9,13 @@ import {
   MeshLambertMaterial,
   PointLight,
   MeshNormalMaterial,
+  MeshPhongMaterial,
   WebGLRenderTarget,
   DoubleSide,
-  AmbientLight
+  AmbientLight,
+  TextureLoader,
+  LoadingManager,
+  DefaultLoadingManager
 } from 'three';
 import {
   GLTFLoader
@@ -99,6 +103,11 @@ export default class GlowProcess {
     this.initCamera();
     this.initLights();
     this.initModel();
+    this.initBackground();
+
+    DefaultLoadingManager.onLoad = () => {
+      this.setup();
+    }
   }
 
   /**
@@ -116,7 +125,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initCamera() {
-    this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 50);
+    this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 70);
 
     this.camera.position.z = 40;
     this.camera.layers.enable(1);
@@ -129,8 +138,8 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initLights() {
-    this.light = new PointLight(0xf57d7d, .2, 20, .1);
-    this.light2 = new PointLight(0xf57d7d, .2, 20, .1);
+    this.light = new PointLight(0xf57d7d, .3, 20, .5);
+    this.light2 = new PointLight(0xf57d7d, .3, 20, .5);
 
     this.light.position.set(0.5, 0, 2);
     this.light2.position.set(-0.5, 0, 2);
@@ -141,8 +150,8 @@ export default class GlowProcess {
     this.scene.add(this.light);
     this.scene.add(this.light2);
 
-    this.light3 = new AmbientLight(0xf57d7d, 0.1);
-    // this.scene.add(this.light3);
+    this.light3 = new AmbientLight(0xffffff, 0.3);
+    this.scene.add(this.light3);
   }
 
   /**
@@ -156,13 +165,13 @@ export default class GlowProcess {
       scene,
     } = this;
 
-    const loader = new GLTFLoader();
+    const modelLoader = new GLTFLoader();
 
     const dracoLoader = new DRACOLoader();
     dracoLoader.setDecoderPath('three/examples/js/libs/draco');
-    loader.setDRACOLoader(dracoLoader);
+    modelLoader.setDRACOLoader(dracoLoader);
 
-    loader.load(bufferFile, res => {
+    modelLoader.load(bufferFile, res => {
       this.mainTubes = res.scene.children.find(el => el.name === 'TopTubes');
       this.mainTubes.material = new MeshBasicMaterial({
         color: 0xf23232,
@@ -177,26 +186,73 @@ export default class GlowProcess {
 
       this.bottomTubes = res.scene.children.find(el => el.name === 'BottomTubes');
       this.bottomTubes.material = new MeshLambertMaterial({
-        color: 0xd6d6d6,
+        color: 0x313632,
         side: DoubleSide,
       });
+
       this.bottomTubes.rotation.x = 1.567;
       scene.add(this.bottomTubes);
-
-      const geo2 = new PlaneBufferGeometry(60, 30, 5, 5);
-      const mat2 = new MeshLambertMaterial({ color: 0xdedbb1 });
-      this.mesh2 = new Mesh(geo2, mat2);
-      this.mesh2.position.z = -1;
-      this.mesh2.position.y = 1;
-
-      this.scene.add(this.mesh2);
-
-      this.setup();
     }, xhr => {
       console.log((xhr.loaded / xhr.total * 100) + '% loaded');
 
     }, err => {
       console.error(err);
+    });
+  }
+
+  initBackground() {
+    const {
+      scene,
+    } = this;
+
+    const texturesToLoad = [
+      {
+        type: 'map',
+        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_color_map2.jpg`,
+      },
+      {
+        type: 'aoMap',
+        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_ao.jpg`,
+      },
+      {
+        type: 'normalMap',
+        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_normal.jpg`,
+      },
+      {
+        type: 'displacementMap',
+        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_roughness.jpg`,
+      }
+    ];
+
+    const loadedTextures = {};
+    const textureManager = new LoadingManager();
+
+    textureManager.onLoad = () => {
+      const geo2 = new PlaneBufferGeometry(80, 50, 5, 5);
+      const mat2 = new MeshPhongMaterial(loadedTextures);
+
+      this.mesh2 = new Mesh(geo2, mat2);
+      this.mesh2.position.z = -2;
+
+      scene.add(this.mesh2);
+
+      const mat = new MeshLambertMaterial({
+        transparent: true,
+        opacity: 0.2,
+      });
+      const geo = new PlaneBufferGeometry(36, 20, 5, 5);
+      const glass = new Mesh(geo, mat);
+
+      glass.position.x = -1;
+
+      scene.add(glass);
+    }
+
+    const texLoader = new TextureLoader(textureManager);
+    texturesToLoad.forEach(el => {
+      texLoader.load(el.url, texture => {
+        loadedTextures[el.type] = texture;
+      });
     });
   }
 
@@ -284,9 +340,9 @@ export default class GlowProcess {
   animate() {
     requestAnimationFrame(this.animate);
 
-    this.camera.position.x = 40 * Math.sin(this.xVal);
-    this.camera.position.z = 40 * Math.cos(this.xVal);
-    this.camera.position.y = 10 * this.yVal;
+    this.camera.position.x = 40 * Math.sin(this.xVal / 4);
+    this.camera.position.z = 40 * Math.cos(this.xVal / 4);
+    this.camera.position.y = 10 * this.yVal / 2;
     this.camera.lookAt(0,0,0);
 
     this.render();
