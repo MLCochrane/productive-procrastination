@@ -42,6 +42,11 @@ const sketches = [
 		'path': 'js/post-process/index',
 		'constructor': []
 	},
+	{
+		'namespace': 'glow-process',
+		'path': 'js/glow-process/index',
+		'constructor': []
+	},
 ]
 
 barba.init({
