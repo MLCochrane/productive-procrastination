@@ -278,7 +278,6 @@ export default class GlowProcess {
       canvas: this.canvas,
     });
 
-    this.renderTarget = new WebGLRenderTarget(this.curX, this.curY);
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.curX, this.curY);
     this.processing();
