@@ -8,6 +8,15 @@
 			{{/each}}
 		</ul>
 		<p class="card__description">{{ card.description }}</p>
+		{{#if card.references}}
+			<br>
+			<p class="card__description">References:</p>
+			<ul>
+				{{#each card.references}}
+					<li class="card__link"><a href="{{ this.link }}" target="_blank">{{ this.name }}</a></li>
+				{{/each}}
+			</ul>
+		{{/if}}
 	</div>
 </div>
 <div class="card__toggle">

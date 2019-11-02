@@ -35,6 +35,15 @@
 			}
 		}
 	}
+	&__link {
+		a {
+			font-size: 14px;
+			color: $dark-grey;
+			&:hover {
+				color: $brand-yellow;
+			}
+		}
+	}
 	&__toggle {
 		cursor: pointer;
 		position: absolute;
