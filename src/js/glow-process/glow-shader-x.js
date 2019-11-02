@@ -1,10 +1,3 @@
-/**
- * Adapted from Pixel Shader in ThreeJS examples by wongbryan / http://wongbryan.github.io
- *
- * TODO: Add uniform for picking whites vs blacks and update shader logic to use this
- *
- */
-
 const GlowShaderHori = {
 
   uniforms: {

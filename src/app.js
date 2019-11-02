@@ -2,14 +2,13 @@ import './scss/app.scss';
 import barba from '@barba/core';
 import { TimelineLite } from 'gsap';
 
-// import Loader from './js/loader';
-
 import { initMenu, closeMenu, } from './js/global/header';
 import Card from './js/global/card';
 
 // Global header logic
 initMenu();
 let card;
+let activeSketch;
 
 const sketches = [
 	{
@@ -66,6 +65,12 @@ barba.init({
 				// Close drawer if open
 				if (current.namespace !== 'home') card.unbindEvents(current.container);
 
+				/*
+				* Responsibility of each sketch to determine if
+				* they have bindings or other that should be removed
+				*/
+				if (activeSketch && activeSketch.destroy) activeSketch.destroy();
+
 				await pageTransiton(current.container, next.container);
 			}
 		}
@@ -75,9 +80,11 @@ barba.init({
 async function runSketch(route) {
 	const curSketch = sketches.find(el => el.namespace === route.namespace);
 	if (!curSketch) return;
-	await import('./' + curSketch.path + '.js').then(result => {
+	return await import('./' + curSketch.path + '.js').then(result => {
 		card.bindEvents(route.container);
-		return new result.default(curSketch.constructor);
+
+		// assigns class instance to variable so we can call destroy method on leave lifecycle hook
+		activeSketch = new result.default(curSketch.constructor);
 	});
 }
 

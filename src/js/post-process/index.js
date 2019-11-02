@@ -4,7 +4,6 @@ import {
   MeshBasicMaterial,
   Mesh,
   PlaneBufferGeometry,
-  VideoTexture,
   TextureLoader,
   WebGLRenderer,
   Vector2,
@@ -48,12 +47,13 @@ export default class PostProcess {
 
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
-    this.withVideo = this.withVideo.bind(this);
     this.processing = this.processing.bind(this);
-    this.withImage = this.withImage.bind(this);
     this.initBackground = this.initBackground.bind(this);
     this.initLights = this.initLights.bind(this);
     this.updateShader = this.updateShader.bind(this);
+    this.handleButtonPress = this.handleButtonPress.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     this.buttons = {
       smaller: document.getElementById('Smaller'),
@@ -82,38 +82,61 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   bindEvents() {
-    window.addEventListener('resize', () => {
-      this.onWindowResize();
-    });
+    window.addEventListener('resize', this.onWindowResize);
 
-    window.addEventListener('mousemove', e => {
-      this.xVal = (e.clientX / window.innerWidth) - 0.5;
-      this.yVal = (e.clientY / window.innerHeight) - 0.5;
-    });
-    window.addEventListener('click', () => {
-      this.renderer.setPixelRatio(window.devicePixelRatio);
-    });
+    window.addEventListener('mousemove', this.handleMouseMove);
 
-    this.buttons.smaller.addEventListener('click', () => {
-      if (this.params.pixelSize > 10) this.params.pixelSize -= 5;
-    });
+    this.buttons.smaller.addEventListener('click', this.handleButtonPress('smaller'));
 
-    this.buttons.bigger.addEventListener('click', () => {
-      if (this.params.pixelSize < 50) this.params.pixelSize += 5;
-    });
+    this.buttons.bigger.addEventListener('click', this.handleButtonPress('bigger'));
 
-    this.buttons.invert.addEventListener('click', () => {
-      this.params.invert = !this.params.invert;
-    });
+    this.buttons.invert.addEventListener('click', this.handleButtonPress('invert'));
 
-    this.buttons.texture.addEventListener('click', () => {
-      this.params.textureIndex = this.params.textureIndex === 3 ? 0 : this.params.textureIndex += 1;
-    });
+    this.buttons.texture.addEventListener('click', this.handleButtonPress('texture'));
 
-    this.buttons.toggle.addEventListener('click', () => {
-      this.params.enabled = !this.params.enabled;
-    });
+    this.buttons.toggle.addEventListener('click', this.handleButtonPress('toggle'));
   }
+
+  /**
+   *
+   * @function handleMouseMove
+   * @memberof .prototype
+   */
+  handleMouseMove(e) {
+    this.xVal = (e.clientX / window.innerWidth) - 0.5;
+    this.yVal = (e.clientY / window.innerHeight) - 0.5;
+  }
+
+  /**
+   * Callback for click events
+   * @function handleButtonPress
+   * @memberof PostProcess.prototype
+   * @param {String} type - Button type to pick which param should be changed
+   */
+  handleButtonPress(type) {
+    return () => {
+      switch (type) {
+        case 'smaller':
+          if (this.params.pixelSize > 10) this.params.pixelSize -= 5;
+          break;
+        case 'bigger':
+          if (this.params.pixelSize < 50) this.params.pixelSize += 5;
+          break;
+        case 'invert':
+          this.params.invert = !this.params.invert;
+          break;
+        case 'texture':
+          this.params.textureIndex = this.params.textureIndex === 3 ? 0 : this.params.textureIndex += 1;
+          break;
+        case 'toggle':
+          this.params.enabled = !this.params.enabled;
+          break;
+        default:
+          break;
+      }
+    }
+  }
+
 
   /**
    * Orders the methods calls for setting up and then rendering scene.
@@ -260,16 +283,22 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   updateShader() {
-    if (!this.texturesLoaded) return;
-    this.pixelPass.enabled = this.params.enabled;
-    this.pixelPass.uniforms['pixelSize'].value = this.params.pixelSize;
-    this.pixelPass.uniforms['innerRepeatLength'].value = this.params.textureIndex === 3 ? 5 : 1;
-    this.pixelPass.uniforms['invert'].value = this.params.invert;
-    this.pixelPass.uniforms['texTwo'].value = this.textures[this.params.textureIndex];
-    this.pixelPass.uniforms['texTwo'].value.needsUpdate = true;
-    this.pixelPass.uniforms['texTwo'].value.wrapS = RepeatWrapping;
-    this.pixelPass.uniforms['texTwo'].value.wrapT = RepeatWrapping;
-    this.pixelPass.uniforms['texTwo'].value.magFilter = NearestFilter;
+    const {
+      pixelPass,
+      params,
+      texturesLoaded,
+    } = this;
+
+    if (!texturesLoaded) return;
+    pixelPass.enabled = params.enabled;
+    pixelPass.uniforms['pixelSize'].value = params.pixelSize;
+    pixelPass.uniforms['innerRepeatLength'].value = params.textureIndex === 3 ? 5 : 1;
+    pixelPass.uniforms['invert'].value = params.invert;
+    pixelPass.uniforms['texTwo'].value = this.textures[params.textureIndex];
+    pixelPass.uniforms['texTwo'].value.needsUpdate = true;
+    pixelPass.uniforms['texTwo'].value.wrapS = RepeatWrapping;
+    pixelPass.uniforms['texTwo'].value.wrapT = RepeatWrapping;
+    pixelPass.uniforms['texTwo'].value.magFilter = NearestFilter;
   }
 
   /**
@@ -278,7 +307,7 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   animate() {
-    requestAnimationFrame(this.animate);
+    this.raf = requestAnimationFrame(this.animate);
 
     this.mesh.rotation.x = (this.yVal);
     this.mesh.rotation.y = (this.xVal) - 1.574;
@@ -293,5 +322,29 @@ export default class PostProcess {
    */
   render() {
     this.composer.render();
+  }
+
+  /**
+   * Cancels RAF loop and unbinds event handlers
+   * @function destroy
+   * @memberof PostProcess.prototype
+   */
+  destroy() {
+    const {
+      buttons,
+      raf,
+      handleButtonPress,
+      handleMouseMove,
+      onWindowResize,
+    } = this;
+
+    cancelAnimationFrame(raf);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('resize', onWindowResize);
+    buttons.smaller.removeEventListener('click', handleButtonPress);
+    buttons.bigger.removeEventListener('click', handleButtonPress);
+    buttons.invert.removeEventListener('click', handleButtonPress);
+    buttons.texture.removeEventListener('click', handleButtonPress);
+    buttons.toggle.removeEventListener('click', handleButtonPress);
   }
 }

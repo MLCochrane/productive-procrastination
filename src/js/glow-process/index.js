@@ -8,9 +8,7 @@ import {
   Vector2,
   MeshLambertMaterial,
   PointLight,
-  MeshNormalMaterial,
   MeshPhongMaterial,
-  WebGLRenderTarget,
   DoubleSide,
   AmbientLight,
   TextureLoader,
@@ -71,8 +69,9 @@ export default class GlowProcess {
     this.processing = this.processing.bind(this);
     this.initLights = this.initLights.bind(this);
     this.updateShader = this.updateShader.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.destroy = this.destroy.bind(this);
 
-    this.bindEvents();
     this.init();
   }
 
@@ -82,14 +81,18 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   bindEvents() {
-    window.addEventListener('resize', () => {
-      this.onWindowResize();
-    });
+    window.addEventListener('resize', this.onWindowResize);
+    window.addEventListener('mousemove', this.handleMouseMove);
+  }
 
-    window.addEventListener('mousemove', e => {
-      this.xVal = (e.clientX / window.innerWidth) - 0.5;
-      this.yVal = (e.clientY / window.innerHeight) - 0.5;
-    });
+  /**
+   * Callback for mouse move event
+   * @function handleMouseMove
+   * @memberof GlowProcess.prototype
+   */
+  handleMouseMove(e) {
+    this.xVal = (e.clientX / window.innerWidth) - 0.5;
+    this.yVal = (e.clientY / window.innerHeight) - 0.5;
   }
 
   /**
@@ -308,7 +311,6 @@ export default class GlowProcess {
     glowPassVert.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
     glowPassVert.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
 
-    // this.updateShader();
     this.glowComposer.renderToScreen = false;
     this.glowComposer.addPass(glowPass);
     this.glowComposer.addPass(glowPassVert);
@@ -337,7 +339,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   animate() {
-    requestAnimationFrame(this.animate);
+    this.raf = requestAnimationFrame(this.animate);
 
     this.camera.position.x = 40 * Math.sin(this.xVal / 4);
     this.camera.position.z = 40 * Math.cos(this.xVal / 4);
@@ -357,5 +359,11 @@ export default class GlowProcess {
     this.glowComposer.render();
     this.camera.layers.set(this.SCENE_LAYER);
     this.finalComposer.render();
+  }
+
+  destroy() {
+    cancelAnimationFrame(this.raf);
+    window.addEventListener('resize', this.onWindowResize);
+    window.addEventListener('mousemove', this.handleMouseMove);
   }
 }

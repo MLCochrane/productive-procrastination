@@ -12,8 +12,8 @@ export default class CutoutSlider {
       box: document.getElementsByClassName('wrap')[0],
       title: document.getElementsByClassName('item'),
       border: document.getElementById('border'),
-      button: document.getElementById('button'),
-      button1: document.getElementById('button1'),
+      advance: document.getElementById('button'),
+      reset: document.getElementById('button1'),
       one: document.getElementById('one'),
       two: document.getElementById('two'),
       three: document.getElementById('three'),
@@ -32,6 +32,10 @@ export default class CutoutSlider {
     this.init = this.init.bind(this);
     this.bindEvents = this.bindEvents.bind(this);
     this.initTimeline = this.initTimeline.bind(this);
+    this.handleAdvance = this.handleAdvance.bind(this);
+    this.handleReset = this.handleReset.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     this.init();
   }
@@ -42,24 +46,49 @@ export default class CutoutSlider {
    * @memberof CutoutSlider.prototype
    */
   bindEvents() {
-    this.selectors.button.addEventListener('click', () => {
-      this.tl.play();
-    });
+    this.selectors.advance.addEventListener('click', this.handleAdvance);
+    this.selectors.reset.addEventListener('click', this.handleReset);
+    this.selectors.box.addEventListener('mousemove', this.handleMouseMove);
+  }
 
-    this.selectors.button1.addEventListener('click', () => {
-      this.tl.time(0);
-      this.tl.pause();
-    });
+  /**
+   * Callback for advancing slide
+   * @function handleAdvance
+   * @memberof CutoutSlider.prototype
+   */
+  handleAdvance() {
+    this.tl.play();
+  }
 
-    this.selectors.box.addEventListener('mousemove', () => {
-      const xPos = event.clientX / window.innerWidth;
-      const yPos = event.clientY / window.innerHeight;
+  /**
+   * Callback for reseting slider
+   * @function handleReset
+   * @memberof CutoutSlider.prototype
+   */
+  handleReset() {
+    this.tl.time(0);
+    this.tl.pause();
+  }
 
-      TweenMax.to(this.selectors.circle, 2, {
-        x: 200 * xPos,
-        y: 200 * yPos
-      });
+  /**
+   * Callback for mousemove
+   * @function handleMouseMove
+   * @memberof CutoutSlider.prototype
+   */
+  handleMouseMove() {
+    const xPos = event.clientX / window.innerWidth;
+    const yPos = event.clientY / window.innerHeight;
+
+    TweenMax.to(this.selectors.circle, 2, {
+      x: 200 * xPos,
+      y: 200 * yPos
     });
+  }
+
+  destroy() {
+    this.selectors.advance.removeEventListener('click', this.handleAdvance);
+    this.selectors.reset.removeEventListener('click', this.handleReset);
+    this.selectors.box.removeEventListener('mousemove', this.handleMouseMove);
   }
 
   /**

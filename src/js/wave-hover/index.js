@@ -90,4 +90,15 @@ export default class HoverMap {
 			this.displacementSprite.y += this.delta.num;
 		});
 	}
+
+	/**
+	 * Destroys app and children
+	 * @function destroy
+	 * @memberof HoverMap.prototype
+	 */
+	destroy() {
+		this.app.destroy(false, {
+			children: true,
+		});
+	}
 }

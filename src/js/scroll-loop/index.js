@@ -17,8 +17,6 @@ export default class ScrollingProjects {
     this.container = document.querySelector('.thing-holder');
     this.current = window.getComputedStyle(this.container);
 
-    // THIS WILL BE WRONG AS THE PAGE LOADS FONT AFTERWARDS
-    // USE onLoad, PROMISE OR OTHER METHOD TO ENSURE TYPEKIT FONT HAS BEEN LOADED AND CORRECT HEIGHT RECORDED
     this.maxHeight = (this.current.getPropertyValue('height').split('px'))[0];
 
     this.tl = {};
@@ -31,6 +29,7 @@ export default class ScrollingProjects {
 
     this.handleWheel = this.handleWheel.bind(this);
     this.handleResize = this.handleResize.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     this.initSliding();
     this.bindEvents();
@@ -44,13 +43,18 @@ export default class ScrollingProjects {
   bindEvents() {
     this.originOffset = this.getYTranslate(this.current);
 
-    window.addEventListener('wheel', e => {
-      this.handleWheel(e);
-    });
+    window.addEventListener('wheel', this.handleWheel);
+    window.addEventListener('resize', this.handleResize);
+  }
 
-    window.addEventListener('resize', e => {
-      this.handleResize(e);
-    });
+  /**
+   * Removes event bindings
+   * @function destroy
+   * @memberof ScrollingProjects.prototype
+   */
+  destroy() {
+    window.removeEventListener('wheel', this.handleWheel);
+    window.removeEventListener('resize', this.handleResize);
   }
 
   /**
