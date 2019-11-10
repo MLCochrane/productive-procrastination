@@ -30,7 +30,7 @@ describe('Navigation', () => {
         cy.get($li).click();
         cy.get(`[data-barba-namespace="${namespace}"]`).should('exist');
         cy.url().should('eq', `http://localhost:8080${link}`);
-        cy.get(`[data-barba-namespace="${previous}"]`, {timeout: 10000}).should('not.exist');
+        cy.get(`[data-barba-namespace="${previous}"]`, {timeout: 30000}).should('not.exist');
         cy.get('#ToggleNav').should('be.visible').click();
         cy.wait(300);
 
