@@ -8,3 +8,4 @@ workflows:
           start: 'npm run dev'
           wait-on: 'http-get://localhost:8080'
           record: true
+          command: npx cypress run --record --key e5e44a66-f40f-4fa7-97c9-f7942aaafda3
