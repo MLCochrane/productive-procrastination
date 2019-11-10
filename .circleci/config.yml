@@ -9,3 +9,5 @@ workflows:
           wait-on: 'http-get://localhost:8080'
           record: true
           command: npx cypress run --record --key e5e44a66-f40f-4fa7-97c9-f7942aaafda3
+          executor: cypress/browsers-chrome69
+          browser: chrome
