@@ -30,7 +30,6 @@ describe('Navigation', () => {
         cy.get($li).click();
         cy.get(`[data-barba-namespace="${namespace}"]`).should('exist');
         cy.url().should('eq', `http://localhost:8080${link}`);
-        cy.wait(2500);
         cy.get(`[data-barba-namespace="${previous}"]`).should('not.exist');
         cy.get('#ToggleNav').should('be.visible').click();
         cy.wait(300);
@@ -41,7 +40,6 @@ describe('Navigation', () => {
           cy.get('.brand__logo a').click();
           cy.get('[data-barba-namespace="home"]').should('exist');
           cy.url().should('eq', 'http://localhost:8080/');
-          cy.wait(2500);
           cy.get(`[data-barba-namespace="${previous}"]`).should('not.exist');
         }
       })
