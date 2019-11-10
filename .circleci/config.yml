@@ -6,6 +6,5 @@ workflows:
     jobs:
       - cypress/run:
           start: 'npm run dev'
-          wait-on: 'http://localhost:8080'
+          wait-on: 'http-get://localhost:8080'
           record: true
-          command: 'cypress run --record --key e5e44a66-f40f-4fa7-97c9-f7942aaafda3'
