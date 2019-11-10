@@ -12,7 +12,7 @@ let activeSketch;
 
 const sketches = [
 	{
-		'namespace': 'scroll',
+		'namespace': 'scroll-loop',
 		'path': 'js/scroll-loop/index',
 		'constructor': []
 	},
