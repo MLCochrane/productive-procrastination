@@ -20,8 +20,8 @@ describe('Navigation', () => {
     .each(($li, index, $list) => {
       const link = $li.attr('href');
       const namespace = link.split('/')[1];
-
       let previous;
+
       cy.get('[data-barba="container"]').then($el => {
         // Checks not only that navigation works but barba correctly removing items from DOM
         previous = $el.attr('data-barba-namespace');
@@ -30,7 +30,7 @@ describe('Navigation', () => {
         cy.get($li).click();
         cy.get(`[data-barba-namespace="${namespace}"]`).should('exist');
         cy.url().should('eq', `http://localhost:8080${link}`);
-        cy.get(`[data-barba-namespace="${previous}"]`).should('not.exist');
+        cy.get(`[data-barba-namespace="${previous}"]`, {timeout: 10000}).should('not.exist');
         cy.get('#ToggleNav').should('be.visible').click();
         cy.wait(300);
 
