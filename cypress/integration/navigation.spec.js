@@ -24,7 +24,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Toon Post Process').click();
-    cy.get(`[data-barba-namespace="glow-process"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="glow-process"]`, {timeout: 20000}).should('not.exist');
   });
 
   it('navigates to and from post processing sketch', () => {
@@ -38,7 +38,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Wave Hover').click();
-    cy.get(`[data-barba-namespace="post-process"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="post-process"]`, {timeout: 20000}).should('not.exist');
   });
 
   it('navigates to and from wave hover sketch', () => {
@@ -52,7 +52,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Scroll Loop').click();
-    cy.get(`[data-barba-namespace="wave-hover"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="wave-hover"]`, {timeout: 20000}).should('not.exist');
   });
 
   it('navigates to and from scroll loop sketch', () => {
@@ -66,7 +66,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Floating Text').click();
-    cy.get(`[data-barba-namespace="scroll-loop"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="scroll-loop"]`, {timeout: 20000}).should('not.exist');
   });
 
   it('navigates to and from floating text sketch', () => {
@@ -80,7 +80,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Inverse Scroll').click();
-    cy.get(`[data-barba-namespace="floating-text"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="floating-text"]`, {timeout: 20000}).should('not.exist');
   });
 
   it('navigates to and from inverse scroll sketch', () => {
@@ -94,7 +94,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Cutout Slider').click();
-    cy.get(`[data-barba-namespace="inverse-scroll"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="inverse-scroll"]`, {timeout: 20000}).should('not.exist');
   });
 
   it('navigates to and from cutout slider sketch', () => {
@@ -108,7 +108,7 @@ describe('Navigation', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Light Glow').click();
-    cy.get(`[data-barba-namespace="cutout-slider"]`).should('not.exist');
+    cy.get(`[data-barba-namespace="cutout-slider"]`, {timeout: 20000}).should('not.exist');
   });
 
 
