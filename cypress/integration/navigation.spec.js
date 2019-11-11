@@ -1,5 +1,5 @@
 describe('Navigation', () => {
-  before(() => {
+  beforeEach(() => {
     cy.visit('localhost:8080/');
   });
 
@@ -14,6 +14,11 @@ describe('Navigation', () => {
   });
 
   it('successfully navigates to each sketch and removes previous DOM', () => {
+    cy.window().then((win) => {
+      cy.spy(win.console, "log")
+      cy.spy(win.console, "warn")
+      cy.spy(win.console, "error")
+    })
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').should('have.length', 7)

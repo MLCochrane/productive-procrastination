@@ -196,7 +196,7 @@ export default class GlowProcess {
       this.bottomTubes.rotation.x = 1.567;
       scene.add(this.bottomTubes);
     }, xhr => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+      // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
 
     }, err => {
       console.error(err);

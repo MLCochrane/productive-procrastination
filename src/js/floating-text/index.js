@@ -23,6 +23,9 @@ export default class FloatingText {
 
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
+    this.handleMouseMove = this.handleMouseMove.bind(this);
+    this.handleResize = this.handleResize.bind(this);
+    this.handleClick = this.handleClick.bind(this);
 
     this.bindEvents();
     this.init();
@@ -34,17 +37,49 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   bindEvents() {
-    window.addEventListener('resize', () => {
-      this.onWindowResize();
-    });
+    window.addEventListener('resize', this.handleResize);
+    window.addEventListener('mousemove', this.handleMouseMove);
+    window.addEventListener('click', this.handleClick);
+  }
 
-    window.addEventListener('mousemove', e => {
-      this.xVal = (e.clientX / window.innerWidth) - 0.5;
-      this.yVal = (e.clientY / window.innerHeight) - 0.5;
-    });
-    window.addEventListener('click', () => {
-      this.renderer.setPixelRatio(window.devicePixelRatio);
-    });
+  /**
+   *
+   * @function destroy
+   * @memberof .prototype
+   */
+  destroy() {
+    window.removeEventListener('resize', this.handleResize);
+    window.removeEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('click', this.handleClick);
+    cancelAnimationFrame(this.id);
+  }
+
+  /**
+   * Callback for click event
+   * @function handleClick
+   * @memberof FloatingText.prototype
+   */
+  handleClick() {
+    this.renderer.setPixelRatio(window.devicePixelRatio);
+  }
+
+  /**
+   * Callback for mousemove
+   * @function handleMouseMove
+   * @memberof FloatingText.prototype
+   */
+  handleMouseMove(e) {
+    this.xVal = (e.clientX / window.innerWidth) - 0.5;
+    this.yVal = (e.clientY / window.innerHeight) - 0.5;
+  }
+
+  /**
+   * Callback for resize event
+   * @function handleResize
+   * @memberof FloatingText.prototype
+   */
+  handleResize() {
+    this.onWindowResize();
   }
 
   /**
@@ -106,7 +141,7 @@ export default class FloatingText {
       this.scene.add(object);
       this.setup(object);
     }, xhr => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+      // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     }, err => {
       console.error(err);
     });
@@ -141,7 +176,7 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   animate() {
-    requestAnimationFrame(this.animate);
+    this.id = requestAnimationFrame(this.animate);
 
     this.mesh.rotation.x = (this.yVal);
     this.mesh.rotation.y = (this.xVal);

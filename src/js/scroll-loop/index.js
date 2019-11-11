@@ -55,6 +55,8 @@ export default class ScrollingProjects {
   destroy() {
     window.removeEventListener('wheel', this.handleWheel);
     window.removeEventListener('resize', this.handleResize);
+    this.tl.kill();
+    this.tl = null;
   }
 
   /**

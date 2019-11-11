@@ -201,7 +201,7 @@ export default class PostProcess {
       this.scene.add(this.mesh);
       this.setup();
     }, xhr => {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+      // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     }, err => {
       console.error(err);
     });
