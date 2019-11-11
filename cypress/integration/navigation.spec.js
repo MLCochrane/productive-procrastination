@@ -20,7 +20,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="glow-process"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Light Glow').click();
     cy.get(`[data-barba-namespace="glow-process"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Toon Post Process').click();
@@ -34,7 +34,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="post-process"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Toon Post Process').click();
     cy.get(`[data-barba-namespace="post-process"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Wave Hover').click();
@@ -48,7 +48,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="wave-hover"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Wave Hover').click();
     cy.get(`[data-barba-namespace="wave-hover"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Scroll Loop').click();
@@ -62,7 +62,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="scroll-loop"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Scroll Loop').click();
     cy.get(`[data-barba-namespace="scroll-loop"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Floating Text').click();
@@ -76,7 +76,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="floating-text"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Floating Text').click();
     cy.get(`[data-barba-namespace="floating-text"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Inverse Scroll').click();
@@ -90,7 +90,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="inverse-scroll"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Inverse Scroll').click();
     cy.get(`[data-barba-namespace="inverse-scroll"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Cutout Slider').click();
@@ -104,7 +104,7 @@ describe('Navigation', () => {
     cy.get(`[data-barba-namespace="cutout-slider"]`).should('not.exist');
     cy.get('.header__list-item a').contains('Cutout Slider').click();
     cy.get(`[data-barba-namespace="cutout-slider"]`).should('exist');
-    cy.get(`[data-barba-namespace="home"]`, {timeout: 10000}).should('not.exist');
+    cy.get(`[data-barba-namespace="home"]`, {timeout: 20000}).should('not.exist');
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);
     cy.get('.header__list-item a').contains('Light Glow').click();
