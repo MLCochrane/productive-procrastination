@@ -1,0 +1,30 @@
+{{#json
+'{
+	"card": {
+    "title": "Light Glow Effect",
+    "date": "Oct 2019",
+    "tags": [
+			"3D",
+      "Interaction"
+    ],
+    "description": "Implementation of an effect from Tron 2.0 written about in GPU Gems.",
+    "references": [
+      {
+        "name": "GPU Gems 1",
+        "link": "https://developer.nvidia.com/gpugems/GPUGems/gpugems_ch21.html"
+      },
+      {
+        "name": "Example of 2D Blur",
+        "link": "https://www.ronja-tutorials.com/2018/08/27/postprocessing-blur.html"
+      }
+    ]
+	}
+}'
+}}
+{{#> layout/base title='Wave Sim' namespace="wave-sim" }}
+{{#*inline "body"}}
+{{> components/sketches/wave-sim }}
+{{> components/sketches/card card=this.card }}
+{{/inline}}
+{{/layout/base}}
+{{/json}}

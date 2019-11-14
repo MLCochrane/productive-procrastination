@@ -46,6 +46,11 @@ const sketches = [
 		'path': 'js/glow-process/index',
 		'constructor': []
 	},
+	{
+		'namespace': 'wave-sim',
+		'path': 'js/wave-sim/index',
+		'constructor': []
+	},
 ]
 
 barba.init({
