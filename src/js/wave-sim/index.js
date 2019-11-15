@@ -1,4 +1,5 @@
 import * as THREE from "three";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // import 'DRACOLoader';
 
 export default class WaterSim {
@@ -16,6 +17,7 @@ export default class WaterSim {
     this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
     this.initGeos = this.initGeos.bind(this);
+    this.initBox = this.initBox.bind(this);
 
     this.bindEvents();
     this.init();
@@ -35,7 +37,8 @@ export default class WaterSim {
   init() {
     this.initScene();
     this.initCamera();
-    this.initGeos();
+    // this.initGeos();
+    this.initBox();
   }
   initScene() {
     this.scene = new THREE.Scene();
@@ -48,7 +51,7 @@ export default class WaterSim {
       300
     );
 
-    this.camera.position.set(0, 10, -7);
+    this.camera.position.set(3, 3, 7);
     this.camera.lookAt(0, 0, 0);
     this.scene.add(this.camera);
   }
@@ -56,7 +59,6 @@ export default class WaterSim {
   initGeos() {
     const waterLoader = new THREE.TextureLoader();
     const nTex = this.createTexture();
-    console.log(nTex);
     waterLoader.load('/src/assets/water-caustics.jpg', (res) => {
       const uniforms = {
         "u_resolution": {
@@ -78,7 +80,7 @@ export default class WaterSim {
         }
       };
 
-      const geo = new THREE.PlaneBufferGeometry(20, 20, 50, 50);
+      const geo = new THREE.PlaneBufferGeometry(10, 10, 50, 50);
       const mat = new THREE.ShaderMaterial({
         uniforms: uniforms,
         vertexShader: document.getElementById('vertexshader').textContent,
@@ -95,6 +97,61 @@ export default class WaterSim {
       this.scene.add(this.mesh);
       this.setup();
     });
+  }
+
+  initBox() {
+    const lightPos = [-1.0, 2.0, 3.0];
+    const uniforms = {
+      u_resolution: {
+        value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+      },
+      scale: {
+        value: new THREE.Vector4(1, 1, 1, .6), // x, y, z, scale
+      },
+      ambientStrength: {
+        value: 0.1,
+      },
+      material: {
+        value: {
+          ambient: new THREE.Vector3(1.0, .5, .31),
+          diffuse: new THREE.Vector3(1.0, 0.5, 0.31),
+          specular: new THREE.Vector3(.5, .5, .5),
+          shininess: 32.0
+        }
+      },
+      light: {
+        value: {
+          position: new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2]),
+          ambient: new THREE.Vector3(0.2, 0.2, 0.2),
+          diffuse: new THREE.Vector3(0.5, 0.5, 0.5),
+          specular: new THREE.Vector3(1.0, 1.0, 1.0)
+        }
+      }
+    };
+
+
+    const box = new THREE.BoxBufferGeometry(2,2,2,3,3,3);
+    const geo = new THREE.PlaneBufferGeometry(10, 10, 50, 50);
+
+    const mat = new THREE.ShaderMaterial({
+      uniforms: uniforms,
+      vertexShader: document.getElementById('vertexshader').textContent,
+      fragmentShader: document.getElementById('fragmentshader').textContent
+    });
+
+
+    this.mesh2 = new THREE.Mesh(box, new THREE.MeshBasicMaterial({color: 0xffffff}));
+    this.mesh2.position.set(lightPos[0], lightPos[1], lightPos[2]);
+    this.mesh2.scale.set(0.3, 0.3, 0.3);
+    this.scene.add(this.mesh2);
+
+    this.mesh = new THREE.Mesh(box, mat);
+    // this.mesh.rotation.x = -1.567;
+    console.log(this.mesh.material);
+
+    this.scene.add(this.mesh);
+
+    this.setup();
   }
 
   createTexture() {
@@ -132,7 +189,6 @@ export default class WaterSim {
   }
 
   setup() {
-
     // RENDERER
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
@@ -140,16 +196,31 @@ export default class WaterSim {
     });
     this.renderer.setSize(this.dims.width, this.dims.height);
     this.renderer.setPixelRatio(window.devicePixelRatio);
+
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+
     this.animate();
   }
   animate() {
     requestAnimationFrame(this.animate);
+
+    this.controls.update();
+
     this.render();
   }
   render(time) {
-    this.mesh.rotation.z += 0.001;
     const delta = this.startTime - Date.now();
-    this.mesh.material.uniforms['time'].value = delta * 0.001;
+
+    const z = 3 * Math.sin(delta * 0.001);
+    const x = -3 * Math.cos(delta * 0.001);
+
+    this.mesh.material.uniforms['light'].value.position = new THREE.Vector3(x, 0.0, z);
+    this.mesh2.position.set(x, 0.0, z);
+    // this.camera.position.y = 2 * this.yVal / 2;
+    // this.mesh.material.uniforms['time'].value = delta * 0.001;
+
+    // this.mesh.rotation.z += 0.01;
+    this.mesh.updateMatrix();
     this.renderer.render(this.scene, this.camera);
   }
 }
