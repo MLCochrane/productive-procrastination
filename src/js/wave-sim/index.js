@@ -121,10 +121,14 @@ export default class WaterSim {
       },
       light: {
         value: {
+          position: new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2]),
           direction: new THREE.Vector3(0.2, -1.0, 0.5),
           ambient: new THREE.Vector3(0.2, 0.2, 0.2),
           diffuse: new THREE.Vector3(0.5, 0.5, 0.5),
-          specular: new THREE.Vector3(1.0, 1.0, 1.0)
+          specular: new THREE.Vector3(1.0, 1.0, 1.0),
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
         }
       }
     };
@@ -144,7 +148,7 @@ export default class WaterSim {
     this.mesh2 = new THREE.Mesh(box, new THREE.MeshBasicMaterial({color: 0xffffff}));
     this.mesh2.position.set(lightPos[0], lightPos[1], lightPos[2]);
     this.mesh2.scale.set(0.3, 0.3, 0.3);
-    // this.scene.add(this.mesh2);
+    this.scene.add(this.mesh2);
 
     this.mesh3 = new THREE.Mesh(box, mat);
     this.mesh3.position.set(2.0, 1.2, -2.0);
