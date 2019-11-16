@@ -121,7 +121,7 @@ export default class WaterSim {
       },
       light: {
         value: {
-          position: new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2]),
+          direction: new THREE.Vector3(0.2, -1.0, 0.5),
           ambient: new THREE.Vector3(0.2, 0.2, 0.2),
           diffuse: new THREE.Vector3(0.5, 0.5, 0.5),
           specular: new THREE.Vector3(1.0, 1.0, 1.0)
@@ -138,18 +138,20 @@ export default class WaterSim {
       vertexShader: document.getElementById('vertexshader').textContent,
       fragmentShader: document.getElementById('fragmentshader').textContent
     });
+    this.mesh = new THREE.Mesh(box, mat);
 
 
     this.mesh2 = new THREE.Mesh(box, new THREE.MeshBasicMaterial({color: 0xffffff}));
     this.mesh2.position.set(lightPos[0], lightPos[1], lightPos[2]);
     this.mesh2.scale.set(0.3, 0.3, 0.3);
-    this.scene.add(this.mesh2);
+    // this.scene.add(this.mesh2);
 
-    this.mesh = new THREE.Mesh(box, mat);
-    // this.mesh.rotation.x = -1.567;
-    console.log(this.mesh.material);
+    this.mesh3 = new THREE.Mesh(box, mat);
+    this.mesh3.position.set(2.0, 1.2, -2.0);
+    this.mesh3.rotation.set(1.0, 0.3, .5);
 
     this.scene.add(this.mesh);
+    this.scene.add(this.mesh3);
 
     this.setup();
   }
@@ -214,12 +216,13 @@ export default class WaterSim {
     const z = 3 * Math.sin(delta * 0.001);
     const x = -3 * Math.cos(delta * 0.001);
 
-    this.mesh.material.uniforms['light'].value.position = new THREE.Vector3(x, 0.0, z);
-    this.mesh2.position.set(x, 0.0, z);
+    // this.mesh.material.uniforms['light'].value.position = new THREE.Vector3(x, 0.0, z);
+    // this.mesh2.position.set(x, 0.0, z);
     // this.camera.position.y = 2 * this.yVal / 2;
     // this.mesh.material.uniforms['time'].value = delta * 0.001;
 
-    // this.mesh.rotation.z += 0.01;
+    this.mesh.rotation.y += 0.01;
+    this.mesh.rotation.z += 0.01;
     this.mesh.updateMatrix();
     this.renderer.render(this.scene, this.camera);
   }

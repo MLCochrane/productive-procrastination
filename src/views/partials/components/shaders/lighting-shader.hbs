@@ -37,14 +37,20 @@
 
 
 	void main() {
+     // local space
 		vec4 pos = vec4( position, 1.0 );
-    //pos*=rotateX(-PI/2.);
+    //pos*=rotateZ(PI/1.5);
 
+    vec4 testNorm = vec4(normal, 0.0);
+    //testNorm*=rotateZ(PI/1.5);
+
+    // local space to world space
     v_FragPos = vec3(modelMatrix * pos);
     v_viewPos = cameraPosition;
 
 		v_Uv = uv;
-    v_Norm = normal;
+    //v_Norm = normal;
+    v_Norm = (modelMatrix * testNorm).xyz;
 
 		gl_Position = projectionMatrix * modelViewMatrix * pos;
 	}
@@ -59,7 +65,7 @@ struct Material {
 };
 
 struct Light {
-    vec3 position;
+    vec3 direction;
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
@@ -88,7 +94,7 @@ void main() {
   vec3 ambient = (material.ambient * light.ambient);
 
   vec3 norm = normalize(v_Norm);
-  vec3 lightDir = normalize(light.position - v_FragPos);
+  vec3 lightDir = normalize(-light.direction);
 
   vec3 viewDir = normalize(v_viewPos - v_FragPos);
   vec3 reflectDir = reflect(-lightDir, norm);
