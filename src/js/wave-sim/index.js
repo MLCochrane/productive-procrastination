@@ -1,4 +1,18 @@
-import * as THREE from "three";
+import {
+  Scene,
+  PerspectiveCamera,
+  Vector3,
+  Vector2,
+  Vector4,
+  BoxBufferGeometry,
+  PlaneBufferGeometry,
+  ShaderMaterial,
+  Mesh,
+  MeshBasicMaterial,
+  WebGLRenderer,
+  DataTexture,
+} from 'three';
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // import 'DRACOLoader';
 
@@ -41,10 +55,10 @@ export default class WaterSim {
     this.initBox();
   }
   initScene() {
-    this.scene = new THREE.Scene();
+    this.scene = new Scene();
   }
   initCamera() {
-    this.camera = new THREE.PerspectiveCamera(
+    this.camera = new PerspectiveCamera(
       50,
       window.innerWidth / window.innerHeight,
       0.2,
@@ -57,15 +71,15 @@ export default class WaterSim {
   }
 
   initGeos() {
-    const waterLoader = new THREE.TextureLoader();
+    const waterLoader = new TextureLoader();
     const nTex = this.createTexture();
     waterLoader.load('/src/assets/water-caustics.jpg', (res) => {
       const uniforms = {
         "u_resolution": {
-          value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+          value: new Vector2(window.innerWidth, window.innerHeight),
         },
         "scale": {
-          value: new THREE.Vector4(1, 1, 1, 1), // x, y, z, scale
+          value: new Vector4(1, 1, 1, 1), // x, y, z, scale
         },
         "time": {
           value: 2.7,
@@ -80,19 +94,19 @@ export default class WaterSim {
         }
       };
 
-      const geo = new THREE.PlaneBufferGeometry(10, 10, 50, 50);
-      const mat = new THREE.ShaderMaterial({
+      const geo = new PlaneBufferGeometry(10, 10, 50, 50);
+      const mat = new ShaderMaterial({
         uniforms: uniforms,
         vertexShader: document.getElementById('vertexshader').textContent,
         fragmentShader: document.getElementById('fragmentshader').textContent
       });
 
-      // mat.uniforms['texOne'].value.wrapS = THREE.RepeatWrapping;
-      // mat.uniforms['texOne'].value.wrapT = THREE.RepeatWrapping;
-      // mat.uniforms['texOne'].value.magFilter = THREE.NearestFilter;
+      // mat.uniforms['texOne'].value.wrapS = RepeatWrapping;
+      // mat.uniforms['texOne'].value.wrapT = RepeatWrapping;
+      // mat.uniforms['texOne'].value.magFilter = NearestFilter;
       mat.uniforms['texOne'].value.needsUpdate = true;
 
-      this.mesh = new THREE.Mesh(geo, mat);
+      this.mesh = new Mesh(geo, mat);
       this.mesh.rotation.x = -1.567;
       this.scene.add(this.mesh);
       this.setup();
@@ -101,56 +115,110 @@ export default class WaterSim {
 
   initBox() {
     const lightPos = [-1.0, 2.0, 3.0];
+
+    // copies direction camera is looking in world space
+    const lightDir = new Vector3(0,0,0);
+    this.camera.getWorldDirection(lightDir);
+
+    const ambientCol = new Vector3(1.0, .5, .31);
+    const diffuseCol = new Vector3(1.0, 0.5, 0.31);
+    const specularCol = new Vector3(.5, .5, .5);
+
     const uniforms = {
       u_resolution: {
-        value: new THREE.Vector2(window.innerWidth, window.innerHeight),
+        value: new Vector2(window.innerWidth, window.innerHeight),
       },
       scale: {
-        value: new THREE.Vector4(1, 1, 1, .6), // x, y, z, scale
+        value: new Vector4(1, 1, 1, .6), // x, y, z, scale
       },
       ambientStrength: {
         value: 0.1,
       },
       material: {
         value: {
-          ambient: new THREE.Vector3(1.0, .5, .31),
-          diffuse: new THREE.Vector3(1.0, 0.5, 0.31),
-          specular: new THREE.Vector3(.5, .5, .5),
+          ambient: ambientCol,
+          diffuse: diffuseCol,
+          specular: specularCol,
           shininess: 32.0
         }
       },
-      light: {
+      spotLight: {
         value: {
-          position: new THREE.Vector3(lightPos[0], lightPos[1], lightPos[2]),
-          direction: new THREE.Vector3(0.2, -1.0, 0.5),
-          ambient: new THREE.Vector3(0.2, 0.2, 0.2),
-          diffuse: new THREE.Vector3(0.5, 0.5, 0.5),
-          specular: new THREE.Vector3(1.0, 1.0, 1.0),
+          position: new Vector3(this.camera.position),
+          direction: lightDir,
+          ambient: new Vector3(0.13, 0.375, 0.61),
+          diffuse: new Vector3(0.13, 0.375, 0.61),
+          specular: specularCol,
           constant: 1.0,
           linear: 0.09,
           quadratic: 0.032,
+          innerCutOff: Math.cos(Math.PI / 12),
+          outerCutOff: Math.cos(Math.PI / 7),
+        }
+      },
+      pointLights: {
+        value: [
+          {
+            position: new Vector3(-3.0, 2.5, 6.31),
+            ambient: new Vector3(0.9, 0.3, 1.0),
+            diffuse: new Vector3(0.9, 0.3, 1.0),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          },
+          {
+            position: new Vector3(5.0, -3.5, -1.31),
+            ambient: new Vector3(0.2, 0.3, 0.1),
+            diffuse: new Vector3(0.2, 0.3, 0.1),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          },
+          {
+            position: new Vector3(-6.0, 3.5, 5.31),
+            ambient: new Vector3(0.2, 0.3, 0.1),
+            diffuse: new Vector3(0.2, 0.3, 0.1),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          }
+        ]
+      },
+      dirLight: {
+        value: {
+          direction: new Vector3(0.2, -5.0, 0.5),
+          ambient: new Vector3(0.2, 0.2, 0.2),
+          diffuse: new Vector3(0.5, 0.5, 0.5),
+          specular: new Vector3(1.0, 1.0, 1.0),
         }
       }
     };
 
+    const box = new BoxBufferGeometry(2,2,2,3,3,3);
+    const geo = new PlaneBufferGeometry(10, 10, 50, 50);
 
-    const box = new THREE.BoxBufferGeometry(2,2,2,3,3,3);
-    const geo = new THREE.PlaneBufferGeometry(10, 10, 50, 50);
-
-    const mat = new THREE.ShaderMaterial({
+    const mat = new ShaderMaterial({
+      defines: {
+        NR_POINT_LIGHTS: uniforms.pointLights.value.length,
+      },
       uniforms: uniforms,
       vertexShader: document.getElementById('vertexshader').textContent,
       fragmentShader: document.getElementById('fragmentshader').textContent
     });
-    this.mesh = new THREE.Mesh(box, mat);
+    this.mesh = new Mesh(box, mat);
 
 
-    this.mesh2 = new THREE.Mesh(box, new THREE.MeshBasicMaterial({color: 0xffffff}));
-    this.mesh2.position.set(lightPos[0], lightPos[1], lightPos[2]);
-    this.mesh2.scale.set(0.3, 0.3, 0.3);
-    this.scene.add(this.mesh2);
+    uniforms.pointLights.value.forEach(el => {
+      const mesh = new Mesh(box, new MeshBasicMaterial({color: 0xffffff}));
+      mesh.position.set(el.position.x, el.position.y, el.position.z);
+      mesh.scale.set(0.3, 0.3, 0.3);
+      this.scene.add(mesh);
+    });
 
-    this.mesh3 = new THREE.Mesh(box, mat);
+    this.mesh3 = new Mesh(box, mat);
     this.mesh3.position.set(2.0, 1.2, -2.0);
     this.mesh3.rotation.set(1.0, 0.3, .5);
 
@@ -191,12 +259,12 @@ export default class WaterSim {
       ];
     }
 
-    return new THREE.DataTexture(data, width, height, THREE.RGBFormat);
+    return new DataTexture(data, width, height, RGBFormat);
   }
 
   setup() {
     // RENDERER
-    this.renderer = new THREE.WebGLRenderer({
+    this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
     });
@@ -215,19 +283,17 @@ export default class WaterSim {
     this.render();
   }
   render(time) {
-    const delta = this.startTime - Date.now();
+    // const delta = this.startTime - Date.now();
+    // const z = 3 * Math.sin(delta * 0.001);
+    // const x = -3 * Math.cos(delta * 0.001);
 
-    const z = 3 * Math.sin(delta * 0.001);
-    const x = -3 * Math.cos(delta * 0.001);
+   const lightDir = new Vector3(0, 0, 0);
+    this.camera.getWorldDirection(lightDir);
 
-    // this.mesh.material.uniforms['light'].value.position = new THREE.Vector3(x, 0.0, z);
-    // this.mesh2.position.set(x, 0.0, z);
-    // this.camera.position.y = 2 * this.yVal / 2;
-    // this.mesh.material.uniforms['time'].value = delta * 0.001;
 
-    this.mesh.rotation.y += 0.01;
-    this.mesh.rotation.z += 0.01;
-    this.mesh.updateMatrix();
+    this.mesh.material.uniforms['spotLight'].value.position = this.camera.position;
+    this.mesh.material.uniforms['spotLight'].value.direction = lightDir;
+
     this.renderer.render(this.scene, this.camera);
   }
 }
