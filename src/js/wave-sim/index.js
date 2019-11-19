@@ -11,6 +11,7 @@ import {
   MeshBasicMaterial,
   WebGLRenderer,
   DataTexture,
+  TextureLoader
 } from 'three';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
@@ -115,7 +116,7 @@ export default class WaterSim {
 
   initBox() {
     const lightPos = [-1.0, 2.0, 3.0];
-
+    const waterLoader = new TextureLoader();
     // copies direction camera is looking in world space
     const lightDir = new Vector3(0,0,0);
     this.camera.getWorldDirection(lightDir);
@@ -131,8 +132,11 @@ export default class WaterSim {
       scale: {
         value: new Vector4(1, 1, 1, .6), // x, y, z, scale
       },
+      time: {
+        value: 1.0,
+      },
       ambientStrength: {
-        value: 0.1,
+      value: 0.1,
       },
       material: {
         value: {
@@ -158,27 +162,27 @@ export default class WaterSim {
       },
       pointLights: {
         value: [
+          // {
+          //   position: new Vector3(-3.0, 2.5, 17.31),
+          //   ambient: new Vector3(0.9, 0.3, 1.0),
+          //   diffuse: new Vector3(0.9, 0.3, 1.0),
+          //   specular: specularCol,
+          //   constant: 1.0,
+          //   linear: 0.09,
+          //   quadratic: 0.032,
+          // },
           {
-            position: new Vector3(-3.0, 2.5, 6.31),
-            ambient: new Vector3(0.9, 0.3, 1.0),
-            diffuse: new Vector3(0.9, 0.3, 1.0),
+            position: new Vector3(5.0, 3.5, 8.31),
+            ambient: new Vector3(0.4, 0.3, 0.9),
+            diffuse: new Vector3(0.4, 0.3, 0.9),
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
             quadratic: 0.032,
           },
           {
-            position: new Vector3(5.0, -3.5, -1.31),
-            ambient: new Vector3(0.2, 0.3, 0.1),
-            diffuse: new Vector3(0.2, 0.3, 0.1),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
-          {
-            position: new Vector3(-6.0, 3.5, 5.31),
-            ambient: new Vector3(0.2, 0.3, 0.1),
+            position: new Vector3(-6.0, 6.5, 10.31),
+            ambient: new Vector3(0.1, 0.6, 0.7),
             diffuse: new Vector3(0.2, 0.3, 0.1),
             specular: specularCol,
             constant: 1.0,
@@ -192,13 +196,21 @@ export default class WaterSim {
           direction: new Vector3(0.2, -5.0, 0.5),
           ambient: new Vector3(0.2, 0.2, 0.2),
           diffuse: new Vector3(0.5, 0.5, 0.5),
-          specular: new Vector3(1.0, 1.0, 1.0),
+          specular: new Vector3(.5, .5, .5),
         }
+      },
+      normalMap: {
+        value: null
       }
     };
 
+
+    waterLoader.load('/src/assets/normal_mapping_normal_map.png', (res) => {
+      uniforms['normalMap'].value = res;
+    });
+
     const box = new BoxBufferGeometry(2,2,2,3,3,3);
-    const geo = new PlaneBufferGeometry(10, 10, 50, 50);
+    const geo = new PlaneBufferGeometry(20, 20, 256, 256);
 
     const mat = new ShaderMaterial({
       defines: {
@@ -222,8 +234,16 @@ export default class WaterSim {
     this.mesh3.position.set(2.0, 1.2, -2.0);
     this.mesh3.rotation.set(1.0, 0.3, .5);
 
-    this.scene.add(this.mesh);
-    this.scene.add(this.mesh3);
+    // this.scene.add(this.mesh);
+    // this.scene.add(this.mesh3);
+
+    const floorMesh = new Mesh(geo, mat);
+
+    floorMesh.rotation.x = -1.567;
+
+    floorMesh.material.uniforms.material.value.shininess = 8;
+    this.scene.add(floorMesh);
+
 
     this.setup();
   }
@@ -283,7 +303,7 @@ export default class WaterSim {
     this.render();
   }
   render(time) {
-    // const delta = this.startTime - Date.now();
+    const delta = this.startTime - Date.now();
     // const z = 3 * Math.sin(delta * 0.001);
     // const x = -3 * Math.cos(delta * 0.001);
 
@@ -291,6 +311,7 @@ export default class WaterSim {
     this.camera.getWorldDirection(lightDir);
 
 
+    this.mesh.material.uniforms['time'].value = delta * 0.001;
     this.mesh.material.uniforms['spotLight'].value.position = this.camera.position;
     this.mesh.material.uniforms['spotLight'].value.direction = lightDir;
 
