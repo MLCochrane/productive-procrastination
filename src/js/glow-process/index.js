@@ -69,6 +69,7 @@ export default class GlowProcess {
     this.processing = this.processing.bind(this);
     this.initLights = this.initLights.bind(this);
     this.updateShader = this.updateShader.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.destroy = this.destroy.bind(this);
 
