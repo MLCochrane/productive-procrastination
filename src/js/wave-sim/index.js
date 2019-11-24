@@ -14,7 +14,7 @@ import {
   TextureLoader,
   MeshPhongMaterial,
   PointLight,
-
+  RGBFormat
 } from 'three';
 import {
   BufferGeometryUtils
@@ -114,7 +114,7 @@ export default class WaterSim {
       mat.uniforms['texOne'].value.needsUpdate = true;
 
       this.mesh = new Mesh(geo, mat);
-      this.mesh.rotation.x = -1.567;
+      // this.mesh.rotation.x = -1.567;
       this.scene.add(this.mesh);
       this.setup();
     });
@@ -129,6 +129,8 @@ export default class WaterSim {
     const ambientCol = new Vector3(1.0, .5, .31);
     const diffuseCol = new Vector3(1.0, 0.5, 0.31);
     const specularCol = new Vector3(.5, .5, .5);
+
+    // const nTex = this.createTexture();
 
     const uniforms = {
       u_resolution: {
@@ -167,15 +169,15 @@ export default class WaterSim {
       },
       pointLights: {
         value: [
-          // {
-          //   position: new Vector3(-3.0, 2.5, 17.31),
-          //   ambient: new Vector3(0.9, 0.3, 1.0),
-          //   diffuse: new Vector3(0.9, 0.3, 1.0),
-          //   specular: specularCol,
-          //   constant: 1.0,
-          //   linear: 0.09,
-          //   quadratic: 0.032,
-          // },
+          {
+            position: new Vector3(-3.0, 7.5, -5.31),
+            ambient: new Vector3(0.1, 0.3, 1.0),
+            diffuse: new Vector3(0.1, 0.3, 1.0),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          },
           {
             position: new Vector3(3.0, 3.5, 0.31),
             ambient: new Vector3(0.4, 0.3, 0.9),
@@ -210,7 +212,7 @@ export default class WaterSim {
     };
 
     const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
-    const geo = new PlaneBufferGeometry(10, 10, 2, 2);
+    const geo = new PlaneBufferGeometry(10, 10, 50, 50);
 
     waterLoader.load('/src/assets/normal_mapping_normal_map.png', (res) => {
       uniforms['normalMap'].value = res;
@@ -227,21 +229,22 @@ export default class WaterSim {
     });
     this.mesh = new Mesh(box, mat);
 
-    uniforms.pointLights.value.forEach(el => {
-      const mesh = new Mesh(box, new MeshBasicMaterial({color: 0xffffff}));
-      mesh.position.set(el.position.x, el.position.y, el.position.z);
-      mesh.scale.set(0.3, 0.3, 0.3);
-      this.scene.add(mesh);
-    });
+    // uniforms.pointLights.value.forEach(el => {
+    //   const mesh = new Mesh(box, new MeshBasicMaterial({color: 0xffffff}));
+    //   mesh.position.set(el.position.x, el.position.y, el.position.z);
+    //   mesh.scale.set(0.3, 0.3, 0.3);
+    //   this.scene.add(mesh);
+    // });
 
     const floorMesh = new Mesh(geo, mat);
-    floorMesh.rotation.x = -1;
+    floorMesh.rotation.x = -1.567;
     floorMesh.position.set(-2, 0, 0);
     this.scene.add(floorMesh);
 
     this.setup();
   }
 
+  // WORK IN PROGRESS, STILL NEED TO GENERATE SUMMED WAVES
   createTexture() {
     const width = 256;
     const height = 256;
@@ -249,16 +252,34 @@ export default class WaterSim {
     const size = width * height;
     const data = new Uint8Array(3 * size);
 
-    // const r = Math.floor(color.r * 255);
-    // const g = Math.floor(color.g * 255);
-    // const b = Math.floor(color.b * 255);
     const interval = 2 * Math.PI / 256;
 
     for (let i = 0; i < size; i++) {
 
       const stride = i * 3;
 
-      const col = cross([1, 0, Math.cos(3 * (i * interval))], [0, 1, Math.cos(3 * (i * interval))]);
+      let col = [0, 0, 0];
+
+      for (let j = 0; j < 15; j++) {
+        const dirX = Math.random() * (1 - (-1)) + (-1);
+        const dirY = Math.random() * (1 - (-1)) + (-1);
+
+        const curCol = cross(
+          [1, 0, Math.cos(3 * (i * interval))],
+          [0, 1, Math.cos(3 * (i * interval))]
+        );
+
+        (dir, pos.x, pos.y, time, 1.5, .5)
+        
+        function partialDer(dir, x, y, t, k, speed, ) {
+          const internalWave = dot(dir, [x, y]) * w + t * speed;
+          return k * dir.y * w * amp * (pow((sin(internalWave) + 1.0) / 2., k - 1.0)) * cos(internalWave);
+        }
+
+        col[0] += curCol[0];
+        col[1] += curCol[1];
+        col[2] += curCol[2];
+      }
 
       data[stride] = Math.round((col[0] * 0.5 + 0.5) * 255);
       data[stride + 1] = Math.round((col[1] * 0.5 + 0.5) * 255);
@@ -271,6 +292,14 @@ export default class WaterSim {
         (vecA[2] * vecB[0]) - (vecA[0] * vecB[2]),
         (vecA[0] * vecB[1]) - (vecA[1] * vecB[0])
       ];
+    }
+
+    function dot(vecA, vecB) {
+      let sum;
+      for (let i = 0; i < vecA.length; i++) {
+        sum += vecA[i] * vecB[i];
+      }
+      return sum;
     }
 
     return new DataTexture(data, width, height, RGBFormat);
