@@ -11,9 +11,14 @@ import {
   MeshBasicMaterial,
   WebGLRenderer,
   DataTexture,
-  TextureLoader
-} from 'three';
+  TextureLoader,
+  MeshPhongMaterial,
+  PointLight,
 
+} from 'three';
+import {
+  BufferGeometryUtils
+} from 'three/examples/jsm/utils/BufferGeometryUtils';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 // import 'DRACOLoader';
 
@@ -96,6 +101,7 @@ export default class WaterSim {
       };
 
       const geo = new PlaneBufferGeometry(10, 10, 50, 50);
+
       const mat = new ShaderMaterial({
         uniforms: uniforms,
         vertexShader: document.getElementById('vertexshader').textContent,
@@ -115,7 +121,6 @@ export default class WaterSim {
   }
 
   initBox() {
-    const lightPos = [-1.0, 2.0, 3.0];
     const waterLoader = new TextureLoader();
     // copies direction camera is looking in world space
     const lightDir = new Vector3(0,0,0);
@@ -130,7 +135,7 @@ export default class WaterSim {
         value: new Vector2(window.innerWidth, window.innerHeight),
       },
       scale: {
-        value: new Vector4(1, 1, 1, .6), // x, y, z, scale
+        value: new Vector4(1, 1, 1, 1), // x, y, z, scale
       },
       time: {
         value: 1.0,
@@ -143,7 +148,7 @@ export default class WaterSim {
           ambient: ambientCol,
           diffuse: diffuseCol,
           specular: specularCol,
-          shininess: 32.0
+          shininess: 64.0
         }
       },
       spotLight: {
@@ -172,7 +177,7 @@ export default class WaterSim {
           //   quadratic: 0.032,
           // },
           {
-            position: new Vector3(5.0, 3.5, 8.31),
+            position: new Vector3(3.0, 3.5, 0.31),
             ambient: new Vector3(0.4, 0.3, 0.9),
             diffuse: new Vector3(0.4, 0.3, 0.9),
             specular: specularCol,
@@ -181,9 +186,9 @@ export default class WaterSim {
             quadratic: 0.032,
           },
           {
-            position: new Vector3(-6.0, 6.5, 10.31),
-            ambient: new Vector3(0.1, 0.6, 0.7),
-            diffuse: new Vector3(0.2, 0.3, 0.1),
+            position: new Vector3(-2.0, 3.0, 2.0),
+            ambient: new Vector3(0., 0., 0.),
+            diffuse: diffuseCol,
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
@@ -201,27 +206,26 @@ export default class WaterSim {
       },
       normalMap: {
         value: null
-      }
+      },
     };
 
+    const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
+    const geo = new PlaneBufferGeometry(10, 10, 2, 2);
 
     waterLoader.load('/src/assets/normal_mapping_normal_map.png', (res) => {
       uniforms['normalMap'].value = res;
     });
 
-    const box = new BoxBufferGeometry(2,2,2,3,3,3);
-    const geo = new PlaneBufferGeometry(20, 20, 256, 256);
-
     const mat = new ShaderMaterial({
       defines: {
         NR_POINT_LIGHTS: uniforms.pointLights.value.length,
+        USE_TANGENT: true
       },
       uniforms: uniforms,
       vertexShader: document.getElementById('vertexshader').textContent,
       fragmentShader: document.getElementById('fragmentshader').textContent
     });
     this.mesh = new Mesh(box, mat);
-
 
     uniforms.pointLights.value.forEach(el => {
       const mesh = new Mesh(box, new MeshBasicMaterial({color: 0xffffff}));
@@ -230,20 +234,10 @@ export default class WaterSim {
       this.scene.add(mesh);
     });
 
-    this.mesh3 = new Mesh(box, mat);
-    this.mesh3.position.set(2.0, 1.2, -2.0);
-    this.mesh3.rotation.set(1.0, 0.3, .5);
-
-    // this.scene.add(this.mesh);
-    // this.scene.add(this.mesh3);
-
     const floorMesh = new Mesh(geo, mat);
-
-    floorMesh.rotation.x = -1.567;
-
-    floorMesh.material.uniforms.material.value.shininess = 8;
+    floorMesh.rotation.x = -1;
+    floorMesh.position.set(-2, 0, 0);
     this.scene.add(floorMesh);
-
 
     this.setup();
   }
