@@ -11,7 +11,7 @@
   varying mat3 v_TBN;
 
 	float amp = 0.5;
-	float w = 1.8;
+	float w = .8;
 
 	float wave(vec2 dir, float x, float y, float t, float k, float speed) {
 		float base = sin(dot(dir, vec2(x, y)) * w + t * speed) + 1.0;
@@ -48,11 +48,11 @@
 		pos.z += wave(dir, pos.x, pos.y, time, 1.5, .5);
 		pos.z += wave(dir2, pos.x, pos.y, time, 1., .6);
 
-    vec3 newBi = vec3(1.0, 0.0, wavePartDerX(dir, pos.x, pos.y, time, 1.5, .5));
-    vec3 newTan = vec3(0.0, 1.0, wavePartDerY(dir, pos.x, pos.y, time, 1.5, .5));
+    vec3 newBi = vec3(1.0, 0.0, wavePartDerX(dir, pos.x, pos.y, time, 1.5, .25));
+    vec3 newTan = vec3(0.0, 1.0, wavePartDerY(dir, pos.x, pos.y, time, 1.5, .25));
 
-    vec3 newBi2 = vec3(1.0, 0.0, wavePartDerX(dir2, pos.x, pos.y, time, 1., .6));
-    vec3 newTan2 = vec3(0.0, 1.0, wavePartDerY(dir2, pos.x, pos.y, time, 1., .6));
+    vec3 newBi2 = vec3(1.0, 0.0, wavePartDerX(dir2, pos.x, pos.y, time, 1., .16));
+    vec3 newTan2 = vec3(0.0, 1.0, wavePartDerY(dir2, pos.x, pos.y, time, 1., .16));
 
     v_Norm = cross(newBi, newTan);
     v_Norm += cross(newBi2, newTan2);
@@ -125,6 +125,7 @@ uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform vec2 u_resolution;
 uniform vec3 ambientColor;
 uniform float ambientStrength;
+uniform float time;
 
 uniform sampler2D normalMap;
 
@@ -145,7 +146,7 @@ vec3 CalcDirectionalLight(DirLight light, vec3 normal, vec3 viewDir) {
   vec3 specular = (spec * material.specular) * light.specular;
   vec3 diffuse = (diff * material.diffuse) * light.diffuse;
 
-  return ambient + diffuse + specular;
+  return (ambient + diffuse + specular) * ambientStrength;
 }
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 viewDir, vec3 fragPos) {
@@ -213,13 +214,17 @@ void main() {
 	st.x *= u_resolution.x/u_resolution.y;
 
   //vec3 norm = normalize(v_Norm);
-  vec3 norm = texture2D(normalMap, v_Uv).rgb;
+  vec2 newUv = v_Uv;
+  newUv.x += time * 0.005;
+  newUv.y -= time * 0.008;
+
+  vec3 norm = texture2D(normalMap, newUv * 6.).rgb;
   norm = normalize(norm * 2.0 - 1.0);
   norm = normalize(v_TBN * norm);
   vec3 viewDir = normalize(v_viewPos - v_FragPos);
 
   vec3 result = vec3(0.);
-  //result += CalcDirectionalLight(dirLight, norm, viewDir);
+  result += CalcDirectionalLight(dirLight, norm, viewDir);
 
   for (int i = 0; i < NR_POINT_LIGHTS; i++)
   {

@@ -14,12 +14,16 @@ import {
   TextureLoader,
   MeshPhongMaterial,
   PointLight,
-  RGBFormat
+  RGBFormat,
+  RepeatWrapping
 } from 'three';
-import {
-  BufferGeometryUtils
-} from 'three/examples/jsm/utils/BufferGeometryUtils';
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+import {
+  cross,
+  dot
+} from '../utils/math';
 // import 'DRACOLoader';
 
 export default class WaterSim {
@@ -38,6 +42,7 @@ export default class WaterSim {
     this.setup = this.setup.bind(this);
     this.initGeos = this.initGeos.bind(this);
     this.initBox = this.initBox.bind(this);
+    this.createTexture = this.createTexture.bind(this);
 
     this.bindEvents();
     this.init();
@@ -126,11 +131,9 @@ export default class WaterSim {
     const lightDir = new Vector3(0,0,0);
     this.camera.getWorldDirection(lightDir);
 
-    const ambientCol = new Vector3(1.0, .5, .31);
-    const diffuseCol = new Vector3(1.0, 0.5, 0.31);
+    const ambientCol = new Vector3(1.0, .5, .1);
+    const diffuseCol = new Vector3(1.0, 0.5, 0.1);
     const specularCol = new Vector3(.5, .5, .5);
-
-    // const nTex = this.createTexture();
 
     const uniforms = {
       u_resolution: {
@@ -140,17 +143,17 @@ export default class WaterSim {
         value: new Vector4(1, 1, 1, 1), // x, y, z, scale
       },
       time: {
-        value: 1.0,
+        value: 1.2,
       },
       ambientStrength: {
       value: 0.1,
       },
       material: {
         value: {
-          ambient: ambientCol,
-          diffuse: diffuseCol,
+          ambient: new Vector3(0.1, 0.55, 1.),
+          diffuse: new Vector3(0.1, 0.55, 1.),
           specular: specularCol,
-          shininess: 64.0
+          shininess: 32.0
         }
       },
       spotLight: {
@@ -170,9 +173,9 @@ export default class WaterSim {
       pointLights: {
         value: [
           {
-            position: new Vector3(-3.0, 7.5, -5.31),
-            ambient: new Vector3(0.1, 0.3, 1.0),
-            diffuse: new Vector3(0.1, 0.3, 1.0),
+            position: new Vector3(-13.0, 2.5, -5.31),
+            ambient: new Vector3(1., 0.1, .0),
+            diffuse: new Vector3(1., 0.1, .0),
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
@@ -180,15 +183,15 @@ export default class WaterSim {
           },
           {
             position: new Vector3(3.0, 3.5, 0.31),
-            ambient: new Vector3(0.4, 0.3, 0.9),
-            diffuse: new Vector3(0.4, 0.3, 0.9),
+            ambient: new Vector3(.6, 0.3, 0.2),
+            diffuse: new Vector3(0.6, 0.3, 0.2),
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
             quadratic: 0.032,
           },
           {
-            position: new Vector3(-2.0, 3.0, 2.0),
+            position: new Vector3(12.0, 3.0, 2.0),
             ambient: new Vector3(0., 0., 0.),
             diffuse: diffuseCol,
             specular: specularCol,
@@ -201,8 +204,8 @@ export default class WaterSim {
       dirLight: {
         value: {
           direction: new Vector3(0.2, -5.0, 0.5),
-          ambient: new Vector3(0.2, 0.2, 0.2),
-          diffuse: new Vector3(0.5, 0.5, 0.5),
+          ambient: new Vector3(0., 0.23, 0.39),
+          diffuse: new Vector3(0., 0.23, 0.39),
           specular: new Vector3(.5, .5, .5),
         }
       },
@@ -211,11 +214,15 @@ export default class WaterSim {
       },
     };
 
-    const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
-    const geo = new PlaneBufferGeometry(10, 10, 50, 50);
 
-    waterLoader.load('/src/assets/normal_mapping_normal_map.png', (res) => {
+
+    const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
+    const geo = new PlaneBufferGeometry(100, 100, 50, 50);
+
+    waterLoader.load('/src/assets/wave-normal.jpeg', (res) => {
       uniforms['normalMap'].value = res;
+      uniforms['normalMap'].value.wrapT = RepeatWrapping;
+      uniforms['normalMap'].value.wrapS = RepeatWrapping;
     });
 
     const mat = new ShaderMaterial({
@@ -244,8 +251,7 @@ export default class WaterSim {
     this.setup();
   }
 
-  // WORK IN PROGRESS, STILL NEED TO GENERATE SUMMED WAVES
-  createTexture() {
+  createTexture(time) {
     const width = 256;
     const height = 256;
 
@@ -263,19 +269,18 @@ export default class WaterSim {
       for (let j = 0; j < 15; j++) {
         const dirX = Math.random() * (1 - (-1)) + (-1);
         const dirY = Math.random() * (1 - (-1)) + (-1);
+        const xVal = i % width;
+        const yVal = Math.floor(i / width);
+
+        const binormal = partialDer([dirX, dirY], xVal, yVal, time, 1.5, .5, 0);
+        const tangent = partialDer([dirX, dirY], xVal, yVal, time, 1.5, .5, 1);
 
         const curCol = cross(
-          [1, 0, Math.cos(3 * (i * interval))],
-          [0, 1, Math.cos(3 * (i * interval))]
+          [1, 0, binormal],
+          [0, 1, tangent]
         );
 
-        (dir, pos.x, pos.y, time, 1.5, .5)
-        
-        function partialDer(dir, x, y, t, k, speed, ) {
-          const internalWave = dot(dir, [x, y]) * w + t * speed;
-          return k * dir.y * w * amp * (pow((sin(internalWave) + 1.0) / 2., k - 1.0)) * cos(internalWave);
-        }
-
+        // Adding wave value to x, y, z color components
         col[0] += curCol[0];
         col[1] += curCol[1];
         col[2] += curCol[2];
@@ -286,20 +291,12 @@ export default class WaterSim {
       data[stride + 2] = Math.round((col[2] * 0.5 + 0.5) * 255);
     }
 
-    function cross(vecA, vecB) {
-      return [
-        (vecA[1] * vecB[2]) - (vecA[2] * vecB[1]),
-        (vecA[2] * vecB[0]) - (vecA[0] * vecB[2]),
-        (vecA[0] * vecB[1]) - (vecA[1] * vecB[0])
-      ];
-    }
-
-    function dot(vecA, vecB) {
-      let sum;
-      for (let i = 0; i < vecA.length; i++) {
-        sum += vecA[i] * vecB[i];
-      }
-      return sum;
+    // Calculates partial derivative in x and y direction based on wave function
+    function partialDer(windDir, x, y, t, k, speed, direction) {
+      const w = 2.0;
+      const amp = 0.5;
+      const internalWave = dot(windDir, [x, y]) * w + t * speed;
+      return k * windDir[`${direction}`] * w * amp * (Math.pow((Math.sin(internalWave) + 1.0) / 2., k - 1.0)) * Math.cos(internalWave);
     }
 
     return new DataTexture(data, width, height, RGBFormat);
@@ -327,16 +324,16 @@ export default class WaterSim {
   }
   render(time) {
     const delta = this.startTime - Date.now();
-    // const z = 3 * Math.sin(delta * 0.001);
-    // const x = -3 * Math.cos(delta * 0.001);
+    const z = 10 * Math.sin(delta * 0.0001);
+    const x = -10 * Math.cos(delta * 0.0001);
 
-   const lightDir = new Vector3(0, 0, 0);
+    const lightDir = new Vector3(0, 0, 0);
     this.camera.getWorldDirection(lightDir);
-
 
     this.mesh.material.uniforms['time'].value = delta * 0.001;
     this.mesh.material.uniforms['spotLight'].value.position = this.camera.position;
     this.mesh.material.uniforms['spotLight'].value.direction = lightDir;
+    this.mesh.material.uniforms['pointLights'].value[0].position = new Vector3(x, 3.0, z);
 
     this.renderer.render(this.scene, this.camera);
   }
