@@ -24,11 +24,16 @@ function cross(vecA, vecB) {
 }
 
 function dot(vecA, vecB) {
-  let sum;
+  if (typeof vecA !== 'object' || !vecA || !vecA.length) throw 'Both arguments must be arrays';
+  if (typeof vecB !== 'object' || !vecB || !vecB.length) throw 'Both arguments must be arrays';
+
+  if (vecA.length !== vecB.length) throw 'Both arguments must be of the same length';
+
+  let sum = 0;
   for (let i = 0; i < vecA.length; i++) {
     sum += vecA[i] * vecB[i];
   }
-  return sum;
+  return Number.parseFloat(sum.toFixed(3));
 }
 
 export {cross, dot};
