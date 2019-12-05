@@ -218,7 +218,7 @@ void main() {
   newUv.x += time * 0.005;
   newUv.y -= time * 0.008;
 
-  vec3 norm = texture2D(normalMap, newUv * 6.).rgb;
+  vec3 norm = texture2D(normalMap, newUv * 3.).rgb;
   norm = normalize(norm * 2.0 - 1.0);
   norm = normalize(v_TBN * norm);
   vec3 viewDir = normalize(v_viewPos - v_FragPos);

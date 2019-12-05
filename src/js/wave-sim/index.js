@@ -40,7 +40,6 @@ export default class WaterSim {
     this.animate = this.animate.bind(this);
     this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
-    this.initGeos = this.initGeos.bind(this);
     this.initBox = this.initBox.bind(this);
     this.createTexture = this.createTexture.bind(this);
 
@@ -62,7 +61,6 @@ export default class WaterSim {
   init() {
     this.initScene();
     this.initCamera();
-    // this.initGeos();
     this.initBox();
   }
   initScene() {
@@ -76,53 +74,9 @@ export default class WaterSim {
       300
     );
 
-    this.camera.position.set(3, 3, 7);
+    this.camera.position.set(3, 30, -60);
     this.camera.lookAt(0, 0, 0);
     this.scene.add(this.camera);
-  }
-
-  initGeos() {
-    const waterLoader = new TextureLoader();
-    const nTex = this.createTexture();
-    waterLoader.load('/src/assets/water-caustics.jpg', (res) => {
-      const uniforms = {
-        "u_resolution": {
-          value: new Vector2(window.innerWidth, window.innerHeight),
-        },
-        "scale": {
-          value: new Vector4(1, 1, 1, 1), // x, y, z, scale
-        },
-        "time": {
-          value: 2.7,
-        },
-        "texOne": {
-          type: "t",
-          value: nTex,
-        },
-        "texTwo": {
-          type: "t",
-          value: res,
-        }
-      };
-
-      const geo = new PlaneBufferGeometry(10, 10, 50, 50);
-
-      const mat = new ShaderMaterial({
-        uniforms: uniforms,
-        vertexShader: document.getElementById('vertexshader').textContent,
-        fragmentShader: document.getElementById('fragmentshader').textContent
-      });
-
-      // mat.uniforms['texOne'].value.wrapS = RepeatWrapping;
-      // mat.uniforms['texOne'].value.wrapT = RepeatWrapping;
-      // mat.uniforms['texOne'].value.magFilter = NearestFilter;
-      mat.uniforms['texOne'].value.needsUpdate = true;
-
-      this.mesh = new Mesh(geo, mat);
-      // this.mesh.rotation.x = -1.567;
-      this.scene.add(this.mesh);
-      this.setup();
-    });
   }
 
   initBox() {
@@ -146,7 +100,7 @@ export default class WaterSim {
         value: 1.2,
       },
       ambientStrength: {
-      value: 0.1,
+      value: 0.3,
       },
       material: {
         value: {
@@ -204,8 +158,8 @@ export default class WaterSim {
       dirLight: {
         value: {
           direction: new Vector3(0.2, -5.0, 0.5),
-          ambient: new Vector3(0., 0.23, 0.39),
-          diffuse: new Vector3(0., 0.23, 0.39),
+          ambient: new Vector3(0., 0.33, 0.39),
+          diffuse: new Vector3(0., 0.33, 0.39),
           specular: new Vector3(.5, .5, .5),
         }
       },
@@ -213,7 +167,6 @@ export default class WaterSim {
         value: null
       },
     };
-
 
 
     const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
@@ -247,7 +200,6 @@ export default class WaterSim {
     floorMesh.rotation.x = -1.567;
     floorMesh.position.set(-2, 0, 0);
     this.scene.add(floorMesh);
-
     this.setup();
   }
 
@@ -266,9 +218,9 @@ export default class WaterSim {
 
       let col = [0, 0, 0];
 
-      for (let j = 0; j < 15; j++) {
-        const dirX = Math.random() * (1 - (-1)) + (-1);
-        const dirY = Math.random() * (1 - (-1)) + (-1);
+      // for (let j = 0; j < 2; j++) {
+        const dirX = 0.5;
+        const dirY = 0.8;
         const xVal = i % width;
         const yVal = Math.floor(i / width);
 
@@ -284,7 +236,7 @@ export default class WaterSim {
         col[0] += curCol[0];
         col[1] += curCol[1];
         col[2] += curCol[2];
-      }
+      // }
 
       data[stride] = Math.round((col[0] * 0.5 + 0.5) * 255);
       data[stride + 1] = Math.round((col[1] * 0.5 + 0.5) * 255);
@@ -312,7 +264,6 @@ export default class WaterSim {
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-
     this.animate();
   }
   animate() {
