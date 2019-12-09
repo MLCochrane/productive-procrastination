@@ -21,11 +21,11 @@ export default class ScrollingProjects {
 
     this.tl = {};
     this.loopSeconds = 20;
-    this.loopLength = this.loopSeconds * 1920 / window.innerWidth;
+    this.loopLength = (this.loopSeconds * 1920) / window.innerWidth;
 
     this.start = null;
-    this.loopTimeout;
-    this.resizeTimeout
+    this.loopTimeout = null;
+    this.resizeTimeout = null;
 
     this.handleWheel = this.handleWheel.bind(this);
     this.handleResize = this.handleResize.bind(this);
@@ -67,7 +67,7 @@ export default class ScrollingProjects {
   handleResize() {
     clearTimeout(this.resizeTimeout);
     this.resizeTimeout = setTimeout(() => {
-      this.loopLength = this.loopSeconds * 1920 / window.innerWidth;
+      this.loopLength = (this.loopSeconds * 1920) / window.innerWidth;
       // RESET ANIMATION
     }, 100);
   }
@@ -91,12 +91,12 @@ export default class ScrollingProjects {
       // scrolling down
       this.container.style.transform = (this.currentOffset > (this.maxHeight * -0.75))
         ? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
-        : `translate(-50%, -25%)`;
+        : 'translate(-50%, -25%)';
     } else {
       // scrolling up
       this.container.style.transform = (this.currentOffset < (this.maxHeight * -0.25))
         ? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
-        : `translate(-50%, -75%)`;
+        : 'translate(-50%, -75%)';
     }
 
     /*
@@ -107,13 +107,15 @@ export default class ScrollingProjects {
 
     clearTimeout(this.loopTimeout);
     this.loopTimeout = setTimeout(() => {
-
       /* The timeline position in seconds
-      *  the current offset adds whatever the latest scroll amount would be, turns it positive and removes the starting percentage
-      *  then divided by .5 as the total range of the transform is 50% which returns a value between 1-100 indicating
-      *  the current position in the timeline. We then convert that to a percent and mulitply it by the loop time to get a value in seconds
+      *  the current offset adds whatever the latest scroll amount would be, turns it positive
+      *  and removes the starting percentage then divided by .5 as the total range of the
+      *  transform is 50% which returns a value between 1-100 indicating
+      *  the current position in the timeline. We then convert that to a percent
+      *  and mulitply it by the loop time to get a value in seconds
       */
-      const timelinePosition = this.loopLength * (((((percentOffset - (e.deltaY * 0.01)) * -1) - 25) / 0.5)) / 100;
+      const timelinePosition = (
+        this.loopLength * (((((percentOffset - (e.deltaY * 0.01)) * -1) - 25) / 0.5))) / 100;
       if (e.wheelDeltaY < 0) {
         this.tl.play(timelinePosition);
       } else {
@@ -129,8 +131,13 @@ export default class ScrollingProjects {
    */
   initSliding() {
     this.tl = new TimelineMax();
-    this.tl.
-      fromTo(this.container, this.loopLength, { x: '-50%', y: '-25%' }, { x: '-50%', y: '-75%', ease: Power0.easeNone }, 0);
+    this.tl.fromTo(
+      this.container,
+      this.loopLength,
+      { x: '-50%', y: '-25%' },
+      { x: '-50%', y: '-75%', ease: Power0.easeNone },
+      0,
+    );
     this.tl.repeat(5);
   }
 

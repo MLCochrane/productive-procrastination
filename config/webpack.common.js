@@ -2,33 +2,31 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const paths = ['scroll-loop', 'floating-text', 'wave-hover', 'cutout-slider', 'inverse-scroll', 'post-process', 'glow-process', 'wave-sim'];
-const pages = paths.map((el) => {
-  return new HtmlWebpackPlugin({ // eslint-disable-line no-new
-    filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
-    inject: {},
-    template: `src/views/pages/${el}.hbs`,
-    templateParameters: {
-      asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
-    }
-  });
-});
+const pages = paths.map((el) => new HtmlWebpackPlugin({ // eslint-disable-line no-new
+  filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
+  inject: {},
+  template: `src/views/pages/${el}.hbs`,
+  templateParameters: {
+    asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
+  },
+}));
 
 module.exports = {
   entry: {
-    app: ['@babel/polyfill', './src/app.js']
+    app: ['@babel/polyfill', './src/app.js'],
   },
   output: {
     filename: '[name].bundle.js',
     chunkFilename: '[name].[contenthash].js',
     path: path.resolve(__dirname, '../dist'),
-    publicPath: '/'
+    publicPath: '/',
   },
   module: {
     rules: [
       {
         test: /\.js$/,
         exclude: /(node_modules | bower_components)/,
-        loader: 'babel-loader'
+        loader: 'babel-loader',
       },
       {
         test: /\.(png|svg|jpg|gif)$/,
@@ -44,7 +42,7 @@ module.exports = {
               disable: true,
             },
           },
-        ]
+        ],
       },
       {
         test: /\.(hbs|handlebars)/,
@@ -53,17 +51,17 @@ module.exports = {
             loader: 'handlebars-loader',
             query: {
               partialDirs: [path.join(__dirname, '../', 'src/views', 'partials')],
-              helperDirs: [path.join(__dirname, '../', 'src/views', 'helpers')]
-            }
-          }
-        ]
-      }
-    ]
+              helperDirs: [path.join(__dirname, '../', 'src/views', 'helpers')],
+            },
+          },
+        ],
+      },
+    ],
   },
   plugins: [
     new HtmlWebpackPlugin({
       inject: {},
-      template: "src/views/pages/index.hbs"
-    })
+      template: 'src/views/pages/index.hbs',
+    }),
   ].concat(pages),
-}
+};

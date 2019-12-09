@@ -42,7 +42,7 @@ export default class InverseScroll {
     });
 
     let scrollEnded;
-    this.$container.on('scroll', e => {
+    this.$container.on('scroll', (e) => {
       e.preventDefault();
       clearTimeout(scrollEnded);
       scrollEnded = setTimeout(() => {
@@ -73,23 +73,23 @@ export default class InverseScroll {
     // Straightens up both panels after scrolling has ended
     const curHeight = +$('.content__section').css('top').replace(/\D/g, '');
     const diff = curHeight % this.winHeight;
-    let scrollAmount = curHeight + (this.winHeight - diff);
+    const scrollAmount = curHeight + (this.winHeight - diff);
 
     if (diff > this.winHeight / 2) {
       this.leftPanel.animate({
-        top: `-${scrollAmount}px`
+        top: `-${scrollAmount}px`,
       }, this.animationTime);
       this.rightPanel.animate({
-        bottom: `-${scrollAmount}px`
+        bottom: `-${scrollAmount}px`,
       }, this.animationTime);
       this.$container.scrollTop(scrollAmount);
       this.animating = false;
     } else {
       this.leftPanel.animate({
-        top: `-${curHeight - diff}px`
+        top: `-${curHeight - diff}px`,
       }, this.animationTime);
       this.rightPanel.animate({
-        bottom: `-${curHeight - diff}px`
+        bottom: `-${curHeight - diff}px`,
       }, this.animationTime);
       this.$container.scrollTop((curHeight - diff));
       this.animating = false;
