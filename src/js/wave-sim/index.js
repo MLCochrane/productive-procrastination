@@ -8,86 +8,136 @@ import {
   PlaneBufferGeometry,
   ShaderMaterial,
   Mesh,
-  MeshBasicMaterial,
   WebGLRenderer,
-  DataTexture,
   TextureLoader,
-  MeshPhongMaterial,
-  PointLight,
-  RGBFormat,
-  RepeatWrapping
+  RepeatWrapping,
 } from 'three';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
-import {
-  cross,
-  dot
-} from '../utils/math';
-// import 'DRACOLoader';
 
+/*
+ *  Class for wave simulation
+ */
 export default class WaterSim {
   constructor() {
-    this.renderer;
-    this.scene;
-    this.camera;
+    /**
+     * Initlaizes variables for class instance.
+     */
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
 
-    this.canvas = document.getElementById("Sandbox");
-    this.dims = this.canvas.getBoundingClientRect();
+    this.canvas = document.getElementById('Sandbox');
     this.startTime = Date.now();
 
-
+    this.init = this.init.bind(this);
+    this.initWaves = this.initWaves.bind(this);
+    this.initCamera = this.initCamera.bind(this);
+    this.initScene = this.initScene.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
     this.animate = this.animate.bind(this);
     this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
-    this.initBox = this.initBox.bind(this);
-    this.createTexture = this.createTexture.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     this.bindEvents();
     this.init();
   }
 
+  /**
+   * Binds event listeners for DOM events
+   * @function bindEvents
+   * @memberof WaterSim.prototype
+   */
   bindEvents() {
-    window.addEventListener("resize", () => {
-      this.onWindowResize();
-    });
+    window.addEventListener('resize', this.onWindowResize);
   }
 
+  /**
+   * Callback passed to resize event to handle updating camera and renderer size
+   * @function onWindowResize
+   * @memberof WaterSim.prototype
+   */
   onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    const {
+      camera,
+      renderer,
+    } = this;
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
+
+  /**
+   * Orders the methods calls for setting up and then rendering scene.
+   * @function init
+   * @memberof WaterSim.prototype
+   */
   init() {
-    this.initScene();
-    this.initCamera();
-    this.initBox();
+    const {
+      initScene,
+      initCamera,
+      initWaves,
+    } = this;
+
+    initScene();
+    initCamera();
+    initWaves();
   }
+
+  /**
+   * Creates new threejs scene and assigns to class instance
+   * @function initScene
+   * @memberof WaterSim.prototype
+   */
   initScene() {
     this.scene = new Scene();
   }
+
+  /**
+   * Creates new threejs camera and adds to scene
+   * @function initCamera
+   * @memberof WaterSim.prototype
+   */
   initCamera() {
+    const {
+      scene,
+    } = this;
+
     this.camera = new PerspectiveCamera(
       50,
       window.innerWidth / window.innerHeight,
       0.2,
-      300
+      300,
     );
 
     this.camera.position.set(3, 30, -60);
     this.camera.lookAt(0, 0, 0);
-    this.scene.add(this.camera);
+    scene.add(this.camera);
   }
 
-  initBox() {
+  /**
+   * Initializes water mesh, shader uniforms and adds to scene
+   * @function processing
+   * @memberof WaterSim.prototype
+   */
+  initWaves() {
+    const {
+      camera,
+      scene,
+      setup,
+    } = this;
+
     const waterLoader = new TextureLoader();
     // copies direction camera is looking in world space
-    const lightDir = new Vector3(0,0,0);
-    this.camera.getWorldDirection(lightDir);
+    const lightDir = new Vector3(0, 0, 0);
+    camera.getWorldDirection(lightDir);
 
-    const ambientCol = new Vector3(1.0, .5, .1);
-    const diffuseCol = new Vector3(1.0, 0.5, 0.1);
-    const specularCol = new Vector3(.5, .5, .5);
+    // const ambientCol = new Vector3(1.0, 0.5, 0.1);
+    // const diffuseCol = new Vector3(1.0, 0.5, 0.1);
+    const specularCol = new Vector3(0.5, 0.5, 0.5);
 
     const uniforms = {
       u_resolution: {
@@ -100,19 +150,19 @@ export default class WaterSim {
         value: 1.2,
       },
       ambientStrength: {
-      value: 0.3,
+        value: 0.3,
       },
       material: {
         value: {
-          ambient: new Vector3(0.1, 0.55, 1.),
-          diffuse: new Vector3(0.1, 0.55, 1.),
+          ambient: new Vector3(0.1, 0.55, 1.0),
+          diffuse: new Vector3(0.1, 0.55, 1.0),
           specular: specularCol,
-          shininess: 32.0
-        }
+          shininess: 32.0,
+        },
       },
       spotLight: {
         value: {
-          position: new Vector3(this.camera.position),
+          position: new Vector3(camera.position),
           direction: lightDir,
           ambient: new Vector3(0.13, 0.375, 0.61),
           diffuse: new Vector3(0.13, 0.375, 0.61),
@@ -122,14 +172,14 @@ export default class WaterSim {
           quadratic: 0.032,
           innerCutOff: Math.cos(Math.PI / 12),
           outerCutOff: Math.cos(Math.PI / 7),
-        }
+        },
       },
       pointLights: {
         value: [
           {
             position: new Vector3(-13.0, 2.5, -5.31),
-            ambient: new Vector3(1., 0.1, .0),
-            diffuse: new Vector3(1., 0.1, .0),
+            ambient: new Vector3(1.0, 1.0, 0.0),
+            diffuse: new Vector3(1.0, 1.0, 0.0),
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
@@ -137,8 +187,8 @@ export default class WaterSim {
           },
           {
             position: new Vector3(3.0, 3.5, 0.31),
-            ambient: new Vector3(.6, 0.3, 0.2),
-            diffuse: new Vector3(0.6, 0.3, 0.2),
+            ambient: new Vector3(0.0, 1.0, 1.0),
+            diffuse: new Vector3(0.0, 1.0, 1.0),
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
@@ -146,25 +196,25 @@ export default class WaterSim {
           },
           {
             position: new Vector3(12.0, 3.0, 2.0),
-            ambient: new Vector3(0., 0., 0.),
-            diffuse: diffuseCol,
+            ambient: new Vector3(1.0, 0.0, 1.0),
+            diffuse: new Vector3(1.0, 0.0, 1.0),
             specular: specularCol,
             constant: 1.0,
             linear: 0.09,
             quadratic: 0.032,
-          }
-        ]
+          },
+        ],
       },
       dirLight: {
         value: {
           direction: new Vector3(0.2, -5.0, 0.5),
-          ambient: new Vector3(0., 0.33, 0.39),
-          diffuse: new Vector3(0., 0.33, 0.39),
-          specular: new Vector3(.5, .5, .5),
-        }
+          ambient: new Vector3(0.0, 0.33, 0.29),
+          diffuse: new Vector3(0.0, 0.33, 0.29),
+          specular: new Vector3(0.5, 0.5, 0.5),
+        },
       },
       normalMap: {
-        value: null
+        value: null,
       },
     };
 
@@ -172,20 +222,20 @@ export default class WaterSim {
     const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
     const geo = new PlaneBufferGeometry(100, 100, 50, 50);
 
-    waterLoader.load('/src/assets/wave-normal.jpeg', (res) => {
-      uniforms['normalMap'].value = res;
-      uniforms['normalMap'].value.wrapT = RepeatWrapping;
-      uniforms['normalMap'].value.wrapS = RepeatWrapping;
+    waterLoader.load(`${ASSET_PATH}/assets/images/wave-normal.jpg`, (res) => {
+      uniforms.normalMap.value = res;
+      uniforms.normalMap.value.wrapT = RepeatWrapping;
+      uniforms.normalMap.value.wrapS = RepeatWrapping;
     });
 
     const mat = new ShaderMaterial({
       defines: {
         NR_POINT_LIGHTS: uniforms.pointLights.value.length,
-        USE_TANGENT: true
+        USE_TANGENT: true,
       },
-      uniforms: uniforms,
+      uniforms,
       vertexShader: document.getElementById('vertexshader').textContent,
-      fragmentShader: document.getElementById('fragmentshader').textContent
+      fragmentShader: document.getElementById('fragmentshader').textContent,
     });
     this.mesh = new Mesh(box, mat);
 
@@ -199,93 +249,96 @@ export default class WaterSim {
     const floorMesh = new Mesh(geo, mat);
     floorMesh.rotation.x = -1.567;
     floorMesh.position.set(-2, 0, 0);
-    this.scene.add(floorMesh);
-    this.setup();
+    scene.add(floorMesh);
+    setup();
   }
 
-  createTexture(time) {
-    const width = 256;
-    const height = 256;
-
-    const size = width * height;
-    const data = new Uint8Array(3 * size);
-
-    const interval = 2 * Math.PI / 256;
-
-    for (let i = 0; i < size; i++) {
-
-      const stride = i * 3;
-
-      let col = [0, 0, 0];
-
-      // for (let j = 0; j < 2; j++) {
-        const dirX = 0.5;
-        const dirY = 0.8;
-        const xVal = i % width;
-        const yVal = Math.floor(i / width);
-
-        const binormal = partialDer([dirX, dirY], xVal, yVal, time, 1.5, .5, 0);
-        const tangent = partialDer([dirX, dirY], xVal, yVal, time, 1.5, .5, 1);
-
-        const curCol = cross(
-          [1, 0, binormal],
-          [0, 1, tangent]
-        );
-
-        // Adding wave value to x, y, z color components
-        col[0] += curCol[0];
-        col[1] += curCol[1];
-        col[2] += curCol[2];
-      // }
-
-      data[stride] = Math.round((col[0] * 0.5 + 0.5) * 255);
-      data[stride + 1] = Math.round((col[1] * 0.5 + 0.5) * 255);
-      data[stride + 2] = Math.round((col[2] * 0.5 + 0.5) * 255);
-    }
-
-    // Calculates partial derivative in x and y direction based on wave function
-    function partialDer(windDir, x, y, t, k, speed, direction) {
-      const w = 2.0;
-      const amp = 0.5;
-      const internalWave = dot(windDir, [x, y]) * w + t * speed;
-      return k * windDir[`${direction}`] * w * amp * (Math.pow((Math.sin(internalWave) + 1.0) / 2., k - 1.0)) * Math.cos(internalWave);
-    }
-
-    return new DataTexture(data, width, height, RGBFormat);
-  }
-
+  /**
+   * Sets up renderer, calls any other necessary methods and then starts loop
+   * @function setup
+   * @memberof WaterSim.prototype
+   */
   setup() {
-    // RENDERER
+    const {
+      canvas,
+      camera,
+      animate,
+    } = this;
+
     this.renderer = new WebGLRenderer({
       antialias: true,
-      canvas: this.canvas,
+      canvas,
     });
-    this.renderer.setSize(this.dims.width, this.dims.height);
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
-    this.animate();
+    this.controls = new OrbitControls(camera, this.renderer.domElement);
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 100;
+    animate();
   }
+
+  /**
+   * Creates animation loop
+   * @function animate
+   * @memberof WaterSim.prototype
+   */
   animate() {
-    requestAnimationFrame(this.animate);
+    const {
+      controls,
+      render,
+      animate,
+    } = this;
 
-    this.controls.update();
+    this.raf = requestAnimationFrame(animate);
 
-    this.render();
+    controls.update();
+
+    render();
   }
-  render(time) {
+
+  /**
+   * Simply renders scene with instance's scene and camera
+   * @function render
+   * @memberof WaterSim.prototype
+   */
+  render() {
+    const {
+      camera,
+      mesh,
+      scene,
+      renderer,
+    } = this;
+
     const delta = this.startTime - Date.now();
-    const z = 10 * Math.sin(delta * 0.0001);
-    const x = -10 * Math.cos(delta * 0.0001);
+    const z = 10 * Math.sin(delta * 0.0005);
+    const x = -10 * Math.cos(delta * 0.0005);
 
     const lightDir = new Vector3(0, 0, 0);
-    this.camera.getWorldDirection(lightDir);
+    camera.getWorldDirection(lightDir);
 
-    this.mesh.material.uniforms['time'].value = delta * 0.001;
-    this.mesh.material.uniforms['spotLight'].value.position = this.camera.position;
-    this.mesh.material.uniforms['spotLight'].value.direction = lightDir;
-    this.mesh.material.uniforms['pointLights'].value[0].position = new Vector3(x, 3.0, z);
+    mesh.material.uniforms.time.value = delta * 0.001;
+    mesh.material.uniforms.spotLight.value.position = camera.position;
+    mesh.material.uniforms.spotLight.value.direction = lightDir;
+    mesh.material.uniforms.pointLights.value[0].position = new Vector3(x, 3.0, z);
+    mesh.material.uniforms.pointLights.value[1].position = new Vector3(x * 2, 3.0, x * 2);
+    mesh.material.uniforms.pointLights.value[2].position = new Vector3(x * 4, 3.0, z * 4);
 
-    this.renderer.render(this.scene, this.camera);
+    renderer.render(scene, camera);
+  }
+
+  /**
+   * Cancels RAF loop and unbinds event handlers
+   * @function destroy
+   * @memberof WaterSim.prototype
+   */
+  destroy() {
+    const {
+      onWindowResize,
+      raf,
+    } = this;
+
+    cancelAnimationFrame(raf);
+    window.removeEventListener('resize', onWindowResize);
   }
 }

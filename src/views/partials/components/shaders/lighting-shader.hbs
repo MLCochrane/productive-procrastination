@@ -10,20 +10,19 @@
   varying vec3 v_viewPos;
   varying mat3 v_TBN;
 
-	float amp = 0.5;
-	float w = .8;
+	float amp = 0.2;
 
-	float wave(vec2 dir, float x, float y, float t, float k, float speed) {
+	float wave(vec2 dir, float x, float y, float t, float k, float w, float speed) {
 		float base = sin(dot(dir, vec2(x, y)) * w + t * speed) + 1.0;
 		return (2. * amp) * pow(base / 2., k);
 	}
 
-  float wavePartDerX(vec2 dir, float x, float y, float t, float k, float speed) {
+  float wavePartDerX(vec2 dir, float x, float y, float t, float k, float w, float speed) {
 		float internalWave = dot(dir, vec2(x, y)) * w + t * speed;
 		return k * dir.x * w * amp * (pow((sin(internalWave) + 1.0) / 2., k - 1.0)) * cos(internalWave);
 	}
 
-	float wavePartDerY(vec2 dir, float x, float y, float t, float k, float speed) {
+	float wavePartDerY(vec2 dir, float x, float y, float t, float k, float w, float speed) {
 		float internalWave = dot(dir, vec2(x, y)) * w + t * speed;
 		return k * dir.y * w * amp * (pow((sin(internalWave) + 1.0) / 2., k - 1.0)) * cos(internalWave);
 	}
@@ -33,7 +32,7 @@
 
 		vec2 dir = vec2(.8, 0.5);
 		vec2 dir2 = vec2(.5, .7);
-
+		vec2 dir3 = vec2(1.2, .4);
 
      // local space
 		vec4 pos = vec4( position, 1.0 );
@@ -45,17 +44,22 @@
 
     v_Norm = (modelMatrix * norm).xyz;
 
-		pos.z += wave(dir, pos.x, pos.y, time, 1.5, .5);
-		pos.z += wave(dir2, pos.x, pos.y, time, 1., .6);
+		pos.z += wave(dir, pos.x, pos.y, time, 1.5, 15., 2.03);
+		pos.z += wave(dir2, pos.x, pos.y, time, 1.0, 20., 1.75);
+		pos.z += wave(dir3, pos.x, pos.y, time, 2.0, 10., 2.48);
 
-    vec3 newBi = vec3(1.0, 0.0, wavePartDerX(dir, pos.x, pos.y, time, 1.5, .25));
-    vec3 newTan = vec3(0.0, 1.0, wavePartDerY(dir, pos.x, pos.y, time, 1.5, .25));
+    vec3 newBi = vec3(1.0, 0.0, wavePartDerX(dir, pos.x, pos.y, time, 1.5, 2.0, 5.5));
+    vec3 newTan = vec3(0.0, 1.0, wavePartDerY(dir, pos.x, pos.y, time, 1.5, 2.0, 5.5));
 
-    vec3 newBi2 = vec3(1.0, 0.0, wavePartDerX(dir2, pos.x, pos.y, time, 1., .16));
-    vec3 newTan2 = vec3(0.0, 1.0, wavePartDerY(dir2, pos.x, pos.y, time, 1., .16));
+    vec3 newBi2 = vec3(1.0, 0.0, wavePartDerX(dir2, pos.x, pos.y, time, 1.0, 4., 3.9));
+    vec3 newTan2 = vec3(0.0, 1.0, wavePartDerY(dir2, pos.x, pos.y, time, 1.0, 4., 3.9));
+
+    vec3 newBi3 = vec3(1.0, 0.0, wavePartDerX(dir2, pos.x, pos.y, time, 2.0, 3., 4.5));
+    vec3 newTan3 = vec3(0.0, 1.0, wavePartDerY(dir2, pos.x, pos.y, time, 2.0, 3., 4.5));
 
     v_Norm = cross(newBi, newTan);
     v_Norm += cross(newBi2, newTan2);
+    v_Norm += cross(newBi3, newTan3);
 
     // TBN from geometry normals and tangents
     vec3 T = normalize(vec3(modelMatrix * vec4(newTan + newTan2, 0.)));

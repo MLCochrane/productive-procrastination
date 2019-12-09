@@ -13,11 +13,11 @@ import {
   PointLight,
   DefaultLoadingManager,
 } from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
-import { PixelShader } from './pixel-toon-shader';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
+import { PixelShader } from './pixel-toon-shader';
 
 /*
  *  Class for loading and rendering 3D text
@@ -28,10 +28,10 @@ export default class PostProcess {
    * Initlaizes variables for class instance.
    */
   constructor() {
-    this.renderer;
-    this.scene;
-    this.camera;
-    this.mesh;
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
+    this.mesh = null;
     this.xVal = 0;
     this.yVal = 0;
     this.curX = window.innerWidth;
@@ -51,6 +51,7 @@ export default class PostProcess {
     this.initBackground = this.initBackground.bind(this);
     this.initLights = this.initLights.bind(this);
     this.updateShader = this.updateShader.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
     this.handleButtonPress = this.handleButtonPress.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.destroy = this.destroy.bind(this);
@@ -61,13 +62,13 @@ export default class PostProcess {
       invert: document.getElementById('Invert'),
       texture: document.getElementById('Texture'),
       toggle: document.getElementById('Toggle'),
-    }
+    };
 
     this.params = {
       pixelSize: 10,
       invert: true,
       textureIndex: 1,
-      enabled: true
+      enabled: true,
     };
 
     this.texturesLoaded = false;
@@ -98,9 +99,9 @@ export default class PostProcess {
   }
 
   /**
-   *
+   * Callback for handling mouse movements
    * @function handleMouseMove
-   * @memberof .prototype
+   * @memberof PostProcess.prototype
    */
   handleMouseMove(e) {
     this.xVal = (e.clientX / window.innerWidth) - 0.5;
@@ -126,7 +127,9 @@ export default class PostProcess {
           this.params.invert = !this.params.invert;
           break;
         case 'texture':
-          this.params.textureIndex = this.params.textureIndex === 3 ? 0 : this.params.textureIndex += 1;
+          this.params.textureIndex = this.params.textureIndex === 3
+            ? 0
+            : this.params.textureIndex += 1;
           break;
         case 'toggle':
           this.params.enabled = !this.params.enabled;
@@ -134,7 +137,7 @@ export default class PostProcess {
         default:
           break;
       }
-    }
+    };
   }
 
 
@@ -180,7 +183,7 @@ export default class PostProcess {
   initLights() {
     this.light = new PointLight(0xffffff, 10, 10, 2);
     this.light.position.set(-5, 5, 5);
-    this.light.lookAt(0,0,0);
+    this.light.lookAt(0, 0, 0);
     this.scene.add(this.light);
   }
 
@@ -192,7 +195,7 @@ export default class PostProcess {
    */
   initModel(bufferFile) {
     const loader = new OBJLoader();
-    loader.load(bufferFile, res => {
+    loader.load(bufferFile, (res) => {
       [this.mesh] = res.children;
       this.mesh.material = new MeshLambertMaterial({
         color: 0xeeeeee,
@@ -200,9 +203,9 @@ export default class PostProcess {
       this.mesh.position.set(0, -2, 0);
       this.scene.add(this.mesh);
       this.setup();
-    }, xhr => {
+    }, (xhr) => {
       // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    }, err => {
+    }, (err) => {
       console.error(err);
     });
   }
@@ -245,7 +248,7 @@ export default class PostProcess {
     this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
-      alpha: true
+      alpha: true,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.curX, this.curY);
@@ -269,8 +272,8 @@ export default class PostProcess {
     this.composer = new EffectComposer(this.renderer);
     this.composer.addPass(new RenderPass(this.scene, this.camera));
     this.pixelPass = new ShaderPass(PixelShader, 'texOne');
-    this.pixelPass.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
-    this.pixelPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
+    this.pixelPass.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight);
+    this.pixelPass.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
 
     this.updateShader();
 
@@ -291,14 +294,14 @@ export default class PostProcess {
 
     if (!texturesLoaded) return;
     pixelPass.enabled = params.enabled;
-    pixelPass.uniforms['pixelSize'].value = params.pixelSize;
-    pixelPass.uniforms['innerRepeatLength'].value = params.textureIndex === 3 ? 5 : 1;
-    pixelPass.uniforms['invert'].value = params.invert;
-    pixelPass.uniforms['texTwo'].value = this.textures[params.textureIndex];
-    pixelPass.uniforms['texTwo'].value.needsUpdate = true;
-    pixelPass.uniforms['texTwo'].value.wrapS = RepeatWrapping;
-    pixelPass.uniforms['texTwo'].value.wrapT = RepeatWrapping;
-    pixelPass.uniforms['texTwo'].value.magFilter = NearestFilter;
+    pixelPass.uniforms.pixelSize.value = params.pixelSize;
+    pixelPass.uniforms.innerRepeatLength.value = params.textureIndex === 3 ? 5 : 1;
+    pixelPass.uniforms.invert.value = params.invert;
+    pixelPass.uniforms.texTwo.value = this.textures[params.textureIndex];
+    pixelPass.uniforms.texTwo.value.needsUpdate = true;
+    pixelPass.uniforms.texTwo.value.wrapS = RepeatWrapping;
+    pixelPass.uniforms.texTwo.value.wrapT = RepeatWrapping;
+    pixelPass.uniforms.texTwo.value.magFilter = NearestFilter;
   }
 
   /**
