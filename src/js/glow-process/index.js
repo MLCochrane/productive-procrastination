@@ -362,9 +362,14 @@ export default class GlowProcess {
     this.finalComposer.render();
   }
 
+  /**
+   * Cancels RAF loop and unbinds event handlers
+   * @function destroy
+   * @memberof GlowProcess.prototype
+   */
   destroy() {
     cancelAnimationFrame(this.raf);
-    window.addEventListener('resize', this.onWindowResize);
-    window.addEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('resize', this.onWindowResize);
+    window.removeEventListener('mousemove', this.handleMouseMove);
   }
 }

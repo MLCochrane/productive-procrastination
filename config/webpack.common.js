@@ -1,7 +1,7 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const paths = ['scroll-loop', 'floating-text', 'wave-hover', 'cutout-slider', 'inverse-scroll', 'post-process', 'glow-process'];
+const paths = ['scroll-loop', 'floating-text', 'wave-hover', 'cutout-slider', 'inverse-scroll', 'post-process', 'glow-process', 'wave-sim'];
 const pages = paths.map((el) => {
   return new HtmlWebpackPlugin({ // eslint-disable-line no-new
     filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
