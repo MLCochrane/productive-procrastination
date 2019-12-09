@@ -46,16 +46,21 @@ const sketches = [
 		'path': 'js/glow-process/index',
 		'constructor': []
 	},
+	{
+		'namespace': 'wave-sim',
+		'path': 'js/wave-sim/index',
+		'constructor': []
+	},
 ]
 
 barba.init({
 	transitions: [
 		{
 			sync: true,
-			appear: data => {
+			once: data => {
 				// Initial load
 				card = new Card();
-				runSketch(data.current);
+				runSketch(data.next);
 			},
 			enter: ({current, next}) => {
 				closeMenu();

@@ -1,0 +1,31 @@
+{{#json
+'{
+	"card": {
+    "title": "Simple Waves",
+    "date": "Nov 2019",
+    "tags": [
+			"3D",
+      "Shaders",
+      "Interaction"
+    ],
+    "description": "Partial implementation of water simulation with model from GPU Gems. Custom vertex and fragment shader with Bling-Phong lighting.",
+    "references": [
+      {
+        "name": "GPU Gems: Chapter 1",
+        "link": "https://developer.nvidia.com/gpugems/GPUGems/gpugems_ch01.html"
+      },
+      {
+        "name": "Learn OpenGL Lighting",
+        "link": "https://learnopengl.com/Advanced-Lighting/Advanced-Lighting"
+      }
+    ]
+	}
+}'
+}}
+{{#> layout/base title='Wave Sim' namespace="wave-sim" }}
+{{#*inline "body"}}
+{{> components/sketches/wave-sim }}
+{{> components/sketches/card card=this.card }}
+{{/inline}}
+{{/layout/base}}
+{{/json}}
