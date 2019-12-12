@@ -62,6 +62,11 @@ module.exports = {
     new HtmlWebpackPlugin({
       inject: {},
       template: 'src/views/pages/index.hbs',
+      templateParameters: {
+        asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
+        // eslint-disable-next-line
+        links: require(path.join(__dirname, '../', 'src/views', 'json/').concat('homepage.json')),
+      },
     }),
   ].concat(pages),
 };

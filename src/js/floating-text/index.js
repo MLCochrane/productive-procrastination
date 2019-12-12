@@ -9,10 +9,10 @@ export default class FloatingText {
    * Initlaizes variables for class instance.
    */
   constructor() {
-    this.renderer;
-    this.scene;
-    this.camera;
-    this.mesh;
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
+    this.mesh = null;
     this.xVal = 0;
     this.yVal = 0;
     this.curX = window.innerWidth;
@@ -112,10 +112,12 @@ export default class FloatingText {
     const aspect = (window.innerWidth / 2) / (window.innerWidth / 4);
 
     this.camera = new THREE.OrthographicCamera(
-      distance * aspect / - 2,
-      distance * aspect / 2,
+      (distance * aspect) / -2,
+      (distance * aspect) / 2,
       distance / 2,
-      distance / - 2, 0.8, 20
+      distance / -2,
+      0.8,
+      20,
     );
 
     this.camera.position.z = 8;
@@ -129,8 +131,8 @@ export default class FloatingText {
    * @param {String} bufferFile - String representing path to buffer geometry file to load
    */
   initText(bufferFile) {
-    var loader = new THREE.BufferGeometryLoader();
-    loader.load(bufferFile, geo => {
+    const loader = new THREE.BufferGeometryLoader();
+    loader.load(bufferFile, (geo) => {
       // Add the loaded object to the scene
       const mat1 = new THREE.MeshBasicMaterial({ color: 0xffffff });
       const mat2 = new THREE.MeshBasicMaterial({ color: 0x000000 });
@@ -140,9 +142,9 @@ export default class FloatingText {
       this.mesh = object;
       this.scene.add(object);
       this.setup(object);
-    }, xhr => {
+    }, (xhr) => {
       // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    }, err => {
+    }, (err) => {
       console.error(err);
     });
   }

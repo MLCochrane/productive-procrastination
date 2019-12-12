@@ -1,0 +1,124 @@
+{
+  "links": [
+    {
+      "title": "Simple Waves",
+      "date": "Nov 2019",
+      "slug": "/wave-sim",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Light Glow",
+      "date": "Oct 2019",
+      "slug": "/glow-process",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Toon Post Process",
+      "date": "Sept 2019",
+      "slug": "/post-process",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Wave Hover",
+      "date": "Feb 2018",
+      "slug": "/wave-hover",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Scroll Loop",
+      "date": "Dec 2018",
+      "slug": "/scroll-loop",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Floating Text",
+      "date": "Dec 2018",
+      "slug": "/floating-text",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Inverse Scroll",
+      "date": "July 2018",
+      "slug": "/inverse-scroll",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    },
+    {
+      "title": "Cutout Slider",
+      "date": "Nov 2017",
+      "slug": "/cutout-slider",
+      "imgs": {
+        "wide": {
+          "img": "/assets/water-caustics.jpg",
+          "alt": "Screenshot of website landing page"
+        },
+        "normal": {
+          "img": "/assets/homepage/sketch-post-process.jpg",
+          "alt": "Screenshot of website landing page"
+        }
+      }
+    }
+  ]
+}

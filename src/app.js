@@ -10,6 +10,8 @@ initMenu();
 let card;
 let activeSketch;
 
+const imported = new Set();
+
 const sketches = [
 	{
 		'namespace': 'scroll-loop',
@@ -63,6 +65,7 @@ barba.init({
 				runSketch(data.next);
 			},
 			enter: ({current, next}) => {
+				console.log(imported);
 				closeMenu();
 				runSketch(next);
 			},
@@ -86,10 +89,11 @@ async function runSketch(route) {
 	const curSketch = sketches.find(el => el.namespace === route.namespace);
 	if (!curSketch) return;
 	return await import('./' + curSketch.path + '.js').then(result => {
-		card.bindEvents(route.container);
+		if (curSketch.namespace !== 'home') card.bindEvents(route.container);
 
 		// assigns class instance to variable so we can call destroy method on leave lifecycle hook
 		activeSketch = new result.default(curSketch.constructor);
+		imported.add(curSketch);
 	});
 }
 

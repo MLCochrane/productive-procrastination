@@ -14,6 +14,7 @@ module.exports = {
   },
   "rules": {
     "linebreak-style": 0,
+    "no-plusplus": 0,
     "prefer-destructuring": ["error", {
       "object": true,
       "array": false
