@@ -7,8 +7,8 @@ import Card from './js/global/card';
 
 // Global header logic
 initMenu();
-let card;
-let activeSketch;
+let card = null;
+let activeSketch = null;
 
 const imported = new Set();
 
@@ -65,7 +65,7 @@ barba.init({
 				runSketch(data.next);
 			},
 			enter: ({current, next}) => {
-				console.log(imported);
+				if (next.namespace === 'home') activeSketch = null;
 				closeMenu();
 				runSketch(next);
 			},
@@ -93,7 +93,6 @@ async function runSketch(route) {
 
 		// assigns class instance to variable so we can call destroy method on leave lifecycle hook
 		activeSketch = new result.default(curSketch.constructor);
-		imported.add(curSketch);
 	});
 }
 

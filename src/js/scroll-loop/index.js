@@ -19,7 +19,7 @@ export default class ScrollingProjects {
 
     this.maxHeight = (this.current.getPropertyValue('height').split('px'))[0];
 
-    this.tl = {};
+    this.tl = null;
     this.loopSeconds = 20;
     this.loopLength = (this.loopSeconds * 1920) / window.innerWidth;
 
@@ -57,6 +57,7 @@ export default class ScrollingProjects {
     window.removeEventListener('resize', this.handleResize);
     this.tl.kill();
     this.tl = null;
+    console.log('Destroy has been called');
   }
 
   /**

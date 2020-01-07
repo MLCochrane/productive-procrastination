@@ -157,7 +157,7 @@ export default class WaterSim {
           ambient: new Vector3(0.1, 0.55, 1.0),
           diffuse: new Vector3(0.1, 0.55, 1.0),
           specular: specularCol,
-          shininess: 32.0,
+          shininess: 128.0,
         },
       },
       spotLight: {
