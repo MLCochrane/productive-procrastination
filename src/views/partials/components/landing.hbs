@@ -7,9 +7,32 @@
 						<div class="grid-item__content">
 								<div class="grid-item__image-wrap" data-key={{@index}}>
 									{{#modulo nth=4}}
-										<img src="{{../asset_path}}{{ this.imgs.wide.img }}" alt="{{ this.imgs.wide.alt }}" class="grid-item__image grid-item__image--wide">
+										<img
+											srcset="
+											{{#each this.imgs.wide.srcs }}
+												{{../../asset_path}}{{this.path}} {{ this.w }}w,
+											{{/each}}
+											"
+											sizes="
+											(max-width: 699px) 590px,
+											(min-width: 700px and max-width: 800px) 325px,
+											1830px"
+											src="{{../asset_path}}{{ this.imgs.wide.img }}"
+											alt="{{ this.imgs.wide.alt }}"
+											class="grid-item__image grid-item__image--wide">
 									{{else}}
-										<img src="{{../asset_path}}{{ this.imgs.normal.img }}" alt="{{ this.imgs.normal.alt }}" class="grid-item__image grid-item__image--normal">
+										<img
+											srcset="
+											{{#each this.imgs.normal.srcs }}
+												{{../../asset_path}}{{this.path}} {{ this.w }}w,
+											{{/each}}
+											"
+											sizes="
+											(max-width: 800px) 325px,
+											465px"
+											src="{{../asset_path}}{{ this.imgs.normal.img }}"
+											alt="{{ this.imgs.normal.alt }}"
+											class="grid-item__image grid-item__image--normal">
 									{{/modulo}}
 									<div class="grid-item__image-border"></div>
 								</div>
