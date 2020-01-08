@@ -14,6 +14,8 @@
   uniform sampler2D tDepth;
   uniform float cameraNear;
   uniform float cameraFar;
+  uniform float intensity;
+  uniform vec3 fogColor;
 
   float readDepth( sampler2D depthSampler, vec2 coord ) {
     float fragCoordZ = texture2D( depthSampler, coord ).x;
@@ -25,8 +27,12 @@
     vec3 diffuse = texture2D( tDiffuse, vUv ).rgb;
     float depth = readDepth( tDepth, vUv );
 
+    float fogLevel = clamp(depth * intensity, 0., 1.);
+
     //gl_FragColor.rgb = diffuse;
-    gl_FragColor.rgb = mix(diffuse, vec3(.78, .8, .76), depth);
+    //gl_FragColor.rgb = vec3(depth);
+
+    gl_FragColor.rgb = mix(diffuse, fogColor, fogLevel);
     gl_FragColor.a = 1.0;
   }
 </script>
