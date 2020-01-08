@@ -51,6 +51,11 @@ const sketches = [
 		'path': 'js/wave-sim/index',
 		'constructor': []
 	},
+	{
+		'namespace': 'fog',
+		'path': 'js/fog/index',
+		'constructor': []
+	},
 ]
 
 barba.init({

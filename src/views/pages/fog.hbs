@@ -1,0 +1,20 @@
+{{#json
+'{
+	"card": {
+    "title": "Fog",
+    "date": "Feb 2018",
+    "tags": [
+			"3D",
+      "Interaction"
+    ],
+    "description": "Recreation of a neat 3D text effect I came across. Model is generated from a font converted to geometry in Blender, rendered here with ThreeJS."
+	}
+}'
+}}
+{{#> layout/base title='Fog' namespace="fog" }}
+{{#*inline "body"}}
+{{> components/sketches/fog }}
+{{> components/sketches/card card=this.card }}
+{{/inline}}
+{{/layout/base}}
+{{/json}}
