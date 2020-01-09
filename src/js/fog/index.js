@@ -7,16 +7,25 @@ import {
   DepthTexture,
   UnsignedShortType,
   PerspectiveCamera,
-  OrthographicCamera,
   PointLight,
   AmbientLight,
   TorusKnotBufferGeometry,
-  PlaneBufferGeometry,
   MeshLambertMaterial,
-  ShaderMaterial,
   Mesh,
   Vector3,
 } from 'three';
+import {
+  EffectComposer
+} from 'three/examples/jsm/postprocessing/EffectComposer';
+import {
+  RenderPass
+} from 'three/examples/jsm/postprocessing/RenderPass';
+import {
+  ShaderPass
+} from 'three/examples/jsm/postprocessing/ShaderPass';
+import {
+  FogShader
+} from './fog-shader';
 
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
@@ -39,7 +48,8 @@ export default class Fog {
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
     this.handleResize = this.handleResize.bind(this);
-    this.initFog = this.initFog.bind(this);
+    this.processing = this.processing.bind(this);
+    // this.initFog = this.initFog.bind(this);
 
     this.bindEvents();
     this.init();
@@ -93,7 +103,7 @@ export default class Fog {
     this.initScene();
     this.initCamera();
     this.initLights();
-    this.initFog();
+    // this.initFog();
     this.initGeo();
   }
 
@@ -136,10 +146,10 @@ export default class Fog {
   initGeo() {
     const geo = new TorusKnotBufferGeometry(1, 0.3, 128, 64);
     const mat = new MeshLambertMaterial({
-      color: 0x0000ff
+      color: 0xff0f00,
     });
 
-    const count = 10;
+    const count = 30;
     const scale = 10;
 
     for (let i = 0; i < count; i++) {
@@ -182,50 +192,6 @@ export default class Fog {
   }
 
   /**
-   * Sets up fog post processing scene
-   * @function initFog
-   * @memberof Fog.prototype
-   */
-  initFog() {
-    const {
-      camera,
-      target
-    } = this;
-
-    const uniforms = {
-      cameraNear: {
-          value: camera.near
-        },
-      cameraFar: {
-        value: camera.far
-      },
-      tDiffuse: {
-        value: target.texture
-      },
-      tDepth: {
-        value: target.depthTexture
-      },
-      intensity: {
-        value: 2.0,
-      },
-      fogColor: {
-        value: new Vector3(0.3, 0.9, 0.3),
-      }
-    }
-    // Setup post processing stage
-    this.postCamera = new OrthographicCamera( - 1, 1, 1, - 1, 0, 1 );
-    const postMaterial = new ShaderMaterial( {
-      vertexShader: document.getElementById('vertexshader').textContent,
-      fragmentShader: document.getElementById('fragmentshader').textContent,
-      uniforms,
-    });
-    const postPlane = new PlaneBufferGeometry( 2, 2 );
-    const postQuad = new Mesh( postPlane, postMaterial );
-    this.postScene = new Scene();
-    this.postScene.add( postQuad );
-  }
-
-  /**
    * Sets up renderer, controls, and starts animation loop
    * @function setup
    * @memberof Fog.prototype
@@ -234,7 +200,7 @@ export default class Fog {
     this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas,
-      alpha: true
+      alpha: true,
     });
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(window.innerWidth, window.innerHeight);
@@ -243,7 +209,47 @@ export default class Fog {
     this.controls.minDistance = 10;
     this.controls.maxDistance = 100;
 
+    this.processing();
     this.animate();
+  }
+
+  /**
+   * Setting up effect composer and post processing passes
+   * @function processing
+   * @memberof Fog.prototype
+   */
+  processing() {
+    const {
+      renderer,
+      scene,
+      camera,
+      target,
+    } = this;
+
+    this.composer = new EffectComposer(renderer, target);
+    this.composer.addPass(new RenderPass(scene, camera));
+
+    const uniforms = {
+      cameraNear: {
+        value: camera.near
+      },
+      cameraFar: {
+        value: camera.far
+      },
+      tDepth: {
+        value: this.composer.renderTarget2.depthTexture
+      },
+      intensity: {
+        value: 2.0,
+      },
+      fogColor: {
+        value: new Vector3(0.3, 0.9, 0.3),
+      }
+    }
+
+    const fogPass = new ShaderPass(FogShader, 'tDiffuse');
+    fogPass.uniforms = Object.assign(fogPass.uniforms, uniforms);
+    this.composer.addPass(fogPass);
   }
 
   /**
@@ -274,10 +280,12 @@ export default class Fog {
       postCamera
     } = this;
 
-    renderer.setRenderTarget(target);
-    renderer.render(scene, camera);
-    // render post FX
-    renderer.setRenderTarget(null);
-    renderer.render(postScene, postCamera);
+    // renderer.setRenderTarget(target);
+    //renderer.render(scene, camera);
+    // // render post FX
+    // renderer.setRenderTarget(null);
+    // renderer.render(postScene, postCamera);
+
+    this.composer.render();
   }
 }
