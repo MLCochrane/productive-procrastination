@@ -6,6 +6,7 @@ import {
   PlaneBufferGeometry,
   WebGLRenderer,
   Vector2,
+  Vector3,
   MeshLambertMaterial,
   PointLight,
   MeshPhongMaterial,
@@ -13,7 +14,12 @@ import {
   AmbientLight,
   TextureLoader,
   LoadingManager,
-  DefaultLoadingManager
+  DefaultLoadingManager,
+  WebGLRenderTarget,
+  RGBFormat,
+  NearestFilter,
+  DepthTexture,
+  UnsignedShortType,
 } from 'three';
 import {
   GLTFLoader
@@ -40,6 +46,10 @@ import {
   FinalShaderPass
 } from './final-pass-shader';
 
+import {
+  OrbitControls
+} from 'three/examples/jsm/controls/OrbitControls';
+
 /*
  *  Class for loading and rendering 3D text
  */
@@ -65,6 +75,7 @@ export default class GlowProcess {
     this.GLOW_LAYER = 1;
 
     this.animate = this.animate.bind(this);
+    this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
     this.processing = this.processing.bind(this);
     this.initLights = this.initLights.bind(this);
@@ -121,6 +132,16 @@ export default class GlowProcess {
    */
   initScene() {
     this.scene = new Scene();
+
+    this.target = new WebGLRenderTarget(window.innerWidth, window.innerHeight);
+    this.target.texture.format = RGBFormat;
+    this.target.texture.minFilter = NearestFilter;
+    this.target.texture.magFilter = NearestFilter;
+    this.target.texture.generateMipmaps = false;
+    this.target.stencilBuffer = false;
+    this.target.depthBuffer = true;
+    this.target.depthTexture = new DepthTexture();
+    this.target.depthTexture.type = UnsignedShortType;
   }
 
   /**
@@ -129,7 +150,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initCamera() {
-    this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 70);
+    this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.2, 100);
 
     this.camera.position.z = 40;
     this.camera.layers.enable(1);
@@ -282,6 +303,10 @@ export default class GlowProcess {
       canvas: this.canvas,
     });
 
+    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 100;
+
     this.renderer.setPixelRatio(window.devicePixelRatio);
     this.renderer.setSize(this.curX, this.curY);
     this.processing();
@@ -297,7 +322,8 @@ export default class GlowProcess {
     const {
       renderer,
       camera,
-      scene
+      scene,
+      target
     } = this;
 
     this.glowComposer = new EffectComposer(renderer);
@@ -316,11 +342,33 @@ export default class GlowProcess {
     this.glowComposer.addPass(glowPass);
     this.glowComposer.addPass(glowPassVert);
 
+    this.finalComposer = new EffectComposer(renderer, target);
+
+    const uniforms = {
+      cameraNear: {
+        value: camera.near
+      },
+      cameraFar: {
+        value: camera.far
+      },
+      depthTex: {
+        value: this.finalComposer.renderTarget2.depthTexture
+      },
+      glowTexture: {
+        value: this.glowComposer.renderTarget2.texture
+      },
+      intensity: {
+        value: 1.0,
+      },
+      fogColor: {
+        value: new Vector3(.4, .4, .4),
+      }
+    }
+
     const finalPass = new ShaderPass(FinalShaderPass, 'texOne');
-    finalPass.uniforms['glowTexture'].value = this.glowComposer.renderTarget2.texture;
+    finalPass.uniforms = Object.assign(finalPass.uniforms, uniforms);
     finalPass.needsSwap = true;
 
-    this.finalComposer = new EffectComposer(renderer);
     this.finalComposer.addPass(renderPass);
     this.finalComposer.addPass(finalPass);
   }
@@ -342,10 +390,11 @@ export default class GlowProcess {
   animate() {
     this.raf = requestAnimationFrame(this.animate);
 
-    this.camera.position.x = 40 * Math.sin(this.xVal / 4);
-    this.camera.position.z = 40 * Math.cos(this.xVal / 4);
-    this.camera.position.y = 10 * this.yVal / 2;
-    this.camera.lookAt(0,0,0);
+    // this.camera.position.x = 20 * Math.sin(this.xVal * 2);
+    // this.camera.position.z = 20 * Math.cos(this.xVal * 2);
+    // this.camera.position.y = 10 * this.yVal;
+    // this.camera.lookAt(0,0,0);
+    this.controls.update();
 
     this.render();
   }

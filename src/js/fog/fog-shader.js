@@ -54,12 +54,13 @@ const FogShader = {
 
     "void main(){",
     "vec3 diffuse = texture2D(tDiffuse, vUv).rgb;",
+    "vec3 dDiff = texture2D(tDepth, vUv).rgb;",
     "float depth = readDepth(tDepth, vUv);",
     "float fogLevel = clamp(depth * intensity, 0., 1.);",
 
     "gl_FragColor.rgb = mix(diffuse, fogColor, fogLevel);",
     "gl_FragColor.a = 1.0;",
-    "//gl_FragColor = vec4(diffuse, 1.0);",
+    "//gl_FragColor = vec4(dDiff, 1.0);",
     "}"
 
   ].join("\n")
