@@ -10,9 +10,12 @@ initMenu();
 let card = null;
 let activeSketch = null;
 
-const imported = new Set();
-
 const sketches = [
+	{
+		'namespace': 'home',
+		'path': 'js/homepage/index',
+		'constructor': []
+	},
 	{
 		'namespace': 'scroll-loop',
 		'path': 'js/scroll-loop/index',
@@ -65,7 +68,7 @@ barba.init({
 				runSketch(data.next);
 			},
 			enter: ({current, next}) => {
-				if (next.namespace === 'home') activeSketch = null;
+				if (next.namespace === 'home') activeSketch = null; // REMOVE ONCE HOMEPAGE LOGIC DONE
 				closeMenu();
 				runSketch(next);
 			},

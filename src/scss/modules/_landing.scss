@@ -41,6 +41,41 @@
 	height: 100%;
 	width: 100%;
 	overflow-y: scroll;
+	&__top {
+		display: none;
+	}
+	&__section {
+		margin: 0 auto;
+		&:last-of-type {
+			margin-top: 40px;
+			@include media-query($big) {
+				margin-top: 100px;
+			}
+		}
+	}
+	&__copy {
+		font-size: 18px;
+		font-weight: 500;
+		@include media-query($small) {
+			font-size: 24px;
+		}
+		@include media-query($med) {
+			font-size: 34px;
+		}
+		@include media-query($large) {
+			font-size: 42px;
+		}
+		@include media-query($widescreen) {
+			font-size: 54px;
+		}
+	}
+	&__link {
+		color: black;
+		transition: color 300ms;
+		&:hover {
+			color: $brand-yellow;
+		}
+	}
 	&__wrap {
 		max-width: 1500px;
 		padding: 20px;
@@ -53,6 +88,8 @@
 		&-item {
 			width: 100%;
 			height: 80vw;
+			opacity: 0;
+			transform: translateY(100px);
 			max-height: calc(1500px / 2.3);
 			@include media-query($med) {
 				height: calc(100vw / 2);
@@ -60,11 +97,16 @@
 			}
 			@include media-query($big) {
 				height: calc(100vw / 2.3);
-				width: calc(calc(100% / 3) - 20px);
+				//width: calc(calc(100% / 3) - 20px);
 				margin-top: 20px;
-				&:nth-child(4n) {
+				// &:nth-child(4n) {
 					width: 100%;
-				}
+				// }
+			}
+			&.in-view {
+				opacity: 1;
+				transform: translateY(0);
+				transition: opacity 800ms, transform 800ms;
 			}
 		}
 	}
