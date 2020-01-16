@@ -13,3 +13,7 @@
 		width: 512px;
 	}
 }
+
+#Sandbox {
+	@include abs-center();
+}
