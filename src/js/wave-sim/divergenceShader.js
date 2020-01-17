@@ -23,7 +23,7 @@ const DivergenceShader = {
   ].join("\n"),
 
   fragmentShader: [
-    "uniform sampler2D x;",
+    "uniform sampler2D w;",
     "varying highp vec2 vUv;",
     "uniform float halfRdx;",
 
@@ -34,7 +34,8 @@ const DivergenceShader = {
     "vec4 wB = texture2D(w, coords - vec2(0., 1.));",
     "vec4 wT = texture2D(w, coords + vec2(0., 1.));",
 
-    "gl_FragColor = halfrdx * ((wR.x - wL.x) + (wT.y - wB.y));",
+    "float div = halfRdx * ((wR.x - wL.x) + (wT.y - wB.y));",
+    "gl_FragColor = vec4(div, 0., 0., 1.);",
     "}"
 
   ].join("\n")

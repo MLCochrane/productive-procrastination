@@ -33,10 +33,10 @@ const GradientSubtractionShader = {
 
     "void main(){",
     "vec2 coords = vUv;",
-    "half pL = texture2D(p, coords - vec2(1., 0.)).x;",
-    "vec4 pR = texture2D(p, coords + vec2(1., 0.)).x;",
-    "vec4 pB = texture2D(p, coords - vec2(0., 1.)).x;",
-    "vec4 pT = texture2D(p, coords + vec2(0., 1.)).x;",
+    "float pL = texture2D(p, coords - vec2(1., 0.)).x;",
+    "float pR = texture2D(p, coords + vec2(1., 0.)).x;",
+    "float pB = texture2D(p, coords - vec2(0., 1.)).x;",
+    "float pT = texture2D(p, coords + vec2(0., 1.)).x;",
 
     "vec4 uNew = texture2D(w, coords);",
     "uNew.xy -= halfRdx * vec2(pR - pL, pT - pB);",
