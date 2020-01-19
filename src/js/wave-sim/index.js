@@ -65,6 +65,14 @@ import {
 } from './displayDye';
 
 import {
+  AddDye
+} from './addDye';
+
+import {
+  AddForce
+} from './addForce';
+
+import {
   DisplayShader
 } from './displayShader';
 
@@ -97,6 +105,13 @@ export default class WaterSim {
       cellSize: 512,
     };
 
+    this.mouse = {
+      x: 0,
+      y: 0,
+      Dx: 0,
+      Dy: 0,
+    };
+
     this.animate = this.animate.bind(this);
     this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
@@ -106,7 +121,7 @@ export default class WaterSim {
     this.createVelField = this.createVelField.bind(this);
     this.createPressureField = this.createPressureField.bind(this);
 
-    this.testFeedback = this.testFeedback.bind(this);
+    // this.testFeedback = this.testFeedback.bind(this);
 
 
     this.bindEvents();
@@ -114,14 +129,17 @@ export default class WaterSim {
   }
 
   bindEvents() {
-    window.addEventListener("resize", () => {
-      this.onWindowResize();
-    });
+    window.addEventListener('mousemove', (e) => {
+      const x = e.clientX / window.innerWidth;
+      const y = e.clientY / window.innerHeight;
+      const curMouse = {
+        x,
+        y,
+        Dx: x - this.mouse.x,
+        Dy: y - this.mouse.y,
+      };
 
-    window.addEventListener('click', () => {
-      this.stageOneComposer.render();
-      this.stageTwoComposer.render();
-      this.displayComposer.render();
+      this.mouse = curMouse;
     });
   }
 
@@ -191,7 +209,7 @@ export default class WaterSim {
 
       this.mesh = new Mesh(geo, mat);
       this.mesh.position.z = -2;
-      this.mesh.scale.set(0.8, 0.8, 0.8);
+      this.mesh.scale.set(0.1, 0.1, 0.1);
       this.scene.add(this.mesh);
       this.setup();
     }
@@ -266,8 +284,8 @@ export default class WaterSim {
     // this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     // this.mesh.material.uniforms['dataTex'].value.needsUpdate = true;
 
-    // this.processing();
-    this.testFeedback();
+    this.processing();
+    // this.testFeedback();
     this.animate();
   }
 
@@ -276,66 +294,52 @@ export default class WaterSim {
    * @function testFeedback
    * @memberof .prototype
    */
-  testFeedback() {
-    const {
-      renderer,
-      camera,
-      scene,
-    } = this;
+  // testFeedback() {
+  //   const {
+  //     renderer,
+  //     camera,
+  //     scene,
+  //   } = this;
 
-    this.testTarget = new WebGLRenderTarget(512, 512, {
-      magFilter: NearestFilter,
-      minFilter: NearestFilter,
-    });
-    this.testTarget2 = new WebGLRenderTarget(512, 512, {
-      magFilter: NearestFilter,
-      minFilter: NearestFilter,
-    });
-    // console.log(testTarget);
+  //   this.velocityRenderTargetOne = new WebGLRenderTarget(512, 512, {
+  //     // magFilter: NearestFilter,
+  //     // minFilter: NearestFilter,
+  //   });
+  //   this.velocityRenderTargetTwo = new WebGLRenderTarget(512, 512, {
+  //     // magFilter: NearestFilter,
+  //     // minFilter: NearestFilter,
+  //   });
+  //   // console.log(renderTarget);
 
-    this.renderComposer = new EffectComposer(renderer);
-    this.stageOneComposer = new EffectComposer(renderer);
-    this.stageTwoComposer = new EffectComposer(renderer);
-    this.displayComposer = new EffectComposer(renderer);
+  //   this.stageOneComposer = new EffectComposer(renderer);
+  //   this.stageTwoComposer = new EffectComposer(renderer);
+  //   this.displayComposer = new EffectComposer(renderer);
 
-    this.renderComposer.renderToScreen = false;
-    this.stageOneComposer.renderToScreen = false;
-    this.stageTwoComposer.renderToScreen = false;
+  //   this.stageOneComposer.renderToScreen = false;
+  //   this.stageTwoComposer.renderToScreen = false;
 
-    // COMPOSER 1
-    const renderPass = new RenderPass(scene, camera);
-    this.renderComposer.addPass(renderPass);
+  //   // COMPOSER 1
+  //   const renderPass = new RenderPass(scene, camera);
 
-
-    // COMPOSER 2
-    const testShade = new ShaderPass(DisplayDye);
-    testShade.uniforms['tNew'].value = this.renderComposer.renderTarget2.texture; // initial
-    testShade.uniforms['tMix'].value = this.testTarget2.texture;
-    this.stageOneComposer.addPass(testShade);
-    this.stageOneComposer.addPass(new SavePass(this.testTarget));
+  //   // COMPOSER 2
+  //   const returnTexturePass = new ShaderPass(DisplayDye);
+  //   returnTexturePass.uniforms['tMix'].value = this.velocityRenderTargetTwo.texture;
+  //   this.stageOneComposer.addPass(returnTexturePass);
+  //   this.stageOneComposer.addPass(new SavePass(this.velocityRenderTargetOne));
 
 
-    // COMPOSER 3
-    this.stageTwoComposer.addPass(renderPass);
-    const displayPass = new ShaderPass(DisplayShader, 'tNew');
-    displayPass.uniforms['tTest'].value = this.testTarget.texture;
-    this.stageTwoComposer.addPass(displayPass);
-    this.stageTwoComposer.addPass(new SavePass(this.testTarget2));
+  //   // COMPOSER 3
+  //   this.stageTwoComposer.addPass(renderPass);
+  //   const displayPass = new ShaderPass(DisplayShader, 'tNew');
+  //   displayPass.uniforms['tTest'].value = this.velocityRenderTargetOne.texture;
+  //   this.stageTwoComposer.addPass(displayPass);
+  //   this.stageTwoComposer.addPass(new SavePass(this.velocityRenderTargetTwo));
 
 
-    const finalPass = new ShaderPass(DisplayShader);
-    finalPass.uniforms['tNew'].value = this.testTarget2.texture;
-    this.displayComposer.addPass(finalPass);
-
-    // COMPOSER ORDER
-    this.renderComposer.render();
-
-    // for (let i = 0; i<10; i++) {
-    //   this.stageOneComposer.render();
-    //   this.stageTwoComposer.render();
-    //   this.displayComposer.render();
-    // }
-  }
+  //   const finalPass = new ShaderPass(DisplayShader);
+  //   finalPass.uniforms['tNew'].value = this.velocityRenderTargetTwo.texture;
+  //   this.displayComposer.addPass(finalPass);
+  // }
 
   /**
    * Post-Processing
@@ -351,17 +355,30 @@ export default class WaterSim {
       camera,
     } = this;
 
+    this.velocityRenderTargetOne = new WebGLRenderTarget(512, 512);
+    this.velocityRenderTargetTwo = new WebGLRenderTarget(512, 512);
+
+    this.scalarRenderTargetOne = new WebGLRenderTarget(512, 512);
+    // this.scalarRenderTargetTwo = new WebGLRenderTarget(512, 512);
+
+    this.velocityRenderTargetTwo.texture = this.tex;
+
     this.velocityComposer = new EffectComposer(renderer);
     this.velocityComposer.renderToScreen = false;
 
     // 1. advectVelocity: takes in initial velField, returns new intermediate velocity field
     const advectPass = new ShaderPass(AdvectPassShader);
-    advectPass.uniforms['velField'].value = this.velField;
+    advectPass.uniforms['velField'].value = this.velocityRenderTargetTwo.texture;
+    advectPass.uniforms['toAdvect'].value = this.velocityRenderTargetTwo.texture;
+    advectPass.uniforms['dissipation'].value = .9;
     this.velocityComposer.addPass(advectPass);
 
     // 2. applyForces: maybeUse initial dye shader to add? returns new velocity field
-    const applyForces = new ShaderPass(initialDye);
+    const applyForces = new ShaderPass(AddForce);
+    applyForces.uniforms['point'].value = new Vector2(this.mouse.x, this.mouse.y);
+    applyForces.uniforms['forces'].value = new Vector3(this.mouse.Dx, this.mouse.Dy, 0.0);
     this.velocityComposer.addPass(applyForces);
+    this.velocityComposer.addPass(new SavePass(this.velocityRenderTargetOne));
 
 
     this.divergenceComposer = new EffectComposer(renderer);
@@ -369,12 +386,12 @@ export default class WaterSim {
 
     // 3. computeDivergence: takes vel field and produces divergence
     const computeDivergence = new ShaderPass(DivergenceShader);
-    computeDivergence.uniforms['w'].value = this.velocityComposer.renderTarget2.texture;
+    computeDivergence.uniforms['w'].value = this.velocityRenderTargetOne.texture;
     computeDivergence.uniforms['halfRdx'].value = 0.5*(1 / cellSize);
 
     this.divergenceComposer.addPass(computeDivergence);
 
-    // 4. solvePressure: jacobi iterations with divergence and pressure field. returns pressure gradient
+    // // 4. solvePressure: jacobi iterations with divergence and pressure field. returns pressure gradient
     const solvePressure = new ShaderPass(JacobiIterationShader, 'b');
     solvePressure.uniforms['x'].value = presField;
     solvePressure.uniforms['rBeta'].value = 1 / 4;
@@ -384,18 +401,40 @@ export default class WaterSim {
       this.divergenceComposer.addPass(solvePressure);
     }
 
-    // 5. subtractPressure: takes pressure gradient and intermediate velocity field and returns new velocity field
+    // // 5. subtractPressure: takes pressure gradient and intermediate velocity field and returns new velocity field
     const subtractPressure = new ShaderPass(GradientSubtractionShader, 'p');
-    subtractPressure.uniforms['w'] = this.velocityComposer.renderTarget2.texture;
-    subtractPressure.uniforms['halfRdx'] = 0.5 * (1 / cellSize);
+    subtractPressure.uniforms['w'].value = this.velocityRenderTargetOne.texture;
+    subtractPressure.uniforms['halfRdx'].value = 0.5 * (1 / cellSize);
     this.divergenceComposer.addPass(subtractPressure);
+    this.divergenceComposer.addPass(new SavePass(this.velocityRenderTargetTwo));
 
-    //this.divergenceComposer.renderTarget2.texture == latest velocity field
-    this.velField = this.divergenceComposer.renderTarget2.texture;
 
+    // Updating Dye
+
+    this.dyeComposer = new EffectComposer(renderer);
+    this.dyeComposer.renderToScreen = false;
+    this.dyeComposer.addPass(new RenderPass(scene, camera));
+
+    const addingDye = new ShaderPass(AddDye);
+    addingDye.uniforms['tOld'].value = this.scalarRenderTargetOne.texture;
+    this.dyeComposer.addPass(addingDye);
+
+    const advectDye = new ShaderPass(AdvectPassShader, 'toAdvect');
+    advectDye.uniforms['velField'].value = this.velocityRenderTargetTwo.texture;
+    // advectDye.uniforms['toAdvect'].value = this.renderComposer.renderTarget2.texture;
+    advectDye.uniforms['dissipation'].value = 0.9;
+    this.dyeComposer.addPass(advectDye);
+
+    this.dyeComposer.addPass(new SavePass(this.scalarRenderTargetOne));
+
+
+    // final display
     this.stageTwoComposer = new EffectComposer(renderer);
     const displayDye = new ShaderPass(DisplayDye);
+    displayDye.uniforms['tMix'].value = this.scalarRenderTargetOne.texture;
     this.stageTwoComposer.addPass(displayDye);
+
+    console.log(this.velocityComposer.passes[1].uniforms.point.value);
   }
 
   animate() {
@@ -407,16 +446,15 @@ export default class WaterSim {
   }
   render(time) {
     const delta = this.startTime - Date.now();
-    this.mesh.rotation.x += -.005;
-    this.mesh.rotation.z += -.005;
+    this.mesh.position.x = (this.mouse.x * 2.) - 0.5;
+    this.mesh.position.y = -(this.mouse.y * 2.) + 0.5;
 
-    this.stageOneComposer.render();
-    // this.testTarget.
+    this.velocityComposer.passes[1].uniforms.point.value = new Vector2(this.mouse.x, this.mouse.y);
+    this.velocityComposer.passes[1].uniforms.forces.value = new Vector3(this.mouse.Dx, this.mouse.Dy, 0.0);
+
+    this.velocityComposer.render();
+    this.divergenceComposer.render();
+    this.dyeComposer.render();
     this.stageTwoComposer.render();
-    this.displayComposer.render();
-
-    // this.velocityComposer.render();
-    // this.divergenceComposer.render();
-    // this.stageTwoComposer.render();
   }
 }

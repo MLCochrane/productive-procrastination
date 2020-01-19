@@ -1,7 +1,10 @@
-const initialDye = {
+const AddDye = {
 
   uniforms: {
     'tDiffuse': {
+      value: null
+    },
+    'tOld': {
       value: null
     }
   },
@@ -22,20 +25,19 @@ const initialDye = {
   fragmentShader: [
     "varying highp vec2 vUv;",
     "uniform sampler2D tDiffuse;",
-
+    "uniform sampler2D tOld;",
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec4 vel = texture2D(tDiffuse, coords);",
-    "float dist = smoothstep(.2, .25, distance(vUv, vec2(0.5)));",
-    "vec4 col = vec4(vec3(dist, dist, 0.), 1.);",
+    "vec4 tNew = texture2D(tDiffuse, coords);",
+    "vec4 tOld = texture2D(tOld, coords);",
 
-    "gl_FragColor = vel + vec4(0.2, 0., 0., 1.);",
+    "gl_FragColor = tNew + tOld;",
     "}"
 
   ].join("\n")
 };
 
 export {
-  initialDye
+  AddDye
 };

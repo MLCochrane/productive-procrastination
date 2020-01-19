@@ -4,17 +4,17 @@ const AdvectPassShader = {
     // "tDiffuse": {
     //   value: null
     // },
-    // "tOld": {
-    //   value: null
-    // },
+    "toAdvect": {
+      value: null
+    },
     "velField": {
       value: null
     },
     "timestep": {
-      value: .3
+      value: 1.3
     },
     "dissipation": {
-      value: .9
+      value: 1.
     },
     "rdx": {
       value: 1 / 512
@@ -36,6 +36,7 @@ const AdvectPassShader = {
 
   fragmentShader: [
     "uniform sampler2D velField;",
+    "uniform sampler2D toAdvect;",
     "varying highp vec2 vUv;",
     "uniform float timestep;",
     "uniform float dissipation;",
@@ -44,9 +45,10 @@ const AdvectPassShader = {
     "void main(){",
     "vec2 coords = vUv;",
     "vec4 u = texture2D(velField, coords);",
+    "vec4 test = texture2D(toAdvect, coords);",
 
     "vec2 pos = coords - timestep * rdx * u.xy;",
-    "vec4 xNew = dissipation * texture2D(velField, pos);",
+    "vec4 xNew = dissipation * texture2D(toAdvect, pos);",
 
     //"gl_FragColor = vec4(vec3(u.x, u.y, u.z), 1.);",
     "gl_FragColor = xNew;",

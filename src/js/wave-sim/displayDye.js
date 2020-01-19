@@ -1,12 +1,6 @@
 const DisplayDye = {
 
   uniforms: {
-    'tDiffuse': {
-      value: null
-    },
-    'tNew': {
-      value: null
-    },
     'tMix': {
       value: null
     }
@@ -33,7 +27,7 @@ const DisplayDye = {
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec4 tex2 = texture2D(tMix, coords);",
+    "vec4 tex2 = texture2D(tDiffuse, coords);",
 
     "gl_FragColor = tex2;",
     "}"
