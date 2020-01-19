@@ -3,6 +3,12 @@ const DisplayDye = {
   uniforms: {
     'tDiffuse': {
       value: null
+    },
+    'tNew': {
+      value: null
+    },
+    'tMix': {
+      value: null
     }
   },
 
@@ -22,15 +28,14 @@ const DisplayDye = {
   fragmentShader: [
     "varying highp vec2 vUv;",
     "uniform sampler2D tDiffuse;",
-
+    "uniform sampler2D tNew;",
+    "uniform sampler2D tMix;",
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec4 vel = texture2D(tDiffuse, coords);",
-    // "float dist = smoothstep(.2, .25, distance(vUv, vec2(0.5)));",
-    // "vec4 col = vec4(vec3(dist, dist, 0.), 1.);",
+    "vec4 tex2 = texture2D(tMix, coords);",
 
-    "gl_FragColor = vel;",
+    "gl_FragColor = tex2;",
     "}"
 
   ].join("\n")
