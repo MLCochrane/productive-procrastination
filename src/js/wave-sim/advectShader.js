@@ -11,13 +11,13 @@ const AdvectPassShader = {
       value: null
     },
     "timestep": {
-      value: 1.3
+      value: .03
     },
     "dissipation": {
       value: 1.
     },
     "rdx": {
-      value: 1 / 512
+      value: 1 / 1024
     }
   },
 
@@ -47,10 +47,17 @@ const AdvectPassShader = {
     "vec4 u = texture2D(velField, coords);",
     "vec4 test = texture2D(toAdvect, coords);",
 
-    "vec2 pos = coords - timestep * rdx * u.xy;",
-    "vec4 xNew = dissipation * texture2D(toAdvect, pos);",
+    // "u.x = (u.x * 2.) - 1.;",
+    // "u.y = (u.y * 2.) - 1.;",
 
-    //"gl_FragColor = vec4(vec3(u.x, u.y, u.z), 1.);",
+    "vec2 pos = coords - (timestep * u.xy);",
+    "vec4 xNew = texture2D(toAdvect, pos) / (1.0 + dissipation * timestep);",
+    // "vec4 xNew = (1. - dissipation) * texture2D(toAdvect, pos);",
+
+    // "xNew.x = (xNew.x + 1.) / 2.;",
+    // "xNew.y = (xNew.y + 1.) / 2.;",
+
+
     "gl_FragColor = xNew;",
     "}"
 

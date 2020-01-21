@@ -4,6 +4,9 @@ const AddForce = {
     'tDiffuse': {
       value: null
     },
+    'uDiffuse': {
+      value: null
+    },
     'point': {
       value: null
     },
@@ -11,7 +14,7 @@ const AddForce = {
       value: null
     },
     'radius': {
-      value: 0.1
+      value: 0.005
     },
   },
 
@@ -30,18 +33,19 @@ const AddForce = {
 
   fragmentShader: [
     "varying highp vec2 vUv;",
-    "uniform sampler2D tDiffuse;",
+    "uniform sampler2D uDiffuse;",
     "uniform vec2 point;",
     "uniform vec3 forces;",
     "uniform float radius;",
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec2 p = vUv - point.xy;",
+    "vec2 p = coords - point.xy;",
     "vec3 force = exp(-dot(p, p) / radius) * forces;",
-    "vec3 base = texture2D(tDiffuse, coords).xyz;",
+    "vec3 base = texture2D(uDiffuse, coords).xyz;",
 
     "gl_FragColor = vec4(base + force, 1.0);",
+    // "gl_FragColor = vec4(0.5, 0.2, 0.1, 1.0);",
     "}"
 
   ].join("\n")

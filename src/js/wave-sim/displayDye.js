@@ -21,13 +21,11 @@ const DisplayDye = {
 
   fragmentShader: [
     "varying highp vec2 vUv;",
-    "uniform sampler2D tDiffuse;",
-    "uniform sampler2D tNew;",
     "uniform sampler2D tMix;",
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec4 tex2 = texture2D(tDiffuse, coords);",
+    "vec4 tex2 = texture2D(tMix, coords);",
 
     "gl_FragColor = tex2;",
     "}"

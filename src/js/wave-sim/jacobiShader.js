@@ -37,14 +37,25 @@ const JacobiIterationShader = {
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec4 xL = texture2D(x, coords - vec2(1., 0.));",
-    "vec4 xR = texture2D(x, coords + vec2(1., 0.));",
-    "vec4 xB = texture2D(x, coords - vec2(0., 1.));",
-    "vec4 xT = texture2D(x, coords + vec2(0., 1.));",
+    "float offset = 1.0/1024.0;",
+    "float xL = texture2D(x, coords - vec2(1. * offset, 0.)).x;",
+    "float xR = texture2D(x, coords + vec2(1. * offset, 0.)).x;",
+    "float xB = texture2D(x, coords - vec2(0., 1. * offset)).y;",
+    "float xT = texture2D(x, coords + vec2(0., 1. * offset)).y;",
 
-    "vec4 bC = texture2D(b, coords);",
+    // Mapping back to signed values
+    // "xL = (xL * 2.) - 1.;",
+    // "xR = (xR * 2.) - 1.;",
+    // "xB = (xB * 2.) - 1.;",
+    // "xT = (xT * 2.) - 1.;",
 
-    "gl_FragColor = (xL + xR + xB + xT + alpha * bC) * rBeta;",
+    // stored divergence in x component in previous step
+    "float bC = texture2D(b, coords).x;",
+    "float pressure = (xL + xR + xB + xT + (alpha * bC)) * rBeta;",
+
+    // "pressure = (pressure + 1.) * 2.;",
+
+    "gl_FragColor = vec4(pressure, 0., 0., 1.0);",
     "}"
 
   ].join("\n")

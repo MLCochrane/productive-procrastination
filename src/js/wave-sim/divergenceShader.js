@@ -29,12 +29,35 @@ const DivergenceShader = {
 
     "void main(){",
     "vec2 coords = vUv;",
-    "vec4 wL = texture2D(w, coords - vec2(1., 0.));",
-    "vec4 wR = texture2D(w, coords + vec2(1., 0.));",
-    "vec4 wB = texture2D(w, coords - vec2(0., 1.));",
-    "vec4 wT = texture2D(w, coords + vec2(0., 1.));",
+    "float offset = 1.0/1024.0;",
 
-    "float div = halfRdx * ((wR.x - wL.x) + (wT.y - wB.y));",
+    "vec2 leftCoord = coords - vec2(1. * offset, 0.);",
+    "vec2 rightCoord = coords + vec2(1. * offset, 0.);",
+    "vec2 bottomCoord = coords - vec2(0., 1. * offset);",
+    "vec2 topCoord = coords + vec2(0., 1. * offset);",
+
+    // "float wL = (texture2D(w, leftCoord).x * 2.) - 1.;",
+    // "float wR = (texture2D(w, rightCoord).x * 2.) - 1.;",
+    // "float wB = (texture2D(w, bottomCoord).y * 2.) - 1.;",
+    // "float wT = (texture2D(w, topCoord).y * 2.) - 1.;",
+
+    "float wL = texture2D(w, leftCoord).x;",
+    "float wR = texture2D(w, rightCoord).x;",
+    "float wB = texture2D(w, bottomCoord).y;",
+    "float wT = texture2D(w, topCoord).y;",
+
+    "vec2 C = texture2D(w, coords).xy;",
+    // "C.x = (C.x * 2.) - 1.;",
+    // "C.y = (C.y * 2.) - 1.;",
+
+    // adding in bounds check thanks to https://github.com/PavelDoGreat
+    "if (leftCoord.x < 0.0) { wL = -C.x; }",
+    "if (rightCoord.x > 1.0) { wR = -C.x; }",
+    "if (bottomCoord.y < 0.0) { wB = -C.y; }",
+    "if (topCoord.y > 1.0) { wT = -C.y; }",
+
+    "float div = halfRdx * ((wR - wL) + (wT - wB));",
+    // "div = (div + 1.) / 2.;",
     "gl_FragColor = vec4(div, 0., 0., 1.);",
     "}"
 
