@@ -1,69 +1,49 @@
-const AdvectPassShader = {
+import {
+  vertBase
+} from './vertexShader';
+const advectShader = {
 
   uniforms: {
-    // "tDiffuse": {
-    //   value: null
-    // },
-    "toAdvect": {
-      value: null
+    uVelocity: {
+      value: null,
     },
-    "velField": {
-      value: null
+    uSource: {
+      value: null,
     },
-    "timestep": {
-      value: .03
+    uRdx: {
+      value: null,
     },
-    "dissipation": {
-      value: 1.
+    uTimeStep: {
+      value: 0,
     },
-    "rdx": {
-      value: 1 / 1024
-    }
+    uTexelSize: {
+      value: null,
+    },
+    uDissipation: {
+      value: null,
+    },
   },
 
-  vertexShader: [
+  vertexShader: vertBase,
 
-    "varying highp vec2 vUv;",
+  fragmentShader: `
+    precision highp float;
+    precision highp sampler2D;
+    varying vec2 vUv;
+    uniform sampler2D uVelocity;
+    uniform sampler2D uSource;
+    uniform float uRdx;
+    uniform float uTimeStep;
+    uniform float uDissipation;
 
-    "void main() {",
-
-    "vUv = uv;",
-    "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-    "}"
-
-  ].join("\n"),
-
-  fragmentShader: [
-    "uniform sampler2D velField;",
-    "uniform sampler2D toAdvect;",
-    "varying highp vec2 vUv;",
-    "uniform float timestep;",
-    "uniform float dissipation;",
-    "uniform float rdx;",
-
-    "void main(){",
-    "vec2 coords = vUv;",
-    "vec4 u = texture2D(velField, coords);",
-    "vec4 test = texture2D(toAdvect, coords);",
-
-    // "u.x = (u.x * 2.) - 1.;",
-    // "u.y = (u.y * 2.) - 1.;",
-
-    "vec2 pos = coords - (timestep * u.xy);",
-    "vec4 xNew = texture2D(toAdvect, pos) / (1.0 + dissipation * timestep);",
-    // "vec4 xNew = (1. - dissipation) * texture2D(toAdvect, pos);",
-
-    // "xNew.x = (xNew.x + 1.) / 2.;",
-    // "xNew.y = (xNew.y + 1.) / 2.;",
-
-
-    "gl_FragColor = xNew;",
-    "}"
-
-  ].join("\n")
+    void main() {
+      vec2 coord = vUv - 1. * texture2D(uVelocity, vUv).xy * uRdx;
+      vec4 result = texture2D(uSource, coord);
+      gl_FragColor = result * uDissipation;
+    }
+    `
 };
 
 export {
-  AdvectPassShader
+  advectShader
 };

@@ -1,66 +1,51 @@
-const JacobiIterationShader = {
+import {
+  vertBase
+} from './vertexShader';
+const pressureShader = {
 
   uniforms: {
-    "x": {
-      value: null
+    uDivergence: {
+      value: null,
     },
-    "b": {
-      value: null
+    uPressure: {
+      value: null,
     },
-    "alpha": {
-      value: null
+    uRBeta: {
+      value: null,
     },
-    "rBeta": {
-      value: null
-    }
+    uAlpha: {
+      value: null,
+    },
+    uTexelSize: {
+      value: null,
+    },
   },
 
-  vertexShader: [
+  vertexShader: vertBase,
 
-    "varying highp vec2 vUv;",
-
-    "void main() {",
-
-    "vUv = uv;",
-    "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-    "}"
-
-  ].join("\n"),
-
-  fragmentShader: [
-    "uniform sampler2D x;",
-    "uniform sampler2D b;",
-    "varying highp vec2 vUv;",
-    "uniform float alpha;",
-    "uniform float rBeta;",
-
-    "void main(){",
-    "vec2 coords = vUv;",
-    "float offset = 1.0/1024.0;",
-    "float xL = texture2D(x, coords - vec2(1. * offset, 0.)).x;",
-    "float xR = texture2D(x, coords + vec2(1. * offset, 0.)).x;",
-    "float xB = texture2D(x, coords - vec2(0., 1. * offset)).y;",
-    "float xT = texture2D(x, coords + vec2(0., 1. * offset)).y;",
-
-    // Mapping back to signed values
-    // "xL = (xL * 2.) - 1.;",
-    // "xR = (xR * 2.) - 1.;",
-    // "xB = (xB * 2.) - 1.;",
-    // "xT = (xT * 2.) - 1.;",
-
-    // stored divergence in x component in previous step
-    "float bC = texture2D(b, coords).x;",
-    "float pressure = (xL + xR + xB + xT + (alpha * bC)) * rBeta;",
-
-    // "pressure = (pressure + 1.) * 2.;",
-
-    "gl_FragColor = vec4(pressure, 0., 0., 1.0);",
-    "}"
-
-  ].join("\n")
+  fragmentShader: `
+    precision mediump float;
+    precision mediump sampler2D;
+    varying highp vec2 vUv;
+    varying highp vec2 vL;
+    varying highp vec2 vR;
+    varying highp vec2 vT;
+    varying highp vec2 vB;
+    uniform sampler2D uPressure;
+    uniform sampler2D uDivergence;
+    void main() {
+      float L = texture2D(uPressure, vL).x;
+      float R = texture2D(uPressure, vR).x;
+      float T = texture2D(uPressure, vT).x;
+      float B = texture2D(uPressure, vB).x;
+      float C = texture2D(uPressure, vUv).x;
+      float divergence = texture2D(uDivergence, vUv).x;
+      float pressure = (L + R + B + T - divergence) * 0.25;
+      gl_FragColor = vec4(pressure, 0.0, 0.0, 1.0);
+    }
+    `
 };
 
 export {
-  JacobiIterationShader
+  pressureShader
 };

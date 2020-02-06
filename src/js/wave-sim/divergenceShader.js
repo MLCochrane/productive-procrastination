@@ -1,69 +1,47 @@
-const DivergenceShader = {
+import {
+  vertBase
+} from './vertexShader';
+const divergenceShader = {
 
   uniforms: {
-    "w": {
-      value: null
+    uVelocity: {
+      value: null,
     },
-    "halfRdx": {
-      value: null
+    uHalfRdx: {
+      value: null,
+    },
+    uTexelSize: {
+      value: null,
     },
   },
 
-  vertexShader: [
+  vertexShader: vertBase,
 
-    "varying highp vec2 vUv;",
-
-    "void main() {",
-
-    "vUv = uv;",
-    "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-
-    "}"
-
-  ].join("\n"),
-
-  fragmentShader: [
-    "uniform sampler2D w;",
-    "varying highp vec2 vUv;",
-    "uniform float halfRdx;",
-
-    "void main(){",
-    "vec2 coords = vUv;",
-    "float offset = 1.0/1024.0;",
-
-    "vec2 leftCoord = coords - vec2(1. * offset, 0.);",
-    "vec2 rightCoord = coords + vec2(1. * offset, 0.);",
-    "vec2 bottomCoord = coords - vec2(0., 1. * offset);",
-    "vec2 topCoord = coords + vec2(0., 1. * offset);",
-
-    // "float wL = (texture2D(w, leftCoord).x * 2.) - 1.;",
-    // "float wR = (texture2D(w, rightCoord).x * 2.) - 1.;",
-    // "float wB = (texture2D(w, bottomCoord).y * 2.) - 1.;",
-    // "float wT = (texture2D(w, topCoord).y * 2.) - 1.;",
-
-    "float wL = texture2D(w, leftCoord).x;",
-    "float wR = texture2D(w, rightCoord).x;",
-    "float wB = texture2D(w, bottomCoord).y;",
-    "float wT = texture2D(w, topCoord).y;",
-
-    "vec2 C = texture2D(w, coords).xy;",
-    // "C.x = (C.x * 2.) - 1.;",
-    // "C.y = (C.y * 2.) - 1.;",
-
-    // adding in bounds check thanks to https://github.com/PavelDoGreat
-    "if (leftCoord.x < 0.0) { wL = -C.x; }",
-    "if (rightCoord.x > 1.0) { wR = -C.x; }",
-    "if (bottomCoord.y < 0.0) { wB = -C.y; }",
-    "if (topCoord.y > 1.0) { wT = -C.y; }",
-
-    "float div = halfRdx * ((wR - wL) + (wT - wB));",
-    // "div = (div + 1.) / 2.;",
-    "gl_FragColor = vec4(div, 0., 0., 1.);",
-    "}"
-
-  ].join("\n")
+  fragmentShader: `
+    precision mediump float;
+    precision mediump sampler2D;
+    varying highp vec2 vUv;
+    varying highp vec2 vL;
+    varying highp vec2 vR;
+    varying highp vec2 vT;
+    varying highp vec2 vB;
+    uniform sampler2D uVelocity;
+    void main () {
+      float L = texture2D(uVelocity, vL).x;
+      float R = texture2D(uVelocity, vR).x;
+      float T = texture2D(uVelocity, vT).y;
+      float B = texture2D(uVelocity, vB).y;
+      vec2 C = texture2D(uVelocity, vUv).xy;
+      if (vL.x < 0.0) { L = -C.x; }
+      if (vR.x > 1.0) { R = -C.x; }
+      if (vT.y > 1.0) { T = -C.y; }
+      if (vB.y < 0.0) { B = -C.y; }
+      float div = 0.5 * (R - L + T - B);
+      gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
+    }
+    `
 };
 
 export {
-  DivergenceShader
+  divergenceShader
 };
