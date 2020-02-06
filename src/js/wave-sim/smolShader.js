@@ -1,7 +1,10 @@
-const displayShader = {
+const smolShader = {
 
   uniforms: {
-    tDiffuse: {
+    uDeltaTime: {
+      value: 0,
+    },
+    tLastFrame: {
       value: null,
     }
   },
@@ -17,14 +20,17 @@ const displayShader = {
 
   fragmentShader: `
     varying highp vec2 vUv;
-    uniform sampler2D tDiffuse;
+    uniform float uDeltaTime;
+    uniform sampler2D tLastFrame;
+
+
     void main() {
-      vec4 tex = texture2D(tDiffuse, vUv);
-      gl_FragColor = tex;
+      vec4 tex = texture2D(tLastFrame, vUv);
+      gl_FragColor = vec4(vUv * tex.xy + 0.02, 0., 1.);
     }
   `
 };
 
 export {
-  displayShader
+  smolShader
 };
