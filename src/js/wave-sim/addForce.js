@@ -17,9 +17,12 @@ const addForce = {
       value: null,
     },
     uRadius: {
-      value: 0.1 / 100,
+      value: 0.25 / 100,
     },
     uMoved: {
+      value: 0,
+    },
+    uAspect: {
       value: 0,
     },
   },
@@ -32,7 +35,7 @@ const addForce = {
     uniform vec2 uPoint;
     uniform vec3 uForces;
     uniform float uRadius;
-    // uniform float uAspect;
+    uniform float uAspect;
     uniform float uMoved;
 
     float guass(vec2 pos, float r) {
@@ -42,7 +45,7 @@ const addForce = {
     void main() {
       vec2 coords = vUv;
       vec2 p = coords - uPoint.xy;
-      // p.x *= uAspect;
+      p.x *= uAspect;
       float r = uRadius;
 
       vec3 base = texture2D(uDiffuse, coords).xyz;

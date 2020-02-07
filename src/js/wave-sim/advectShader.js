@@ -37,7 +37,7 @@ const advectShader = {
     uniform float uDissipation;
 
     void main() {
-      vec2 coord = vUv - 1. * texture2D(uVelocity, vUv).xy * uRdx;
+      vec2 coord = vUv - uTimeStep * texture2D(uVelocity, vUv).xy * uRdx;
       vec4 result = texture2D(uSource, coord);
       gl_FragColor = result * uDissipation;
     }

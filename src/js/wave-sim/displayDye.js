@@ -20,8 +20,8 @@ const displayShader = {
     uniform sampler2D tDiffuse;
     void main() {
       vec3 c = texture2D(tDiffuse, vUv).rgb;
-      float a = max(c.r, max(c.g, c.b));
-      gl_FragColor = vec4((c + 1.) / 2., 1.);
+      // float a = max(c.r, max(c.g, c.b));
+      gl_FragColor = vec4(c, 1.);
     }
   `
 };

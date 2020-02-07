@@ -26,6 +26,7 @@ const divergenceShader = {
     varying highp vec2 vT;
     varying highp vec2 vB;
     uniform sampler2D uVelocity;
+    uniform float uHalfRdx;
     void main () {
       float L = texture2D(uVelocity, vL).x;
       float R = texture2D(uVelocity, vR).x;
@@ -36,7 +37,7 @@ const divergenceShader = {
       if (vR.x > 1.0) { R = -C.x; }
       if (vT.y > 1.0) { T = -C.y; }
       if (vB.y < 0.0) { B = -C.y; }
-      float div = 0.5 * (R - L + T - B);
+      float div = uHalfRdx * (R - L + T - B);
       gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
     }
     `
