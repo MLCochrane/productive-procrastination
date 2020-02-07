@@ -15,8 +15,10 @@ import {
   RGFormat,
   RedFormat,
   NearestFilter,
+  CanvasTexture,
 } from 'three';
 
+import TextRender from './textCanvas';
 
 import {
   advectShader,
@@ -57,8 +59,13 @@ export default class WaterSim {
 
     this.page = document.querySelector('.page-main');
     this.canvas = document.getElementById('Sandbox');
+    this.overlayCanvas = document.getElementById('OverlayCanvas');
+    this.input = document.getElementById('LeInput');
     this.dims = this.page.getBoundingClientRect();
     this.startTime = Date.now();
+    this.typing = true;
+
+    this.text = new TextRender(this.overlayCanvas, this.input, this.dims.width, this.dims.height);
 
     this.file = `${ASSET_PATH}/assets/TestNormalMap.jpg`,
 
@@ -86,10 +93,11 @@ export default class WaterSim {
     this.setup = this.setup.bind(this);
     this.step = this.step.bind(this);
     this.initSim = this.initSim.bind(this);
+    this.closeTyping = this.closeTyping.bind(this);
     // this.render = this.render.bind(this);
 
-    this.bindEvents();
     this.init();
+    this.bindEvents();
   }
 
   bindEvents() {
@@ -113,6 +121,7 @@ export default class WaterSim {
 
     window.addEventListener('mousedown', () => {
       this.mouseDown = true;
+      this.closeTyping();
     });
 
     window.addEventListener('mouseup', () => {
@@ -122,6 +131,25 @@ export default class WaterSim {
       this.mouse.Dx = 0.;
       this.mouse.Dy = 0.;
     });
+  }
+
+  closeTyping() {
+    const {
+      dye,
+      clearProgram,
+      renderer,
+      overlayCanvas,
+      displayCamera
+    } = this;
+
+    renderer.setRenderTarget(dye.write);
+    clearProgram.mat.uniforms.uTexture.value = new CanvasTexture(overlayCanvas);
+    clearProgram.mat.uniforms.uValue.value = 1.;
+    clearProgram.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
+    renderer.render(clearProgram.scene, displayCamera);
+    overlayCanvas.style.opacity = 0;
+    dye.swap();
+    this.typing = false;
   }
 
   onWindowResize() {
@@ -208,6 +236,8 @@ export default class WaterSim {
     this.clearProgram = this.programScene(clearShader);
     this.gradientSubtractionProgram = this.programScene(gradientSubtraction);
     this.addForceProgram = this.programScene(addForce);
+
+
   }
 
   programScene(shader, uniforms) {
@@ -339,7 +369,7 @@ export default class WaterSim {
     velocity.mat.uniforms.uRdx.value = rdx;
     velocity.mat.uniforms.uTimeStep.value = 0.016;
     velocity.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    velocity.mat.uniforms.uDissipation.value = 0.99;
+    velocity.mat.uniforms.uDissipation.value = 1.;
     renderer.render(velocity.scene, displayCamera);
     renderer.setRenderTarget(null); // removes bound target so correctly swapped?
     velocity.swap();
@@ -350,7 +380,7 @@ export default class WaterSim {
     addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
     addForceProgram.mat.uniforms.uPoint.value = new Vector2(mouse.x, mouse.y);
     addForceProgram.mat.uniforms.uAspect.value = config.aspect;
-    addForceProgram.mat.uniforms.uForces.value = new Vector3(mouse.Dx * 10000, mouse.Dy * 10000, 0.);
+    addForceProgram.mat.uniforms.uForces.value = new Vector3(mouse.Dx * 600, mouse.Dy * 600, 0.);
     addForceProgram.mat.uniforms.uMoved.value = 1;
     renderer.render(addForceProgram.scene, displayCamera);
     renderer.setRenderTarget(null); // removes bound target so correctly swapped?
@@ -367,7 +397,7 @@ export default class WaterSim {
     renderer.setRenderTarget(pressure.write);
     clearProgram.mat.uniforms.uTexture.value = pressure.read.texture;
     clearProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    clearProgram.mat.uniforms.uValue.value = 0.;
+    clearProgram.mat.uniforms.uValue.value = 0.8;
     renderer.render(clearProgram.scene, displayCamera);
     renderer.setRenderTarget(null); // removes bound target so correctly swapped?
     pressure.swap();
@@ -397,17 +427,17 @@ export default class WaterSim {
     velocity.swap();
 
     // DYE FORCES
-    renderer.setRenderTarget(dye.write);
-    addForceProgram.mat.uniforms.uDiffuse.value = dye.read.texture;
-    addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
-    addForceProgram.mat.uniforms.uPoint.value = new Vector2(mouse.x, mouse.y);
-    addForceProgram.mat.uniforms.uAspect.value = config.aspect;
-    addForceProgram.mat.uniforms.uForces.value = mouse.color;
-    addForceProgram.mat.uniforms.uMoved.value = this.mouseDown ? 1 : 0;
-    addForceProgram.mat.uniforms.uRadius.value = 0.3 / 100;
-    renderer.render(addForceProgram.scene, displayCamera);
-    renderer.setRenderTarget(null); // removes bound target so correctly swapped?
-    dye.swap();
+    // renderer.setRenderTarget(dye.write);
+    // addForceProgram.mat.uniforms.uDiffuse.value = dye.read.texture;
+    // addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
+    // addForceProgram.mat.uniforms.uPoint.value = new Vector2(mouse.x, mouse.y);
+    // addForceProgram.mat.uniforms.uAspect.value = config.aspect;
+    // addForceProgram.mat.uniforms.uForces.value = mouse.color;
+    // addForceProgram.mat.uniforms.uMoved.value = this.mouseDown ? 1 : 0;
+    // addForceProgram.mat.uniforms.uRadius.value = 0.3 / 100;
+    // renderer.render(addForceProgram.scene, displayCamera);
+    // renderer.setRenderTarget(null); // removes bound target so correctly swapped?
+    // dye.swap();
 
     // DYE ADVECT
     renderer.setRenderTarget(dye.write);
@@ -416,7 +446,7 @@ export default class WaterSim {
     dye.mat.uniforms.uRdx.value = rdx;
     dye.mat.uniforms.uTimeStep.value = 0.016;
     dye.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
-    dye.mat.uniforms.uDissipation.value = .99;
+    dye.mat.uniforms.uDissipation.value = 1.;
     renderer.render(dye.scene, displayCamera);
     dye.swap();
 
@@ -442,7 +472,7 @@ export default class WaterSim {
 
     const delta = Date.now() - startTime;
 
-    step(delta);
+    if (!this.typing) step(delta);
 
     this.displayQuad.material.uniforms.tDiffuse.value = dye.write.texture;
     renderer.render(displayScene, displayCamera);
