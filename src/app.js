@@ -7,10 +7,15 @@ import Card from './js/global/card';
 
 // Global header logic
 initMenu();
-let card;
-let activeSketch;
+let card = null;
+let activeSketch = null;
 
 const sketches = [
+	{
+		'namespace': 'home',
+		'path': 'js/homepage/index',
+		'constructor': []
+	},
 	{
 		'namespace': 'scroll-loop',
 		'path': 'js/scroll-loop/index',
@@ -63,6 +68,7 @@ barba.init({
 				runSketch(data.next);
 			},
 			enter: ({current, next}) => {
+				if (next.namespace === 'home') activeSketch = null; // REMOVE ONCE HOMEPAGE LOGIC DONE
 				closeMenu();
 				runSketch(next);
 			},
@@ -86,7 +92,7 @@ async function runSketch(route) {
 	const curSketch = sketches.find(el => el.namespace === route.namespace);
 	if (!curSketch) return;
 	return await import('./' + curSketch.path + '.js').then(result => {
-		card.bindEvents(route.container);
+		if (curSketch.namespace !== 'home') card.bindEvents(route.container);
 
 		// assigns class instance to variable so we can call destroy method on leave lifecycle hook
 		activeSketch = new result.default(curSketch.constructor);

@@ -13,6 +13,24 @@ describe('Navigation', () => {
     cy.get('#MainNav').should('not.be.visible');
   });
 
+  it('navigates to and from wave sim sketch', () => {
+    cy.get('#ToggleNav').should('be.visible').click();
+    cy.wait(300);
+    cy.get(`[data-barba-namespace="home"]`).should('exist');
+    cy.get(`[data-barba-namespace="wave-sim"]`).should('not.exist');
+    cy.get('.header__list-item a').contains('Simple Waves').click();
+    cy.get(`[data-barba-namespace="wave-sim"]`).should('exist');
+    cy.get(`[data-barba-namespace="home"]`, {
+      timeout: 20000
+    }).should('not.exist');
+    cy.get('#ToggleNav').should('be.visible').click();
+    cy.wait(300);
+    cy.get('.header__list-item a').contains('Light Glow').click();
+    cy.get(`[data-barba-namespace="wave-sim"]`, {
+      timeout: 20000
+    }).should('not.exist');
+  });
+
   it('navigates to and from light glow sketch', () => {
     cy.get('#ToggleNav').should('be.visible').click();
     cy.wait(300);

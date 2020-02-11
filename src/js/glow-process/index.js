@@ -13,31 +13,31 @@ import {
   AmbientLight,
   TextureLoader,
   LoadingManager,
-  DefaultLoadingManager
+  DefaultLoadingManager,
 } from 'three';
 import {
-  GLTFLoader
+  GLTFLoader,
 } from 'three/examples/jsm/loaders/GLTFLoader';
 import {
-  DRACOLoader
+  DRACOLoader,
 } from 'three/examples/jsm/loaders/DRACOLoader';
 import {
-  EffectComposer
-} from 'three/examples/jsm/postprocessing/EffectComposer.js';
+  EffectComposer,
+} from 'three/examples/jsm/postprocessing/EffectComposer';
 import {
-  RenderPass
-} from 'three/examples/jsm/postprocessing/RenderPass.js';
+  RenderPass,
+} from 'three/examples/jsm/postprocessing/RenderPass';
 import {
-  ShaderPass
-} from 'three/examples/jsm/postprocessing/ShaderPass.js';
+  ShaderPass,
+} from 'three/examples/jsm/postprocessing/ShaderPass';
 import {
-  GlowShaderHori
+  GlowShaderHori,
 } from './glow-shader-x';
 import {
-  GlowShaderVert
+  GlowShaderVert,
 } from './glow-shader-y';
 import {
-  FinalShaderPass
+  FinalShaderPass,
 } from './final-pass-shader';
 
 /*
@@ -49,10 +49,10 @@ export default class GlowProcess {
    * Initlaizes variables for class instance.
    */
   constructor() {
-    this.renderer;
-    this.scene;
-    this.camera;
-    this.mesh;
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
+    this.mesh = null;
     this.xVal = 0;
     this.yVal = 0;
     this.curX = window.innerWidth;
@@ -111,7 +111,7 @@ export default class GlowProcess {
 
     DefaultLoadingManager.onLoad = () => {
       this.setup();
-    }
+    };
   }
 
   /**
@@ -142,8 +142,8 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initLights() {
-    this.light = new PointLight(0xf57d7d, .3, 20, .5);
-    this.light2 = new PointLight(0xf57d7d, .3, 20, .5);
+    this.light = new PointLight(0xf57d7d, 0.3, 20, 0.5);
+    this.light2 = new PointLight(0xf57d7d, 0.3, 20, 0.5);
 
     this.light.position.set(0.5, 0, 2);
     this.light2.position.set(-0.5, 0, 2);
@@ -175,8 +175,8 @@ export default class GlowProcess {
     dracoLoader.setDecoderPath('three/examples/js/libs/draco');
     modelLoader.setDRACOLoader(dracoLoader);
 
-    modelLoader.load(bufferFile, res => {
-      this.mainTubes = res.scene.children.find(el => el.name === 'TopTubes');
+    modelLoader.load(bufferFile, (res) => {
+      this.mainTubes = res.scene.children.find((el) => el.name === 'TopTubes');
       this.mainTubes.material = new MeshBasicMaterial({
         color: 0xf23232,
       });
@@ -188,7 +188,7 @@ export default class GlowProcess {
       this.mainTubes.layers.enable(this.GLOW_LAYER);
       scene.add(this.mainTubes);
 
-      this.bottomTubes = res.scene.children.find(el => el.name === 'BottomTubes');
+      this.bottomTubes = res.scene.children.find((el) => el.name === 'BottomTubes');
       this.bottomTubes.material = new MeshLambertMaterial({
         color: 0x313632,
         side: DoubleSide,
@@ -196,10 +196,10 @@ export default class GlowProcess {
 
       this.bottomTubes.rotation.x = 1.567;
       scene.add(this.bottomTubes);
-    }, xhr => {
+    }, (xhr) => {
       // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
 
-    }, err => {
+    }, (err) => {
       console.error(err);
     });
   }
@@ -225,7 +225,7 @@ export default class GlowProcess {
       {
         type: 'displacementMap',
         url: `${ASSET_PATH}/assets/Concrete_Wall/CW_roughness.jpg`,
-      }
+      },
     ];
 
     const loadedTextures = {};
@@ -250,11 +250,11 @@ export default class GlowProcess {
       glass.position.x = -1;
 
       scene.add(glass);
-    }
+    };
 
     const texLoader = new TextureLoader(textureManager);
-    texturesToLoad.forEach(el => {
-      texLoader.load(el.url, texture => {
+    texturesToLoad.forEach((el) => {
+      texLoader.load(el.url, (texture) => {
         loadedTextures[el.type] = texture;
       });
     });
@@ -297,7 +297,7 @@ export default class GlowProcess {
     const {
       renderer,
       camera,
-      scene
+      scene,
     } = this;
 
     this.glowComposer = new EffectComposer(renderer);
@@ -305,19 +305,19 @@ export default class GlowProcess {
     this.glowComposer.addPass(renderPass);
 
     const glowPass = new ShaderPass(GlowShaderHori, 'texOne');
-    glowPass.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
-    glowPass.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
+    glowPass.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight);
+    glowPass.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
 
     const glowPassVert = new ShaderPass(GlowShaderVert, 'texOne');
-    glowPassVert.uniforms['resolution'].value = new Vector2(window.innerWidth, window.innerHeight);
-    glowPassVert.uniforms['resolution'].value.multiplyScalar(window.devicePixelRatio);
+    glowPassVert.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight);
+    glowPassVert.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
 
     this.glowComposer.renderToScreen = false;
     this.glowComposer.addPass(glowPass);
     this.glowComposer.addPass(glowPassVert);
 
     const finalPass = new ShaderPass(FinalShaderPass, 'texOne');
-    finalPass.uniforms['glowTexture'].value = this.glowComposer.renderTarget2.texture;
+    finalPass.uniforms.glowTexture.value = this.glowComposer.renderTarget2.texture;
     finalPass.needsSwap = true;
 
     this.finalComposer = new EffectComposer(renderer);
@@ -331,7 +331,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   updateShader() {
-    this.glowPass.uniforms['texOne'].value.needsUpdate = true;
+    this.glowPass.uniforms.texOne.value.needsUpdate = true;
   }
 
   /**
@@ -344,8 +344,8 @@ export default class GlowProcess {
 
     this.camera.position.x = 40 * Math.sin(this.xVal / 4);
     this.camera.position.z = 40 * Math.cos(this.xVal / 4);
-    this.camera.position.y = 10 * this.yVal / 2;
-    this.camera.lookAt(0,0,0);
+    this.camera.position.y = (10 * this.yVal) / 2;
+    this.camera.lookAt(0, 0, 0);
 
     this.render();
   }
@@ -362,9 +362,14 @@ export default class GlowProcess {
     this.finalComposer.render();
   }
 
+  /**
+   * Cancels RAF loop and unbinds event handlers
+   * @function destroy
+   * @memberof GlowProcess.prototype
+   */
   destroy() {
     cancelAnimationFrame(this.raf);
-    window.addEventListener('resize', this.onWindowResize);
-    window.addEventListener('mousemove', this.handleMouseMove);
+    window.removeEventListener('resize', this.onWindowResize);
+    window.removeEventListener('mousemove', this.handleMouseMove);
   }
 }

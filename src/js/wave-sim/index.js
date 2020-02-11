@@ -8,245 +8,137 @@ import {
   WebGLRenderTarget,
   PlaneBufferGeometry,
   ShaderMaterial,
-  HalfFloatType,
-  CanvasTexture,
+  Mesh,
+  WebGLRenderer,
+  TextureLoader,
+  RepeatWrapping,
 } from 'three';
 
 import TextRender from '../fluid/textCanvas';
 
-import {
-  advectShader,
-}
-from '../fluid/advectShader';
 
-import {
-  divergenceShader,
-}
-from '../fluid/divergenceShader';
-
-import {
-  pressureShader,
-}
-from '../fluid/jacobiShader';
-
-import {
-  gradientSubtraction,
-}
-from '../fluid/gradientSubtractionShader';
-
-import {
-  clearShader,
-} from '../fluid/clearShader';
-
-import {
-  displayShader,
-} from '../fluid/displayDye';
-
-import {
-  addForce,
-}
-from '../fluid/addForce';
-
-
+/*
+ *  Class for wave simulation
+ */
 export default class WaterSim {
   constructor() {
-    this.renderer;
-    this.scene;
-    this.camera;
+    /**
+     * Initlaizes variables for class instance.
+     */
+    this.renderer = null;
+    this.scene = null;
+    this.camera = null;
 
-    this.page = document.querySelector('.page-main');
     this.canvas = document.getElementById('Sandbox');
-    this.overlayCanvas = document.getElementById('OverlayCanvas');
-    this.input = document.getElementById('LeInput');
-    this.dims = this.page.getBoundingClientRect();
     this.startTime = Date.now();
 
-    this.config = {
-      simResolution: 128,
-      dyeResolution: 1024,
-      velDissipation: 0.99,
-      dyeDissipation: 0.99,
-      displayWidth: this.dims.width,
-      displayHeight: this.dims.height,
-      aspect: this.dims.width / this.dims.height,
-      geo: new PlaneBufferGeometry(2, 2),
-      useTyping: true,
-    };
-
-    if (this.config.useTyping) {
-      this.typing = true;
-      this.text = new TextRender(this.overlayCanvas, this.input, this.dims.width, this.dims.height);
-    }
-
-    this.mouse = {
-      x: 0.5,
-      y: 0.5,
-      Dx: 0.,
-      Dy: 0.,
-      color: new Vector3(0.1, 0.1, 0.1),
-    };
-
+    this.init = this.init.bind(this);
+    this.initWaves = this.initWaves.bind(this);
+    this.initCamera = this.initCamera.bind(this);
+    this.initScene = this.initScene.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
     this.animate = this.animate.bind(this);
     this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
-    this.step = this.step.bind(this);
-    this.initSim = this.initSim.bind(this);
-    this.closeTyping = this.closeTyping.bind(this);
-    // this.render = this.render.bind(this);
+    this.destroy = this.destroy.bind(this);
 
     this.init();
     this.bindEvents();
   }
 
+  /**
+   * Binds event listeners for DOM events
+   * @function bindEvents
+   * @memberof WaterSim.prototype
+   */
   bindEvents() {
-    // IMPROVE THE COPYING UPDATING OF VALUES HERE
-    window.addEventListener('mousemove', (e) => {
-      const x = e.clientX / window.innerWidth;
-      const y = Math.abs((e.clientY / window.innerHeight) - 1.);
-      if (!this.mouseDown) return;
-      const curMouse = {
-        x,
-        y,
-        Dx: x - this.mouse.x,
-        Dy: y - this.mouse.y,
-        color: this.mouse.color,
-      };
-
-      this.mouse = curMouse;
-    });
-
-    window.addEventListener('mousedown', () => {
-      this.mouseDown = true;
-      if (this.typing) this.closeTyping();
-      this.typing = false;
-    });
-
-    window.addEventListener('mouseup', () => {
-      this.mouseDown = false;
-
-      this.mouse.color = new Vector3(Math.random(), Math.random(), Math.random());
-      this.mouse.Dx = 0.;
-      this.mouse.Dy = 0.;
-    });
+    window.addEventListener('resize', this.onWindowResize);
   }
 
-  closeTyping() {
-    const {
-      dye,
-      clearProgram,
-      renderer,
-      overlayCanvas,
-      displayCamera
-    } = this;
-
-    renderer.setRenderTarget(dye.write);
-    clearProgram.mat.uniforms.uTexture.value = new CanvasTexture(overlayCanvas);
-    clearProgram.mat.uniforms.uValue.value = 1.;
-    clearProgram.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
-    renderer.render(clearProgram.scene, displayCamera);
-    overlayCanvas.style.opacity = 0;
-    dye.swap();
-  }
-
+  /**
+   * Callback passed to resize event to handle updating camera and renderer size
+   * @function onWindowResize
+   * @memberof WaterSim.prototype
+   */
   onWindowResize() {
-    // this.camera.aspect = window.innerWidth / window.innerHeight;
-    // this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    const {
+      camera,
+      renderer,
+    } = this;
+
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
   }
 
+  /**
+   * Orders the methods calls for setting up and then rendering scene.
+   * @function init
+   * @memberof WaterSim.prototype
+   */
   init() {
-    this.setup();
-    this.initRenderTargets();
-    this.initSim();
-  }
-
-  setup() {
     const {
-      config,
-      canvas,
+      initScene,
+      initCamera,
+      initWaves,
     } = this;
 
-    const ctx = canvas.getContext('webgl2');
-    // RENDERER
-    this.renderer = new WebGLRenderer({
-      alpha: true,
-      depth: false,
-      stencil: false,
-      antialias: false,
-      preserveDrawingBuffer: false,
-      canvas: canvas,
-      context: ctx,
-    });
-
-    this.renderer.extensions.get('EXT_color_buffer_float');
-    // gl.getExtension();
-
-    this.renderer.setSize(config.displayWidth, config.displayHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    initScene();
+    initCamera();
+    initWaves();
   }
 
-  initRenderTargets() {
+  /**
+   * Creates new threejs scene and assigns to class instance
+   * @function initScene
+   * @memberof WaterSim.prototype
+   */
+  initScene() {
+    this.scene = new Scene();
+  }
+
+  /**
+   * Creates new threejs camera and adds to scene
+   * @function initCamera
+   * @memberof WaterSim.prototype
+   */
+  initCamera() {
     const {
-      config,
+      scene,
     } = this;
 
-    const simRes = config.simResolution;
-    this.velocity = this.doubleTarget(
-      simRes,
-      simRes,
-      {
-        // format: RGFormat,
-        // internalFormat: 'RGBA16F',
-        type: HalfFloatType,
-      },
-      advectShader
+    this.camera = new PerspectiveCamera(
+      50,
+      window.innerWidth / window.innerHeight,
+      0.2,
+      300,
     );
 
-    this.divergence = this.singleTarget(
-      simRes,
-      simRes,
-      {
-        // format: RedFormat,
-        // internalFormat: 'R16F',
-        type: HalfFloatType,
-      },
-      divergenceShader
-    );
-
-    this.pressure = this.doubleTarget(
-      simRes,
-      simRes,
-      {
-        // format: RedFormat,
-        // internalFormat: 'R16F',
-        type: HalfFloatType,
-      },
-      pressureShader
-    );
-
-    this.dye = this.doubleTarget(1024, 1024, {
-      type: HalfFloatType,
-    },
-    advectShader
-    );
-    this.clearProgram = this.programScene(clearShader);
-    this.gradientSubtractionProgram = this.programScene(gradientSubtraction);
-    this.addForceProgram = this.programScene(addForce);
-
-
+    this.camera.position.set(3, 30, -60);
+    this.camera.lookAt(0, 0, 0);
+    scene.add(this.camera);
   }
 
-  programScene(shader, uniforms) {
-    const prgScene = new Scene();
-    const prgMat = new ShaderMaterial(shader);
-    const prgMesh = new Mesh(this.config.geo, prgMat);
-    prgScene.add(prgMesh);
+  /**
+   * Initializes water mesh, shader uniforms and adds to scene
+   * @function processing
+   * @memberof WaterSim.prototype
+   */
+  initWaves() {
+    const {
+      camera,
+      scene,
+      setup,
+    } = this;
 
-    return {
-      mat: prgMat,
-      scene: prgScene
-    }
-  }
+    const waterLoader = new TextureLoader();
+    // copies direction camera is looking in world space
+    const lightDir = new Vector3(0, 0, 0);
+    camera.getWorldDirection(lightDir);
+
+    // const ambientCol = new Vector3(1.0, 0.5, 0.1);
+    // const diffuseCol = new Vector3(1.0, 0.5, 0.1);
+    const specularCol = new Vector3(0.5, 0.5, 0.5);
 
   doubleTarget(width, height, options, shader, uniforms) {
     let trg1 = new WebGLRenderTarget(width, height, options);
@@ -273,40 +165,74 @@ export default class WaterSim {
       get write() {
         return trg2;
       },
-      set write(value) {
-        trg2 = value;
+      ambientStrength: {
+        value: 0.3,
       },
-      swap() {
-        let temp = trg1;
-        trg1 = trg2;
-        trg2 = temp;
-      }
-    }
-  }
-
-  singleTarget(width, height, options, shader, uniforms) {
-    let trg1 = new WebGLRenderTarget(width, height, options);
-
-    const targetScene = new Scene();
-    const targetMat = new ShaderMaterial(shader);
-    const targetMesh = new Mesh(this.config.geo, targetMat);
-    targetScene.add(targetMesh);
-
-    return {
-      width,
-      height,
-      texelSizeX: 1 / width,
-      texelSizeY: 1 / height,
-      scene: targetScene,
-      mat: targetMat,
-      get target() {
-        return trg1;
+      material: {
+        value: {
+          ambient: new Vector3(0.1, 0.55, 1.0),
+          diffuse: new Vector3(0.1, 0.55, 1.0),
+          specular: specularCol,
+          shininess: 128.0,
+        },
       },
-      set target(value) {
-        trg1 = value;
-      }
-    }
-  }
+      spotLight: {
+        value: {
+          position: new Vector3(camera.position),
+          direction: lightDir,
+          ambient: new Vector3(0.13, 0.375, 0.61),
+          diffuse: new Vector3(0.13, 0.375, 0.61),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+          innerCutOff: Math.cos(Math.PI / 12),
+          outerCutOff: Math.cos(Math.PI / 7),
+        },
+      },
+      pointLights: {
+        value: [
+          {
+            position: new Vector3(-13.0, 2.5, -5.31),
+            ambient: new Vector3(1.0, 1.0, 0.0),
+            diffuse: new Vector3(1.0, 1.0, 0.0),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          },
+          {
+            position: new Vector3(3.0, 3.5, 0.31),
+            ambient: new Vector3(0.0, 1.0, 1.0),
+            diffuse: new Vector3(0.0, 1.0, 1.0),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          },
+          {
+            position: new Vector3(12.0, 3.0, 2.0),
+            ambient: new Vector3(1.0, 0.0, 1.0),
+            diffuse: new Vector3(1.0, 0.0, 1.0),
+            specular: specularCol,
+            constant: 1.0,
+            linear: 0.09,
+            quadratic: 0.032,
+          },
+        ],
+      },
+      dirLight: {
+        value: {
+          direction: new Vector3(0.2, -5.0, 0.5),
+          ambient: new Vector3(0.0, 0.33, 0.29),
+          diffuse: new Vector3(0.0, 0.33, 0.29),
+          specular: new Vector3(0.5, 0.5, 0.5),
+        },
+      },
+      normalMap: {
+        value: null,
+      },
+    };
 
   initSim() {
     this.displayScene();
@@ -318,162 +244,123 @@ export default class WaterSim {
       config,
     } = this;
 
-    this.displayScene = new Scene();
-    this.displayCamera = new OrthographicCamera(
-      -1, // left
-      1, // right
-      1, // top
-      -1, // bottom
-      -1, // near,
-      1, // far
-    );
+    waterLoader.load(`${ASSET_PATH}/assets/images/wave-normal.jpg`, (res) => {
+      uniforms.normalMap.value = res;
+      uniforms.normalMap.value.wrapT = RepeatWrapping;
+      uniforms.normalMap.value.wrapS = RepeatWrapping;
+    });
 
-    this.displayScene.add(this.displayCamera);
+    const mat = new ShaderMaterial({
+      defines: {
+        NR_POINT_LIGHTS: uniforms.pointLights.value.length,
+        USE_TANGENT: true,
+      },
+      uniforms,
+      vertexShader: document.getElementById('vertexshader').textContent,
+      fragmentShader: document.getElementById('fragmentshader').textContent,
+    });
+    this.mesh = new Mesh(box, mat);
 
-    const displayMaterial = new ShaderMaterial(displayShader);
-    this.displayQuad = new Mesh(config.geo, displayMaterial);
-    this.displayScene.add(this.displayQuad);
+    // uniforms.pointLights.value.forEach(el => {
+    //   const mesh = new Mesh(box, new MeshBasicMaterial({color: 0xffffff}));
+    //   mesh.position.set(el.position.x, el.position.y, el.position.z);
+    //   mesh.scale.set(0.3, 0.3, 0.3);
+    //   this.scene.add(mesh);
+    // });
+
+    const floorMesh = new Mesh(geo, mat);
+    floorMesh.rotation.x = -1.567;
+    floorMesh.position.set(-2, 0, 0);
+    scene.add(floorMesh);
+    setup();
   }
 
-  step(delta) {
+  /**
+   * Sets up renderer, calls any other necessary methods and then starts loop
+   * @function setup
+   * @memberof WaterSim.prototype
+   */
+  setup() {
     const {
-      useTyping,
-      mouse,
-      renderer,
-      config,
-      displayCamera,
-      velocity,
-      divergence,
-      pressure,
-      clearProgram,
-      gradientSubtractionProgram,
-      addForceProgram,
-      dye,
+      canvas,
+      camera,
+      animate,
     } = this;
 
-    const res = config.simResolution;
+    this.renderer = new WebGLRenderer({
+      antialias: true,
+      canvas,
+    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    const rdx = 1 / res;
-    const halfRdx = rdx * 0.5;
-    const alpha = -res * res;
-
-    renderer.setViewport(0, 0, res, res);
-
-    // ADVECTION
-    renderer.setRenderTarget(velocity.write);
-    velocity.mat.uniforms.uVelocity.value = velocity.read.texture;
-    velocity.mat.uniforms.uSource.value = velocity.read.texture;
-    velocity.mat.uniforms.uRdx.value = rdx;
-    velocity.mat.uniforms.uTimeStep.value = 0.016;
-    velocity.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    velocity.mat.uniforms.uDissipation.value = config.velDissipation;
-    renderer.render(velocity.scene, displayCamera);
-    renderer.setRenderTarget(null); // removes bound target so correctly swapped?
-    velocity.swap();
-
-    // FORCES
-    renderer.setRenderTarget(velocity.write);
-    addForceProgram.mat.uniforms.uDiffuse.value = velocity.read.texture;
-    addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    addForceProgram.mat.uniforms.uPoint.value = new Vector2(mouse.x, mouse.y);
-    addForceProgram.mat.uniforms.uAspect.value = config.aspect;
-    addForceProgram.mat.uniforms.uForces.value = new Vector3(mouse.Dx * 2000, mouse.Dy * 2000, 0.);
-    addForceProgram.mat.uniforms.uMoved.value = 1;
-    renderer.render(addForceProgram.scene, displayCamera);
-    renderer.setRenderTarget(null); // removes bound target so correctly swapped?
-    velocity.swap();
-
-    // DIVERGENCE
-    renderer.setRenderTarget(divergence.target);
-    divergence.mat.uniforms.uVelocity.value = velocity.read.texture;
-    divergence.mat.uniforms.uHalfRdx.value = halfRdx;
-    divergence.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    renderer.render(divergence.scene, displayCamera);
-
-    // CLEAR PRESSURE
-    renderer.setRenderTarget(pressure.write);
-    clearProgram.mat.uniforms.uTexture.value = pressure.read.texture;
-    clearProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    clearProgram.mat.uniforms.uValue.value = 0.3;
-    renderer.render(clearProgram.scene, displayCamera);
-    renderer.setRenderTarget(null); // removes bound target so correctly swapped?
-    pressure.swap();
-
-
-    // PRESSURE SOLVER
-    renderer.setRenderTarget(pressure.write); // unnecessary?
-    pressure.mat.uniforms.uDivergence.value = divergence.target.texture;
-    pressure.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    pressure.mat.uniforms.uAlpha.value = alpha;
-
-    for (let i = 0; i<30; i++) {
-      renderer.setRenderTarget(pressure.write);
-      pressure.mat.uniforms.uPressure.value = pressure.read.texture;
-      renderer.render(pressure.scene, displayCamera);
-      renderer.setRenderTarget(null);
-      pressure.swap();
-    }
-
-    // GRADIENT SUBTRACTION
-    renderer.setRenderTarget(velocity.write);
-    gradientSubtractionProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
-    gradientSubtractionProgram.mat.uniforms.uVelocity.value = velocity.read.texture;
-    gradientSubtractionProgram.mat.uniforms.uPressure.value = pressure.read.texture;
-    gradientSubtractionProgram.mat.uniforms.uHalfRdx.value = halfRdx;
-    renderer.render(gradientSubtractionProgram.scene, displayCamera);
-    velocity.swap();
-
-    // DYE FORCES
-    if (!useTyping) {
-      renderer.setRenderTarget(dye.write);
-      addForceProgram.mat.uniforms.uDiffuse.value = dye.read.texture;
-      addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
-      addForceProgram.mat.uniforms.uPoint.value = new Vector2(mouse.x, mouse.y);
-      addForceProgram.mat.uniforms.uAspect.value = config.aspect;
-      addForceProgram.mat.uniforms.uForces.value = mouse.color;
-      addForceProgram.mat.uniforms.uMoved.value = this.mouseDown ? 1 : 0;
-      addForceProgram.mat.uniforms.uRadius.value = 0.3 / 100;
-      renderer.render(addForceProgram.scene, displayCamera);
-      renderer.setRenderTarget(null); // removes bound target so correctly swapped?
-      dye.swap();
-    }
-
-    // DYE ADVECT
-    renderer.setRenderTarget(dye.write);
-    dye.mat.uniforms.uVelocity.value = velocity.read.texture;
-    dye.mat.uniforms.uSource.value = dye.read.texture;
-    dye.mat.uniforms.uRdx.value = rdx;
-    dye.mat.uniforms.uTimeStep.value = 0.016;
-    dye.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
-    dye.mat.uniforms.uDissipation.value = config.dyeDissipation;
-    renderer.render(dye.scene, displayCamera);
-    dye.swap();
-
-    renderer.setViewport(0, 0, config.displayWidth, config.displayHeight);
-    renderer.setRenderTarget(null);
+    this.controls = new OrbitControls(camera, this.renderer.domElement);
+    this.controls.minDistance = 10;
+    this.controls.maxDistance = 100;
+    animate();
   }
 
+  /**
+   * Creates animation loop
+   * @function animate
+   * @memberof WaterSim.prototype
+   */
   animate() {
-    requestAnimationFrame(this.animate);
-
-    this.render();
-  }
-
-  render(time) {
     const {
-      renderer,
-      dye,
-      displayCamera,
-      displayScene,
-      startTime,
-      step
+      controls,
+      render,
+      animate,
     } = this;
 
-    const delta = Date.now() - startTime;
+    this.raf = requestAnimationFrame(animate);
 
-    if (!this.typing) step(delta);
+    controls.update();
 
-    this.displayQuad.material.uniforms.tDiffuse.value = dye.write.texture;
-    renderer.render(displayScene, displayCamera);
+    render();
+  }
+
+  /**
+   * Simply renders scene with instance's scene and camera
+   * @function render
+   * @memberof WaterSim.prototype
+   */
+  render() {
+    const {
+      camera,
+      mesh,
+      scene,
+      renderer,
+    } = this;
+
+    const delta = this.startTime - Date.now();
+    const z = 10 * Math.sin(delta * 0.0005);
+    const x = -10 * Math.cos(delta * 0.0005);
+
+    const lightDir = new Vector3(0, 0, 0);
+    camera.getWorldDirection(lightDir);
+
+    mesh.material.uniforms.time.value = delta * 0.001;
+    mesh.material.uniforms.spotLight.value.position = camera.position;
+    mesh.material.uniforms.spotLight.value.direction = lightDir;
+    mesh.material.uniforms.pointLights.value[0].position = new Vector3(x, 3.0, z);
+    mesh.material.uniforms.pointLights.value[1].position = new Vector3(x * 2, 3.0, x * 2);
+    mesh.material.uniforms.pointLights.value[2].position = new Vector3(x * 4, 3.0, z * 4);
+
+    renderer.render(scene, camera);
+  }
+
+  /**
+   * Cancels RAF loop and unbinds event handlers
+   * @function destroy
+   * @memberof WaterSim.prototype
+   */
+  destroy() {
+    const {
+      onWindowResize,
+      raf,
+    } = this;
+
+    cancelAnimationFrame(raf);
+    window.removeEventListener('resize', onWindowResize);
   }
 }

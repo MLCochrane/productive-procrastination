@@ -1,6 +1,7 @@
 {{#json
 '{
 	"links": [
+		{"title": "Simple Waves", "date": "Nov 2019", "slug": "/wave-sim"},
 		{"title": "Light Glow", "date": "Oct 2019", "slug": "/glow-process"},
 		{"title": "Toon Post Process", "date": "Sept 2019", "slug": "/post-process"},
 		{"title": "Wave Hover", "date": "Feb 2018", "slug": "/wave-hover"},
@@ -15,7 +16,7 @@
 	<div class="sidebar">
 		<div class="brand">
 			<h1 class="brand__logo"><a href="/">
-			<img src="./src/assets/logo.png" alt="Productive Procrastination">
+			<img src="/logo.png" alt="Productive Procrastination">
 		</a></h1>
 		</div>
 		<svg id="ToggleNav" class="header__burger" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 30" width="30px" height="30px">
@@ -23,6 +24,9 @@
 			<rect y="13" width="30" height="4" rx="0" ry="0" class="burger__element burger__element--middle"></rect>
 			<rect y="19" width="30" height="4" rx="0" ry="0" class="burger__element burger__element--bottom"></rect>
 		</svg>
+		<div class="sidebar__random">
+			{{!-- {{> components/dice }} --}}
+		</div>
 	</div>
 	<nav id="MainNav" class="header__nav">
 		<div class="header__sec header__sec--left">
