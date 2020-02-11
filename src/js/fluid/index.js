@@ -12,40 +12,40 @@ import {
   CanvasTexture,
 } from 'three';
 
-import TextRender from '../fluid/textCanvas';
+import TextRender from './textCanvas';
 
 import {
   advectShader,
 }
-from '../fluid/advectShader';
+from './advectShader';
 
 import {
   divergenceShader,
 }
-from '../fluid/divergenceShader';
+from './divergenceShader';
 
 import {
   pressureShader,
 }
-from '../fluid/jacobiShader';
+from './jacobiShader';
 
 import {
   gradientSubtraction,
 }
-from '../fluid/gradientSubtractionShader';
+from './gradientSubtractionShader';
 
 import {
   clearShader,
-} from '../fluid/clearShader';
+} from './clearShader';
 
 import {
   displayShader,
-} from '../fluid/displayDye';
+} from './displayDye';
 
 import {
   addForce,
 }
-from '../fluid/addForce';
+from './addForce';
 
 
 export default class WaterSim {
@@ -193,8 +193,7 @@ export default class WaterSim {
     const simRes = config.simResolution;
     this.velocity = this.doubleTarget(
       simRes,
-      simRes,
-      {
+      simRes, {
         // format: RGFormat,
         // internalFormat: 'RGBA16F',
         type: HalfFloatType,
@@ -204,8 +203,7 @@ export default class WaterSim {
 
     this.divergence = this.singleTarget(
       simRes,
-      simRes,
-      {
+      simRes, {
         // format: RedFormat,
         // internalFormat: 'R16F',
         type: HalfFloatType,
@@ -215,8 +213,7 @@ export default class WaterSim {
 
     this.pressure = this.doubleTarget(
       simRes,
-      simRes,
-      {
+      simRes, {
         // format: RedFormat,
         // internalFormat: 'R16F',
         type: HalfFloatType,
@@ -225,9 +222,9 @@ export default class WaterSim {
     );
 
     this.dye = this.doubleTarget(1024, 1024, {
-      type: HalfFloatType,
-    },
-    advectShader
+        type: HalfFloatType,
+      },
+      advectShader
     );
     this.clearProgram = this.programScene(clearShader);
     this.gradientSubtractionProgram = this.programScene(gradientSubtraction);
@@ -260,8 +257,8 @@ export default class WaterSim {
     return {
       width,
       height,
-      texelSizeX: 1/width,
-      texelSizeY: 1/height,
+      texelSizeX: 1 / width,
+      texelSizeY: 1 / height,
       scene: targetScene,
       mat: targetMat,
       get read() {
@@ -406,7 +403,7 @@ export default class WaterSim {
     pressure.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
     pressure.mat.uniforms.uAlpha.value = alpha;
 
-    for (let i = 0; i<30; i++) {
+    for (let i = 0; i < 30; i++) {
       renderer.setRenderTarget(pressure.write);
       pressure.mat.uniforms.uPressure.value = pressure.read.texture;
       renderer.render(pressure.scene, displayCamera);
