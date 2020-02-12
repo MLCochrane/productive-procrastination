@@ -113,7 +113,6 @@ export default class Fluid {
 
     window.addEventListener('mousedown', () => {
       this.mouseDown = true;
-      // this.closeTyping();
     });
 
     window.addEventListener('mouseup', () => {
