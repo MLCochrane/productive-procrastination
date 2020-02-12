@@ -1,0 +1,30 @@
+{{#json
+'{
+	"card": {
+    "title": "Fluid",
+    "date": "Jan 2020",
+    "tags": [
+			"2D",
+      "Interaction"
+    ],
+    "description": "Implementation of an effect from Tron 2.0 written about in GPU Gems.",
+    "references": [
+      {
+        "name": "GPU Gems: Chapter 21",
+        "link": "https://developer.nvidia.com/gpugems/GPUGems/gpugems_ch21.html"
+      },
+      {
+        "name": "Example of 2D Blur",
+        "link": "https://www.ronja-tutorials.com/2018/08/27/postprocessing-blur.html"
+      }
+    ]
+	}
+}'
+}}
+{{#> layout/base title="Fluid" namespace="fluid" }}
+{{#*inline "body"}}
+{{> components/sketches/fluid }}
+{{> components/sketches/card card=this.card }}
+{{/inline}}
+{{/layout/base}}
+{{/json}}
