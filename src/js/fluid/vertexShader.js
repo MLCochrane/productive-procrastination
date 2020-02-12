@@ -1,4 +1,4 @@
-export const vertBase = `
+export default `
     precision highp float;
     varying vec2 vUv;
     varying vec2 vL;

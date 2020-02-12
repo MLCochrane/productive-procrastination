@@ -1,8 +1,6 @@
-import {
-  vertBase
-} from './vertexShader';
-const addForce = {
+import vertBase from './vertexShader';
 
+export default {
   uniforms: {
     uDiffuse: {
       value: null,
@@ -54,9 +52,5 @@ const addForce = {
 
       gl_FragColor = vec4(base + result, 1.0);
     }
-  `
-};
-
-export {
-  addForce
+  `,
 };

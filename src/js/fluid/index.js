@@ -1,3 +1,4 @@
+
 import {
   Scene,
   Vector3,
@@ -13,48 +14,23 @@ import {
 } from 'three';
 
 import TextRender from './textCanvas';
+
 import addTexture from './addTexture';
+import advectShader from './advectShader';
+import divergenceShader from './divergenceShader';
+import pressureShader from './jacobiShader';
+import gradientSubtraction from './gradientSubtractionShader';
+import clearShader from './clearShader';
+import displayShader from './displayDye';
+import addForce from './addForce';
 
-import {
-  advectShader,
-}
-  from './advectShader';
-
-import {
-  divergenceShader,
-}
-  from './divergenceShader';
-
-import {
-  pressureShader,
-}
-  from './jacobiShader';
-
-import {
-  gradientSubtraction,
-}
-  from './gradientSubtractionShader';
-
-import {
-  clearShader,
-} from './clearShader';
-
-import {
-  displayShader,
-} from './displayDye';
-
-import {
-  addForce,
-}
-  from './addForce';
-
-
+/**
+ * Class handling fluid simulation.
+ *
+ */
 export default class Fluid {
   constructor() {
-    this.renderer;
-    this.scene;
-    this.camera;
-
+    this.renderer = this.setUpRenderer();
     this.page = document.querySelector('.page-main');
     this.canvas = document.getElementById('Sandbox');
     this.overlayCanvas = document.getElementById('OverlayCanvas');
@@ -112,6 +88,11 @@ export default class Fluid {
     this.bindEvents();
   }
 
+  /**
+   * Sets up event handlers.
+   * @function bindEvents
+   * @memberof Fluid.prototype
+   */
   bindEvents() {
     // IMPROVE THE COPYING UPDATING OF VALUES HERE
     window.addEventListener('mousemove', (e) => {
@@ -144,6 +125,14 @@ export default class Fluid {
     });
   }
 
+  /**
+   * Callback passed to text render class to add the 2D canvas as a texture to dye.
+   * @function addTextTexture
+   * @memberof Fluid.prototype
+   * @param {Object} position - Positions of current rendered character
+   * @param {String} position.x - The x position of character in pixels
+   * @param {String} position.y - The y position of character in pixels
+   */
   addTextTexture(position) {
     const {
       dye,
@@ -165,6 +154,14 @@ export default class Fluid {
     generateTextForces(position);
   }
 
+  /**
+   * Generate velocity forces to add based on rendered character position.
+   * @function generateTextForces
+   * @memberof Fluid.prototype
+   * @param {Object} position - Positions of current rendered character
+   * @param {String} position.x - The x position of character in pixels
+   * @param {String} position.y - The y position of character in pixels
+   */
   generateTextForces({ x, y }) {
     const {
       forces,
@@ -178,23 +175,44 @@ export default class Fluid {
     forces.text.active = 1;
   }
 
+  /**
+   * Callback for resize event.
+   * @function onWindowResize
+   * @memberof Fluid.prototype
+   */
   onWindowResize() {
     const {
       renderer,
       config,
+      page,
     } = this;
+
+    this.dims = page.getBoundingClientRect();
+    config.displayWidth = this.dims.width;
+    config.displayHeight = this.dims.height;
+    config.aspect = this.dims.width / this.dims.height;
 
     renderer.setSize(config.displayWidth, config.displayHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
   }
 
+  /**
+   * Sets order of method calls.
+   * @function init
+   * @memberof Fluid.prototype
+   */
   init() {
-    this.setup();
     this.initRenderTargets();
     this.initSim();
   }
 
-  setup() {
+  /**
+   * Creates new WebGLRenderer with various options.
+   * @function setUpRenderer
+   * @memberof Fluid.prototype
+   * @returns {WebGLRenderer} - ThreeJS renderer
+   */
+  setUpRenderer() {
     const {
       config,
       canvas,
@@ -202,7 +220,7 @@ export default class Fluid {
 
     const ctx = canvas.getContext('webgl2');
     // RENDERER
-    this.renderer = new WebGLRenderer({
+    const renderer = new WebGLRenderer({
       alpha: true,
       depth: false,
       stencil: false,
@@ -212,11 +230,17 @@ export default class Fluid {
       context: ctx,
     });
 
-    this.renderer.extensions.get('EXT_color_buffer_float');
-    this.renderer.setSize(config.displayWidth, config.displayHeight);
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    renderer.extensions.get('EXT_color_buffer_float');
+    renderer.setSize(config.displayWidth, config.displayHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
+    return renderer;
   }
 
+  /**
+   * Creates all render targets and programs needed for simulation.
+   * @function initRenderTargets
+   * @memberof Fluid.prototype
+   */
   initRenderTargets() {
     const {
       config,
@@ -263,6 +287,15 @@ export default class Fluid {
     this.addTexProgram = this.programScene(addTexture);
   }
 
+  /**
+   * Generate shader material and scene to use in a render pass.
+   * @function programScene
+   * @memberof Fluid.prototype
+   * @param {Object} shader - Shader for use in ShaderMaterial
+   * @param {Object} shader.uniforms - Object of uniforms to use in shader program
+   * @param {String} shader.vertexShader - Vertex shader in string
+   * @param {String} shader.fragmentShader - Fragment shader in string
+   */
   programScene(shader) {
     const prgScene = new Scene();
     const prgMat = new ShaderMaterial(shader);
@@ -275,6 +308,18 @@ export default class Fluid {
     };
   }
 
+  /**
+   * Create object with two render targets used as read/write buffers and method to swap.
+   * @function doubleTarget
+   * @memberof Fluid.prototype
+   * @param {Number} width - Width in pixels of render target
+   * @param {Number} height - Height in pixels of render target
+   * @param {Object} options - Any options for use in WebGLRenderTarget
+   * @param {Object} shader - Shader for use in ShaderMaterial
+   * @param {Object} shader.uniforms - Object of uniforms to use in shader program
+   * @param {String} shader.vertexShader - Vertex shader in string
+   * @param {String} shader.fragmentShader - Fragment shader in string
+   */
   doubleTarget(width, height, options, shader) {
     let trg1 = new WebGLRenderTarget(width, height, options);
     let trg2 = new WebGLRenderTarget(width, height, options);
@@ -311,6 +356,20 @@ export default class Fluid {
     };
   }
 
+  /**
+   * Create object with single render target. Only difference between doubleTarget
+   * is that there will be no need to use render result in subsequent calls and thus
+   * no need for method to swap between.
+   * @function singleTarget
+   * @memberof Fluid.prototype
+   * @param {Number} width - Width in pixels of render target
+   * @param {Number} height - Height in pixels of render target
+   * @param {Object} options - Any options for use in WebGLRenderTarget
+   * @param {Object} shader - Shader for use in ShaderMaterial
+   * @param {Object} shader.uniforms - Object of uniforms to use in shader program
+   * @param {String} shader.vertexShader - Vertex shader in string
+   * @param {String} shader.fragmentShader - Fragment shader in string
+   */
   singleTarget(width, height, options, shader) {
     let trg1 = new WebGLRenderTarget(width, height, options);
 
@@ -335,11 +394,21 @@ export default class Fluid {
     };
   }
 
+  /**
+   * Sets up method order of actual simulation.
+   * @function initSim
+   * @memberof Fluid.prototype
+   */
   initSim() {
     this.displayScene();
     this.animate();
   }
 
+  /**
+   * Sets up display camera for use in sim as well as materal and scene for final render pass.
+   * @function displayScene
+   * @memberof Fluid.prototype
+   */
   displayScene() {
     const {
       config,
@@ -362,6 +431,11 @@ export default class Fluid {
     this.displayScene.add(this.displayQuad);
   }
 
+  /**
+   * Sets up order of render passes for fluid simulation. Heart of the sim right here.
+   * @function step
+   * @memberof Fluid.prototype
+   */
   step() {
     const {
       useTyping,
@@ -400,7 +474,10 @@ export default class Fluid {
 
     // FORCES
     renderer.setRenderTarget(velocity.write);
-    addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
+    addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(
+      velocity.texelSizeX,
+      velocity.texelSizeY,
+    );
     addForceProgram.mat.uniforms.uAspect.value = config.aspect;
     for (let i = 0; i < 2; i++) {
       renderer.setRenderTarget(velocity.write);
@@ -424,13 +501,19 @@ export default class Fluid {
     renderer.setRenderTarget(divergence.target);
     divergence.mat.uniforms.uVelocity.value = velocity.read.texture;
     divergence.mat.uniforms.uHalfRdx.value = halfRdx;
-    divergence.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
+    divergence.mat.uniforms.uTexelSize.value = new Vector2(
+      velocity.texelSizeX,
+      velocity.texelSizeY,
+    );
     renderer.render(divergence.scene, displayCamera);
 
     // CLEAR PRESSURE
     renderer.setRenderTarget(pressure.write);
     clearProgram.mat.uniforms.uTexture.value = pressure.read.texture;
-    clearProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
+    clearProgram.mat.uniforms.uTexelSize.value = new Vector2(
+      velocity.texelSizeX,
+      velocity.texelSizeY,
+    );
     clearProgram.mat.uniforms.uValue.value = 0.3;
     renderer.render(clearProgram.scene, displayCamera);
     renderer.setRenderTarget(null); // removes bound target so correctly swapped?
@@ -452,7 +535,10 @@ export default class Fluid {
 
     // GRADIENT SUBTRACTION
     renderer.setRenderTarget(velocity.write);
-    gradientProgram.mat.uniforms.uTexelSize.value = new Vector2(velocity.texelSizeX, velocity.texelSizeY);
+    gradientProgram.mat.uniforms.uTexelSize.value = new Vector2(
+      velocity.texelSizeX,
+      velocity.texelSizeY,
+    );
     gradientProgram.mat.uniforms.uVelocity.value = velocity.read.texture;
     gradientProgram.mat.uniforms.uPressure.value = pressure.read.texture;
     gradientProgram.mat.uniforms.uHalfRdx.value = halfRdx;
@@ -489,12 +575,22 @@ export default class Fluid {
     renderer.setRenderTarget(null);
   }
 
+  /**
+   * Creates RAF loop and calls render method.
+   * @function animate
+   * @memberof Fluid.prototype
+   */
   animate() {
     requestAnimationFrame(this.animate);
 
     this.render();
   }
 
+  /**
+   * Render loop.
+   * @function render
+   * @memberof Fluid.prototype
+   */
   render() {
     const {
       renderer,

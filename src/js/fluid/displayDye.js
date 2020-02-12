@@ -1,19 +1,13 @@
-const displayShader = {
+import vertBase from './vertexShader';
 
+export default {
   uniforms: {
     tDiffuse: {
       value: null,
     },
   },
 
-  vertexShader: `
-    #include <common>
-    varying highp vec2 vUv;
-    void main() {
-      vUv = position.xy;
-      gl_Position = vec4(position * 2. - 1., 1.);
-    }
-  `,
+  vertexShader: vertBase,
 
   fragmentShader: `
     varying highp vec2 vUv;
@@ -24,8 +18,4 @@ const displayShader = {
       gl_FragColor = vec4(c, 1.);
     }
   `,
-};
-
-export {
-  displayShader,
 };

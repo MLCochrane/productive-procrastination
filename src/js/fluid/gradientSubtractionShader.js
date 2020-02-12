@@ -1,7 +1,6 @@
-import {
-  vertBase
-} from './vertexShader';
-const gradientSubtraction = {
+import vertBase from './vertexShader';
+
+export default {
 
   uniforms: {
     uVelocity: {
@@ -40,9 +39,5 @@ const gradientSubtraction = {
       velocity.xy -= uHalfRdx * vec2(R - L, T - B);
       gl_FragColor = vec4(velocity, 0.0, 1.0);
     }
-    `
-};
-
-export {
-  gradientSubtraction
+    `,
 };

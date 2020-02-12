@@ -1,7 +1,6 @@
-import {
-  vertBase
-} from './vertexShader';
-const pressureShader = {
+import vertBase from './vertexShader';
+
+export default {
 
   uniforms: {
     uDivergence: {
@@ -41,9 +40,5 @@ const pressureShader = {
       float pressure = (L + R + B + T + (uAlpha * divergence)) * 0.25;
       gl_FragColor = vec4(pressure, 0.0, 0.0, 1.0);
     }
-    `
-};
-
-export {
-  pressureShader
+    `,
 };

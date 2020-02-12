@@ -1,7 +1,6 @@
-import {
-  vertBase
-} from './vertexShader';
-const divergenceShader = {
+import vertBase from './vertexShader';
+
+export default {
 
   uniforms: {
     uVelocity: {
@@ -40,9 +39,5 @@ const divergenceShader = {
       float div = uHalfRdx * (R - L + T - B);
       gl_FragColor = vec4(div, 0.0, 0.0, 1.0);
     }
-    `
-};
-
-export {
-  divergenceShader
+    `,
 };

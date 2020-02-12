@@ -1,8 +1,6 @@
-import {
-  vertBase
-} from './vertexShader';
-const advectShader = {
+import vertBase from './vertexShader';
 
+export default {
   uniforms: {
     uVelocity: {
       value: null,
@@ -41,9 +39,5 @@ const advectShader = {
       vec4 result = texture2D(uSource, coord);
       gl_FragColor = result * uDissipation;
     }
-    `
-};
-
-export {
-  advectShader
+    `,
 };

@@ -1,6 +1,6 @@
-import { vertBase } from './vertexShader';
+import vertBase from './vertexShader';
 
-const clearShader = {
+export default {
 
   uniforms: {
     uTexture: {
@@ -26,8 +26,4 @@ const clearShader = {
       gl_FragColor = uValue * tex;
     }
   `,
-};
-
-export {
-  clearShader,
 };
