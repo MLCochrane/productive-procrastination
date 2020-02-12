@@ -1,11 +1,10 @@
 import {
   Scene,
+  PerspectiveCamera,
   Vector3,
   Vector2,
-  Mesh,
-  WebGLRenderer,
-  OrthographicCamera,
-  WebGLRenderTarget,
+  Vector4,
+  BoxBufferGeometry,
   PlaneBufferGeometry,
   ShaderMaterial,
   Mesh,
@@ -14,7 +13,9 @@ import {
   RepeatWrapping,
 } from 'three';
 
-import TextRender from '../fluid/textCanvas';
+import {
+  OrbitControls,
+} from 'three/examples/jsm/controls/OrbitControls';
 
 
 /*
@@ -42,8 +43,8 @@ export default class WaterSim {
     this.setup = this.setup.bind(this);
     this.destroy = this.destroy.bind(this);
 
-    this.init();
     this.bindEvents();
+    this.init();
   }
 
   /**
@@ -140,30 +141,15 @@ export default class WaterSim {
     // const diffuseCol = new Vector3(1.0, 0.5, 0.1);
     const specularCol = new Vector3(0.5, 0.5, 0.5);
 
-  doubleTarget(width, height, options, shader, uniforms) {
-    let trg1 = new WebGLRenderTarget(width, height, options);
-    let trg2 = new WebGLRenderTarget(width, height, options);
-
-    const targetScene = new Scene();
-    const targetMat = new ShaderMaterial(shader);
-    const targetMesh = new Mesh(this.config.geo, targetMat);
-    targetScene.add(targetMesh);
-
-    return {
-      width,
-      height,
-      texelSizeX: 1/width,
-      texelSizeY: 1/height,
-      scene: targetScene,
-      mat: targetMat,
-      get read() {
-        return trg1;
+    const uniforms = {
+      u_resolution: {
+        value: new Vector2(window.innerWidth, window.innerHeight),
       },
-      set read(value) {
-        trg1 = value;
+      scale: {
+        value: new Vector4(1, 1, 1, 1), // x, y, z, scale
       },
-      get write() {
-        return trg2;
+      time: {
+        value: 1.2,
       },
       ambientStrength: {
         value: 0.3,
@@ -173,7 +159,7 @@ export default class WaterSim {
           ambient: new Vector3(0.1, 0.55, 1.0),
           diffuse: new Vector3(0.1, 0.55, 1.0),
           specular: specularCol,
-          shininess: 128.0,
+          shininess: 32.0,
         },
       },
       spotLight: {
@@ -191,34 +177,33 @@ export default class WaterSim {
         },
       },
       pointLights: {
-        value: [
-          {
-            position: new Vector3(-13.0, 2.5, -5.31),
-            ambient: new Vector3(1.0, 1.0, 0.0),
-            diffuse: new Vector3(1.0, 1.0, 0.0),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
-          {
-            position: new Vector3(3.0, 3.5, 0.31),
-            ambient: new Vector3(0.0, 1.0, 1.0),
-            diffuse: new Vector3(0.0, 1.0, 1.0),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
-          {
-            position: new Vector3(12.0, 3.0, 2.0),
-            ambient: new Vector3(1.0, 0.0, 1.0),
-            diffuse: new Vector3(1.0, 0.0, 1.0),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
+        value: [{
+          position: new Vector3(-13.0, 2.5, -5.31),
+          ambient: new Vector3(1.0, 1.0, 0.0),
+          diffuse: new Vector3(1.0, 1.0, 0.0),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+        },
+        {
+          position: new Vector3(3.0, 3.5, 0.31),
+          ambient: new Vector3(0.0, 1.0, 1.0),
+          diffuse: new Vector3(0.0, 1.0, 1.0),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+        },
+        {
+          position: new Vector3(12.0, 3.0, 2.0),
+          ambient: new Vector3(1.0, 0.0, 1.0),
+          diffuse: new Vector3(1.0, 0.0, 1.0),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+        },
         ],
       },
       dirLight: {
@@ -234,15 +219,9 @@ export default class WaterSim {
       },
     };
 
-  initSim() {
-    this.displayScene();
-    this.animate();
-  }
 
-  displayScene() {
-    const {
-      config,
-    } = this;
+    const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
+    const geo = new PlaneBufferGeometry(100, 100, 50, 50);
 
     waterLoader.load(`${ASSET_PATH}/assets/images/wave-normal.jpg`, (res) => {
       uniforms.normalMap.value = res;

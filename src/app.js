@@ -56,6 +56,11 @@ const sketches = [
 		'path': 'js/wave-sim/index',
 		'constructor': []
 	},
+	{
+		'namespace': 'fluid',
+		'path': 'js/fluid/index',
+		'constructor': []
+	},
 ]
 
 barba.init({
