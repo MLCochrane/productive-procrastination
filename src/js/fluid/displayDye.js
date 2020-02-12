@@ -3,7 +3,7 @@ const displayShader = {
   uniforms: {
     tDiffuse: {
       value: null,
-    }
+    },
   },
 
   vertexShader: `
@@ -23,9 +23,9 @@ const displayShader = {
       // float a = max(c.r, max(c.g, c.b));
       gl_FragColor = vec4(c, 1.);
     }
-  `
+  `,
 };
 
 export {
-  displayShader
+  displayShader,
 };

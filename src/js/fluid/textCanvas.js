@@ -1,46 +1,80 @@
+/**
+ * Class for rendering text on 2D canvas
+ * @param {HTMLCanvasElement} canvas - canvas for 2D context
+ * @param {Number} width - width of canvas in pixels
+ * @param {Number} height - height of canvas in pixels
+ * @param {Function} callback - callback function called once text drawn
+ */
 export default class TextRender {
-  constructor(canvas, input, width, height) {
-    this.input = input;
+  constructor(canvas, width, height, callback) {
+    this.callback = callback;
+    this.handleKeyDown = this.handleKeyDown.bind(this);
 
     canvas.width = width;
     canvas.height = height;
 
-    const ctx = canvas.getContext('2d');
-
-    input.focus();
-
-    input.addEventListener('keyup', e => {
-      let text = input.value;
-      const count = text.length;
-      // const fontSize = 200 / (length / 20);
-      let fontSize = 500;
-      if (count > 1) fontSize *= (1 / Math.log(count + 2));
-      ctx.font = `${fontSize}px Press Start`;
-      const length = ctx.measureText(text).width;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-
-      const start = (canvas.width / 2) - length / 2;
-      const stop = (canvas.width / 2) + length / 2;
-
-      ctx.fillStyle = this.calcGrad(ctx, start, stop);
-
-      ctx.fillText(text, (canvas.width / 2) - length / 2, (canvas.height / 2) + fontSize / 4);
-    });
+    this.ctx = canvas.getContext('2d');
+    window.addEventListener('keydown', this.handleKeyDown);
   }
 
-  calcGrad(ctx, start, stop) {
-    const gradient = ctx.createLinearGradient(start, 0, stop, 0);
-
-    gradient.addColorStop(0, '#f0f1c0');
-    // gradient.addColorStop(.5, 'cyan');
-    gradient.addColorStop(1, '#18ddb2');
-
-    // Set the fill style and draw a rectangle
-    return gradient;
+  /**
+   * Event handler for keydown event
+   * @function handleKeyDown
+   * @memberof TextRender.prototype
+   */
+  handleKeyDown({ key }) {
+    // this should filter out control keys
+    if (key.length > 1) return;
+    this.drawChar(key);
   }
 
-  setFocus() {
-    this.input.focus();
+  /**
+   * Draws character to canvas
+   * @function drawChar
+   * @memberof TextRender.prototype
+   * @param {String} char - single character to be drawn to canvas
+   */
+  drawChar(char) {
+    const {
+      ctx,
+    } = this;
+
+    const { width } = ctx.canvas;
+    const { height } = ctx.canvas;
+
+    const fontSize = 200;
+    ctx.font = `${fontSize}px Press Start`;
+    ctx.clearRect(0, 0, width, height);
+    const r = Math.floor(255 * Math.random());
+    const g = Math.floor(255 * Math.random());
+    const b = Math.floor(255 * Math.random());
+    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
+
+    let x = Math.random();
+    let y = Math.random();
+
+    if (x > y) {
+      y = Math.round(y);
+      y = y === 1 ? height - fontSize : fontSize;
+      x *= width - fontSize;
+    } else {
+      x = Math.round(x);
+      x = x === 1 ? width - fontSize : fontSize;
+      y = y * height + fontSize > height ? height - (2 * fontSize) : y * height + fontSize;
+    }
+    ctx.fillText(char, x, y);
+
+    // ctx.fillText(char, x * width, y * height);
+    this.callback({ x, y });
+    ctx.clearRect(0, 0, width, height);
+  }
+
+  /**
+   * Removes event handlers and deals with any other cleanup
+   * @function destory
+   * @memberof TextRender.prototype
+   */
+  destory() {
+    window.removeEventListener('keydown', this.handleKeyDown);
   }
 }

@@ -1,4 +1,5 @@
 import { vertBase } from './vertexShader';
+
 const clearShader = {
 
   uniforms: {
@@ -24,9 +25,9 @@ const clearShader = {
       vec4 tex = texture2D(uTexture, vUv);
       gl_FragColor = uValue * tex;
     }
-  `
+  `,
 };
 
 export {
-  clearShader
+  clearShader,
 };
