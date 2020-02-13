@@ -1,15 +1,15 @@
 {{#json
 '{
 	"links": [
-		{"title": "Fluid Sim", "date": "Jan 2020", "slug": "/fluid"},
-		{"title": "Simple Waves", "date": "Nov 2019", "slug": "/wave-sim"},
-		{"title": "Light Glow", "date": "Oct 2019", "slug": "/glow-process"},
-		{"title": "Toon Post Process", "date": "Sept 2019", "slug": "/post-process"},
-		{"title": "Wave Hover", "date": "Feb 2018", "slug": "/wave-hover"},
-		{"title": "Scroll Loop", "date": "Dec 2018",  "slug": "/scroll-loop"},
-		{"title": "Floating Text", "date": "Dec 2018", "slug": "/floating-text"},
-		{"title": "Inverse Scroll", "date": "July 2018", "slug": "/inverse-scroll"},
-		{"title": "Cutout Slider", "date": "Nov 2017", "slug": "/cutout-slider"}
+		{"title": "Fluid Sim", "date": "Jan 2020", "slug": "/fluid", "tags": "2D, Interaction"},
+		{"title": "Simple Waves", "date": "Nov 2019", "slug": "/wave-sim", "tags": "3D, Interaction"},
+		{"title": "Light Glow", "date": "Oct 2019", "slug": "/glow-process", "tags": "3D, Interaction"},
+		{"title": "Toon Post Process", "date": "Sept 2019", "slug": "/post-process", "tags": "3D, Interaction"},
+		{"title": "Scroll Loop", "date": "Dec 2018",  "slug": "/scroll-loop", "tags": "Design, Interaction"},
+		{"title": "Floating Text", "date": "Dec 2018", "slug": "/floating-text", "tags": "3D, Interaction"},
+		{"title": "Inverse Scroll", "date": "July 2018", "slug": "/inverse-scroll", "tags": "Design, Interaction"},
+		{"title": "Wave Hover", "date": "Feb 2018", "slug": "/wave-hover", "tags": "Graphics, Interaction"},
+		{"title": "Cutout Slider", "date": "Nov 2017", "slug": "/cutout-slider", "tags": "SVG, Interaction"}
 	]
 }'
 }}
@@ -29,17 +29,39 @@
 			{{!-- {{> components/dice }} --}}
 		</div>
 	</div>
-	<nav id="MainNav" class="header__nav">
+	<nav id="MainNav" class="header__nav" aria-hidden="true">
 		<div class="header__sec header__sec--left">
 			<ul class="header__list">
 				{{#each links}}
 				<li class="header__list-item">
-					<span class="header__date">{{ this.date }}</span>
-					<a href="{{this.slug}}">{{this.title}}</a>
+					<a class="header__list-link" href="{{this.slug}}">
+						<div class="header__list-item-wrap">
+							<div class="header__list-comp header__list-comp--first">
+								<p class="header__title">{{this.title}}</p>
+							</div>
+							<div class="header__list-comp header__list-comp--second">
+								<p class="header__tags">{{this.tags}}</p>
+							</div>
+							<div class="header__list-comp header__list-comp--third">
+								<p class="header__date">{{ this.date }}</p>
+							</div>
+						</div>
+					</a>
 				</li>
 				{{/each}}
 			</ul>
 			<p class="header__disclaimer">*Date indicates when majority of work was completed although individual sketches may have been updated since.</p>
+			<div class="header__description">
+				<p class="header__copy">
+					I'm <a href="https://lukecochrane.ca" target="_blank" class="header__link">Luke</a>, and this is Productive
+					Procrastination. A collection of digital sketches - experiments or tests of ideas I've had and things I've come
+					across on this world wide web.
+				</p>
+				<p class="header__copy">
+					As is the nature of experiments these are not complete, refined digital experiences and support across devices and
+					browsers may vary.
+				</p>
+			</div>
 		</div>
 		<div class="header__sec header__sec--right">
 		</div>

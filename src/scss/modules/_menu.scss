@@ -24,9 +24,6 @@
 			width: 2px;
 			height: 25%;
 		}
-		&__random {
-
-		}
 	}
 	.brand {
 		display: inline-block;
@@ -64,8 +61,8 @@
 		opacity: 0;
 		z-index: 99;
 		transform: translateX(-100%);
+		transition: transform 300ms, opacity 300ms;
 		&.isactive {
-			transition: transform 300ms, opacity 300ms;
 			transform: translateX(0%);
 			opacity: 1;
 		}
@@ -74,8 +71,11 @@
 		&--left {
 			width: 100%;
 			background: $dark-grey;
+			overflow: auto;
+			margin-left: 50px;
 			@include media-query($large) {
-				width: 90%;
+				width: calc(90% - 90px);
+				margin-left: 90px;
 			}
 		}
 		&--right {
@@ -119,34 +119,52 @@
 		}
 	}
 	&__date {
-		vertical-align: super;
+		align-self: center;
 		font-size: $--step-down-4;
-		color: #808080;
 	}
 	&__list {
-		position: absolute;
-    transform: translate(-50%,-50%);
-    top: 50%;
-		left: 50%;
 		width: 100%;
-		padding-left: 60px;
+		padding: 40px 20px;
 		@include media-query($large) {
 			width: auto;
-			padding: 0;
+			padding: 100px 50px 20px;
 		}
-		&-item {
-			font-family: $mainFont;
-			padding: .25em;
+		&-comp {
+			width: calc(100% / 2);
+			@include media-query($large) {
+				width: calc(100% / 3);
+			}
+			&--second {
+				display: none;
+				text-align: center;
+				@include media-query($large) {
+					display: block;
+				}
+			}
+			&--third {
+				text-align: right;
+			}
+		}
+		&-item-wrap {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 2px solid $light-grey;
 			font-size: 20px;
+			padding: 1.0em 0;
 			@include media-query($large) {
 			font-size: 32px;
+			border-width: 4px;
 			}
 			@include media-query($large) {
 				font-size: 40px;
 			}
+		}
+		&-item {
+			font-family: $mainFont;
 			a {
 				text-decoration: none;
-				color: #eee;
+				color: $light-grey;
 				transition: color 300ms;
 				&:hover {
 					color: $brand-yellow;
@@ -159,18 +177,48 @@
 			}
 		}
 	}
-	&__disclaimer {
+	&__title {
+		font-size: inherit;
+	}
+	&__tags {
 		display: none;
-		position: absolute;
-		transform: translateX(-50%);
-		left: 50%;
-		bottom: 0;
-		color: white;
-		width: 70%;
+		@include media-query($large) {
+			display: inherit;
+		}
+	}
+	&__disclaimer {
+		color: $light-grey;
 		padding-bottom: 1em;
 		text-align: center;
-			@include media-query($large) {
-				display: inherit;
-			}
+	}
+	&__description {
+		width: 80%;
+		margin: 50px auto;
+		@include media-query($large) {
+			width: 75%;
+		}
+	}
+	&__copy {
+		font-size: 18px;
+		font-weight: 500;
+		color: $light-grey;
+		padding-bottom: 1em;
+		@include media-query($small) {
+			font-size: 24px;
+		}
+		@include media-query($med) {
+			font-size: 34px;
+		}
+		@include media-query($large) {
+			font-size: 42px;
+		}
+	}
+
+	&__link {
+		transition: color 300ms;
+
+		&:hover {
+			color: $brand-yellow;
+		}
 	}
 }

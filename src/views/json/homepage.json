@@ -1,6 +1,39 @@
 {
   "links": [
     {
+      "title": "Fluid",
+      "date": "Jan 2020",
+      "slug": "/fluid",
+      "imgs": {
+        "wide": {
+          "img": "/assets/homepage/fluid/fluid-wide.jpg",
+          "alt": "Screenshot of website landing page",
+          "srcs": [
+            {
+              "path": "/assets/homepage/fluid/fluid-wide@0,25x.jpg",
+              "w": "458"
+            },
+            {
+              "path": "/assets/homepage/fluid/fluid-wide@0,5x.jpg",
+              "w": "915"
+            },
+            {
+              "path": "/assets/homepage/fluid/fluid-wide@0,75x.jpg",
+              "w": "1373"
+            },
+            {
+              "path": "/assets/homepage/fluid/fluid-wide.jpg",
+              "w": "1830"
+            },
+            {
+              "path": "/assets/homepage/fluid/fluid-wide@2x.jpg",
+              "w": "3660"
+            }
+          ]
+        }
+      }
+    },
+    {
       "title": "Simple Waves",
       "date": "Nov 2019",
       "slug": "/wave-sim",
@@ -28,28 +61,6 @@
             {
               "path": "/assets/homepage/water-sim/water-sim-wide@2x.jpg",
               "w": "3660"
-            }
-          ]
-        },
-        "normal": {
-          "img": "/assets/homepage/water-sim/water-sim-normal.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/water-sim/water-sim-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/water-sim/water-sim-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/water-sim/water-sim-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/water-sim/water-sim-normal@2x.jpg",
-              "w": "920"
             }
           ]
         }
@@ -85,28 +96,6 @@
               "w": "3660"
             }
           ]
-        },
-        "normal": {
-          "img": "/assets/homepage/sketch-post-process.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/glow-process/glow-process-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/glow-process/glow-process-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/glow-process/glow-process-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/glow-process/glow-process-normal@2x.jpg",
-              "w": "920"
-            }
-          ]
         }
       }
     },
@@ -137,83 +126,6 @@
             {
               "path": "/assets/homepage/post-process/post-process-wide@2x.jpg",
               "w": "3660"
-            }
-          ]
-        },
-        "normal": {
-          "img": "/assets/homepage/post-process/post-process-normal.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/post-process/post-process-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/post-process/post-process-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/post-process/post-process-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/post-process/post-process-normal@2x.jpg",
-              "w": "920"
-            }
-          ]
-        }
-      }
-    },
-    {
-      "title": "Wave Hover",
-      "date": "Feb 2018",
-      "slug": "/wave-hover",
-      "imgs": {
-        "wide": {
-          "img": "/assets/homepage/wave-hover/wave-hover-wide.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-wide@0,25x.jpg",
-              "w": "458"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-wide@0,5x.jpg",
-              "w": "915"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-wide@0,75x.jpg",
-              "w": "1373"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-wide.jpg",
-              "w": "1830"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-wide@2x.jpg",
-              "w": "3660"
-            }
-          ]
-        },
-        "normal": {
-          "img": "/assets/homepage/wave-hover/wave-hover-normal.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/wave-hover/wave-hover-normal@2x.jpg",
-              "w": "920"
             }
           ]
         }
@@ -249,28 +161,6 @@
               "w": "3660"
             }
           ]
-        },
-        "normal": {
-          "img": "/assets/homepage/scroll-loop/scroll-loop-normal.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/scroll-loop/scroll-loop-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/scroll-loop/scroll-loop-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/scroll-loop/scroll-loop-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/scroll-loop/scroll-loop-normal@2x.jpg",
-              "w": "920"
-            }
-          ]
         }
       }
     },
@@ -302,28 +192,6 @@
             {
               "path": "/assets/homepage/floating-text/floating-text-wide@2x.jpg",
               "w": "3660"
-            }
-          ]
-        },
-        "normal": {
-          "img": "/assets/homepage/floating-text/floating-text-normal.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/floating-text/floating-text-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/floating-text/floating-text-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/floating-text/floating-text-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/floating-text/floating-text-normal@2x.jpg",
-              "w": "920"
             }
           ]
         }
@@ -358,26 +226,36 @@
               "w": "3660"
             }
           ]
-        },
-        "normal": {
-          "img": "/assets/homepage/inverse-scroll/inverse-scroll-normal.jpg",
+        }
+      }
+    },
+    {
+      "title": "Wave Hover",
+      "date": "Feb 2018",
+      "slug": "/wave-hover",
+      "imgs": {
+        "wide": {
+          "img": "/assets/homepage/wave-hover/wave-hover-wide.jpg",
           "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/inverse-scroll/inverse-scroll-normal@0,5x.jpg",
-              "w": "230"
+          "srcs": [{
+              "path": "/assets/homepage/wave-hover/wave-hover-wide@0,25x.jpg",
+              "w": "458"
             },
             {
-              "path": "/assets/homepage/inverse-scroll/inverse-scroll-normal@0,75x.jpg",
-              "w": "345"
+              "path": "/assets/homepage/wave-hover/wave-hover-wide@0,5x.jpg",
+              "w": "915"
             },
             {
-              "path": "/assets/homepage/inverse-scroll/inverse-scroll-normal.jpg",
-              "w": "460"
+              "path": "/assets/homepage/wave-hover/wave-hover-wide@0,75x.jpg",
+              "w": "1373"
             },
             {
-              "path": "/assets/homepage/inverse-scroll/inverse-scroll-normal@2x.jpg",
-              "w": "920"
+              "path": "/assets/homepage/wave-hover/wave-hover-wide.jpg",
+              "w": "1830"
+            },
+            {
+              "path": "/assets/homepage/wave-hover/wave-hover-wide@2x.jpg",
+              "w": "3660"
             }
           ]
         }
@@ -411,28 +289,6 @@
             {
               "path": "/assets/homepage/cutout-slider/cutout-slider-wide@2x.jpg",
               "w": "3660"
-            }
-          ]
-        },
-        "normal": {
-          "img": "/assets/homepage/cutout-slider/cutout-slider-normal.jpg",
-          "alt": "Screenshot of website landing page",
-          "srcs": [
-            {
-              "path": "/assets/homepage/cutout-slider/cutout-slider-normal@0,5x.jpg",
-              "w": "230"
-            },
-            {
-              "path": "/assets/homepage/cutout-slider/cutout-slider-normal@0,75x.jpg",
-              "w": "345"
-            },
-            {
-              "path": "/assets/homepage/cutout-slider/cutout-slider-normal.jpg",
-              "w": "460"
-            },
-            {
-              "path": "/assets/homepage/cutout-slider/cutout-slider-normal@2x.jpg",
-              "w": "920"
             }
           ]
         }

@@ -1,3 +1,7 @@
+/**
+ * Class handling homepage animations.
+ *
+ */
 export default class Home {
   constructor() {
     this.items = [];
@@ -50,7 +54,8 @@ export default class Home {
   onWidowResize() {
     clearTimeout(this.resizeTimeout);
     this.resizeTimeout = setTimeout(() => {
-      this.getItemPositions();
+      this.getItemPositions(true);
+      this.checkInView();
     }, 100);
   }
 
