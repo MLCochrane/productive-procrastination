@@ -1,7 +1,11 @@
+const fs = require('fs');
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
-const paths = ['scroll-loop', 'floating-text', 'wave-hover', 'cutout-slider', 'inverse-scroll', 'post-process', 'glow-process', 'wave-sim', 'fluid'];
+const overrides = ['utils', 'homepage', 'global'];
+const paths = fs.readdirSync(path.join(__dirname, '../', 'src/js')).filter((el) => overrides.indexOf(el) === -1);
+
 const pages = paths.map((el) => new HtmlWebpackPlugin({ // eslint-disable-line no-new
   filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
   inject: {},
@@ -59,6 +63,9 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.DefinePlugin({
+      SKETCH_PATHS: JSON.stringify(paths.concat('homepage')),
+    }),
     new HtmlWebpackPlugin({
       inject: {},
       template: 'src/views/pages/index.hbs',
