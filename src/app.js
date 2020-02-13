@@ -7,51 +7,10 @@ import Card from './js/global/card';
 
 // Global header logic
 initMenu();
-let card;
-let activeSketch;
+let card = null;
+let activeSketch = null;
 
-const sketches = [
-	{
-		'namespace': 'scroll-loop',
-		'path': 'js/scroll-loop/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'floating-text',
-		'path': 'js/floating-text/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'wave-hover',
-		'path': 'js/wave-hover/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'cutout-slider',
-		'path': 'js/cutout-slider/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'inverse-scroll',
-		'path': 'js/inverse-scroll/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'post-process',
-		'path': 'js/post-process/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'glow-process',
-		'path': 'js/glow-process/index',
-		'constructor': []
-	},
-	{
-		'namespace': 'wave-sim',
-		'path': 'js/wave-sim/index',
-		'constructor': []
-	},
-]
+const sketches = SKETCH_PATHS;
 
 barba.init({
 	transitions: [
@@ -63,12 +22,13 @@ barba.init({
 				runSketch(data.next);
 			},
 			enter: ({current, next}) => {
+				if (next.namespace === 'homepage') activeSketch = null; // REMOVE ONCE HOMEPAGE LOGIC DONE
 				closeMenu();
 				runSketch(next);
 			},
 			leave: async ({ current, next }) => {
 				// Close drawer if open
-				if (current.namespace !== 'home') card.unbindEvents(current.container);
+				if (current.namespace !== 'homepage') card.unbindEvents(current.container);
 
 				/*
 				* Responsibility of each sketch to determine if
@@ -83,13 +43,13 @@ barba.init({
 });
 
 async function runSketch(route) {
-	const curSketch = sketches.find(el => el.namespace === route.namespace);
+	const curSketch = sketches.find(el => el === route.namespace);
 	if (!curSketch) return;
-	return await import('./' + curSketch.path + '.js').then(result => {
-		card.bindEvents(route.container);
+	return await import(`./js/${curSketch}/index.js`).then(result => {
+		if (curSketch !== 'homepage') card.bindEvents(route.container);
 
 		// assigns class instance to variable so we can call destroy method on leave lifecycle hook
-		activeSketch = new result.default(curSketch.constructor);
+		activeSketch = new result.default();
 	});
 }
 

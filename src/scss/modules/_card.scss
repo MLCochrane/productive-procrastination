@@ -36,9 +36,11 @@
 		}
 	}
 	&__link {
+		padding-bottom: 1em;
 		a {
 			font-size: 14px;
 			color: $dark-grey;
+			text-decoration: none;
 			&:hover {
 				color: $brand-yellow;
 			}

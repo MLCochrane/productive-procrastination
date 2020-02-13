@@ -3,6 +3,10 @@
 		position: fixed;
 		left: 0;
 		top: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+		align-items: center;
 		z-index: 999;
 		height: 100%;
 		padding: 5px;
@@ -67,8 +71,11 @@
 		&--left {
 			width: 100%;
 			background: $dark-grey;
+			overflow: auto;
+			margin-left: 50px;
 			@include media-query($large) {
-				width: 90%;
+				width: calc(90% - 90px);
+				margin-left: 90px;
 			}
 		}
 		&--right {
@@ -81,7 +88,6 @@
 	}
 	&__burger {
 		cursor: pointer;
-		@include abs-center();
 			.burger__element {
 				transition: transform 300ms;
 				&--middle {
@@ -113,31 +119,52 @@
 		}
 	}
 	&__date {
-		vertical-align: super;
+		align-self: center;
 		font-size: $--step-down-4;
-		color: #808080;
 	}
 	&__list {
-		position: absolute;
-    transform: translate(-50%,-50%);
-    top: 50%;
-		left: 50%;
 		width: 100%;
-		padding-left: 60px;
+		padding: 40px 20px;
 		@include media-query($large) {
 			width: auto;
-			padding: 0;
+			padding: 100px 50px 20px;
 		}
-		&-item {
-			font-family: $mainFont;
+		&-comp {
+			width: calc(100% / 2);
+			@include media-query($large) {
+				width: calc(100% / 3);
+			}
+			&--second {
+				display: none;
+				text-align: center;
+				@include media-query($large) {
+					display: block;
+				}
+			}
+			&--third {
+				text-align: right;
+			}
+		}
+		&-item-wrap {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			border-bottom: 2px solid $light-grey;
+			font-size: 20px;
+			padding: 1.0em 0;
+			@include media-query($large) {
 			font-size: 32px;
-			padding: .25em;
+			border-width: 4px;
+			}
 			@include media-query($large) {
 				font-size: 40px;
 			}
+		}
+		&-item {
+			font-family: $mainFont;
 			a {
 				text-decoration: none;
-				color: #eee;
+				color: $light-grey;
 				transition: color 300ms;
 				&:hover {
 					color: $brand-yellow;
@@ -150,14 +177,48 @@
 			}
 		}
 	}
+	&__title {
+		font-size: inherit;
+	}
+	&__tags {
+		display: none;
+		@include media-query($large) {
+			display: inherit;
+		}
+	}
 	&__disclaimer {
-		position: absolute;
-		transform: translateX(-50%);
-		left: 50%;
-		bottom: 0;
-		color: white;
-		width: 70%;
+		color: $light-grey;
 		padding-bottom: 1em;
 		text-align: center;
+	}
+	&__description {
+		width: 80%;
+		margin: 50px auto;
+		@include media-query($large) {
+			width: 75%;
+		}
+	}
+	&__copy {
+		font-size: 18px;
+		font-weight: 500;
+		color: $light-grey;
+		padding-bottom: 1em;
+		@include media-query($small) {
+			font-size: 24px;
+		}
+		@include media-query($med) {
+			font-size: 34px;
+		}
+		@include media-query($large) {
+			font-size: 42px;
+		}
+	}
+
+	&__link {
+		transition: color 300ms;
+
+		&:hover {
+			color: $brand-yellow;
+		}
 	}
 }
