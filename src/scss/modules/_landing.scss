@@ -2,41 +2,6 @@
 	height: 100%;
 	width: 100%;
 	overflow-y: scroll;
-	&__top {
-		display: none;
-	}
-	&__section {
-		margin: 0 auto;
-		&:last-of-type {
-			margin-top: 40px;
-			@include media-query($big) {
-				margin-top: 100px;
-			}
-		}
-	}
-	&__copy {
-		font-size: 18px;
-		font-weight: 500;
-		@include media-query($small) {
-			font-size: 24px;
-		}
-		// @include media-query($med) {
-		// 	font-size: 34px;
-		// }
-		@include media-query($large) {
-			font-size: 42px;
-		}
-		// @include media-query($widescreen) {
-		// 	font-size: 54px;
-		// }
-	}
-	&__link {
-		color: black;
-		transition: color 300ms;
-		&:hover {
-			color: $brand-yellow;
-		}
-	}
 	&__wrap {
 		max-width: 1500px;
 		padding: 20px;
