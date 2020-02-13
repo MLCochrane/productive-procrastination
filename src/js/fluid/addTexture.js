@@ -1,4 +1,4 @@
-import { vertBase } from './vertexShader';
+import vertBase from './vertexShader';
 
 export default {
   uniforms: {

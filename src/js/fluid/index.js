@@ -30,23 +30,24 @@ import addForce from './addForce';
  */
 export default class Fluid {
   constructor() {
-    this.renderer = this.setUpRenderer();
-    this.page = document.querySelector('.page-main');
     this.canvas = document.getElementById('Sandbox');
     this.overlayCanvas = document.getElementById('OverlayCanvas');
     this.input = document.getElementById('LeInput');
-    this.dims = this.page.getBoundingClientRect();
+    this.sidebarWidth = window.innerWidth > 1024 ? 90 : 50;
     this.startTime = Date.now();
+
+    const displayWidth = window.innerWidth - this.sidebarWidth;
+    const displayHeight = window.innerHeight;
 
     this.config = {
       simResolution: 128,
       dyeResolution: 1024,
       velDissipation: 0.99,
       dyeDissipation: 0.99,
-      forceMultiplier: 2000,
-      displayWidth: this.dims.width,
-      displayHeight: this.dims.height,
-      aspect: this.dims.width / this.dims.height,
+      forceMultiplier: 2500,
+      displayWidth,
+      displayHeight,
+      aspect: displayWidth / displayHeight,
       geo: new PlaneBufferGeometry(2, 2),
       useTyping: true,
     };
@@ -69,21 +70,27 @@ export default class Fluid {
       },
     };
 
+    this.setUpRenderer = this.setUpRenderer.bind(this);
     this.animate = this.animate.bind(this);
     this.step = this.step.bind(this);
     this.addTextTexture = this.addTextTexture.bind(this);
     this.generateTextForces = this.generateTextForces.bind(this);
+    this.onWindowResize = this.onWindowResize.bind(this);
+    this.onMouseMove = this.onMouseMove.bind(this);
+    this.onMouseDown = this.onMouseDown.bind(this);
+    this.onMouseUp = this.onMouseUp.bind(this);
 
     if (this.config.useTyping) {
       this.typing = true;
       this.text = new TextRender(
         this.overlayCanvas,
-        this.dims.width,
-        this.dims.height,
+        displayWidth,
+        displayHeight,
         this.addTextTexture,
       );
     }
 
+    this.renderer = this.setUpRenderer();
     this.init();
     this.bindEvents();
   }
@@ -94,34 +101,109 @@ export default class Fluid {
    * @memberof Fluid.prototype
    */
   bindEvents() {
-    // IMPROVE THE COPYING UPDATING OF VALUES HERE
-    window.addEventListener('mousemove', (e) => {
-      const x = e.clientX / window.innerWidth;
-      const y = Math.abs((e.clientY / window.innerHeight) - 1.0);
-      if (!this.mouseDown) return;
-      const curMouse = {
-        active: 1,
-        x,
-        y,
-        Dx: x - this.forces.mouse.x,
-        Dy: y - this.forces.mouse.y,
-        color: this.forces.mouse.color,
-      };
+    const {
+      onMouseDown,
+      onMouseUp,
+      onMouseMove,
+      onWindowResize,
+    } = this;
 
-      this.forces.mouse = curMouse;
-    });
 
-    window.addEventListener('mousedown', () => {
-      this.mouseDown = true;
-    });
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('resize', onWindowResize);
+  }
 
-    window.addEventListener('mouseup', () => {
-      this.mouseDown = false;
+  /**
+   * Removes event listeners.
+   * @function destroy
+   * @memberof Fluid.prototype
+   */
+  destroy() {
+    const {
+      onMouseDown,
+      onMouseUp,
+      onMouseMove,
+      onWindowResize,
+      text,
+    } = this;
 
-      this.forces.mouse.color = new Vector3(Math.random(), Math.random(), Math.random());
-      this.forces.mouse.Dx = 0.0;
-      this.forces.mouse.Dy = 0.0;
-    });
+    window.removeEventListener('mousedown', onMouseDown);
+    window.removeEventListener('mouseup', onMouseUp);
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('resize', onWindowResize);
+
+    text.destroy();
+  }
+
+  /**
+   * Callback for mousedown event.
+   * @function onMouseDown
+   * @memberof Fluid.prototype
+   */
+  onMouseDown() {
+    this.mouseDown = true;
+  }
+
+  /**
+   * Callback for mouseup event.
+   * @function onMouseUp
+   * @memberof Fluid.prototype
+   */
+  onMouseUp() {
+    this.mouseDown = false;
+
+    this.forces.mouse.color = new Vector3(Math.random(), Math.random(), Math.random());
+    this.forces.mouse.Dx = 0.0;
+    this.forces.mouse.Dy = 0.0;
+  }
+
+  /**
+   * Callback for mousemove event.
+   * @function onMouseMove
+   * @memberof Fluid.prototype
+   * @param {Object} e - Event object from mousemove event.
+   * @param {Number} e.clientY - Y component of pixel coordinate of mouse event.
+   * @param {Number} e.clientX - X component of pixel coordinate of mouse event.
+   */
+  onMouseMove({ clientX, clientY }) {
+    const x = clientX / window.innerWidth;
+    const y = Math.abs((clientY / window.innerHeight) - 1.0);
+    if (!this.mouseDown) return;
+    const curMouse = {
+      active: 1,
+      x,
+      y,
+      Dx: x - this.forces.mouse.x,
+      Dy: y - this.forces.mouse.y,
+      color: this.forces.mouse.color,
+    };
+
+    this.forces.mouse = curMouse;
+  }
+
+  /**
+   * Callback for resize event.
+   * @function onWindowResize
+   * @memberof Fluid.prototype
+   */
+  onWindowResize() {
+    const {
+      renderer,
+      config,
+    } = this;
+
+    this.sidebarWidth = window.innerWidth > 1024 ? 90 : 50;
+    const displayWidth = window.innerWidth - this.sidebarWidth;
+    const displayHeight = window.innerHeight;
+
+    config.displayWidth = displayWidth;
+    config.displayHeight = displayHeight;
+    config.aspect = displayWidth / displayHeight;
+
+    renderer.setSize(config.displayWidth, config.displayHeight);
+    renderer.setPixelRatio(window.devicePixelRatio);
   }
 
   /**
@@ -172,27 +254,6 @@ export default class Fluid {
     forces.text.Dx = Math.random() * 2 - 1;
     forces.text.Dy = Math.random() * 2 - 1;
     forces.text.active = 1;
-  }
-
-  /**
-   * Callback for resize event.
-   * @function onWindowResize
-   * @memberof Fluid.prototype
-   */
-  onWindowResize() {
-    const {
-      renderer,
-      config,
-      page,
-    } = this;
-
-    this.dims = page.getBoundingClientRect();
-    config.displayWidth = this.dims.width;
-    config.displayHeight = this.dims.height;
-    config.aspect = this.dims.width / this.dims.height;
-
-    renderer.setSize(config.displayWidth, config.displayHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
   }
 
   /**

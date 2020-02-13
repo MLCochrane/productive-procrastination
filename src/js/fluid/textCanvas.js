@@ -21,6 +21,8 @@ export default class TextRender {
    * Event handler for keydown event
    * @function handleKeyDown
    * @memberof TextRender.prototype
+   * @param {Object} event - Keydown event
+   * @param {String} event.key - Keyboard character pressed
    */
   handleKeyDown({ key }) {
     // this should filter out control keys
@@ -42,8 +44,8 @@ export default class TextRender {
     const { width } = ctx.canvas;
     const { height } = ctx.canvas;
 
-    const fontSize = 200;
-    ctx.font = `${fontSize}px Press Start`;
+    const fontSize = 200 * (width / 1830);
+    ctx.font = `${fontSize}px Ubuntu`;
     ctx.clearRect(0, 0, width, height);
     const r = Math.floor(255 * Math.random());
     const g = Math.floor(255 * Math.random());
@@ -71,10 +73,10 @@ export default class TextRender {
 
   /**
    * Removes event handlers and deals with any other cleanup
-   * @function destory
+   * @function destroy
    * @memberof TextRender.prototype
    */
-  destory() {
+  destroy() {
     window.removeEventListener('keydown', this.handleKeyDown);
   }
 }
