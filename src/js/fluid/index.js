@@ -40,7 +40,7 @@ export default class Fluid {
     const displayHeight = window.innerHeight;
 
     this.config = {
-      simResolution: 128,
+      simResolution: 256,
       dyeResolution: 1024,
       velDissipation: 0.99,
       dyeDissipation: 0.99,
