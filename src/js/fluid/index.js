@@ -44,7 +44,7 @@ export default class Fluid {
       dyeResolution: 1024,
       velDissipation: 0.99,
       dyeDissipation: 0.99,
-      forceMultiplier: 2500,
+      forceMultiplier: 4000,
       displayWidth,
       displayHeight,
       aspect: displayWidth / displayHeight,
@@ -59,7 +59,7 @@ export default class Fluid {
         y: 0.5,
         Dx: 0.0,
         Dy: 0.0,
-        color: new Vector3(0.1, 0.1, 0.1),
+        color: new Vector3(0.48, 0.77, 0.48),
       },
       text: {
         active: 0,
