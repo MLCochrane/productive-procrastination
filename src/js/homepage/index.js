@@ -32,7 +32,7 @@ export default class Home {
     } = this;
 
     bindEvents();
-    getItemPositions(true);
+    getItemPositions();
     checkInView();
   }
 
@@ -54,7 +54,7 @@ export default class Home {
   onWidowResize() {
     clearTimeout(this.resizeTimeout);
     this.resizeTimeout = setTimeout(() => {
-      this.getItemPositions(true);
+      this.getItemPositions();
       this.checkInView();
     }, 100);
   }
@@ -102,7 +102,7 @@ export default class Home {
    * @function getItemPositions
    * @memberof Home.prototype
    */
-  getItemPositions(isInitial) {
+  getItemPositions() {
     const {
       parent,
     } = this;
@@ -120,9 +120,7 @@ export default class Home {
 
     this.pagePos = parent.scrollTop + window.innerHeight;
 
-    if (isInitial) {
-      // Copy over all items before checking if in view
-      this.outOfView = this.items;
-    }
+    // Copy over all items before checking if in view
+    this.outOfView = this.items;
   }
 }
