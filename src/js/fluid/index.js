@@ -34,13 +34,14 @@ export default class Fluid {
     this.overlayCanvas = document.getElementById('OverlayCanvas');
     this.input = document.getElementById('LeInput');
     this.sidebarWidth = window.innerWidth > 1024 ? 90 : 50;
+    this.time = new Date();
     this.startTime = Date.now();
 
     const displayWidth = window.innerWidth - this.sidebarWidth;
     const displayHeight = window.innerHeight;
 
     this.config = {
-      simResolution: 256,
+      simResolution: 128,
       dyeResolution: 1024,
       velDissipation: 0.99,
       dyeDissipation: 0.99,
@@ -71,6 +72,7 @@ export default class Fluid {
     };
 
     this.setUpRenderer = this.setUpRenderer.bind(this);
+    this.displayScene = this.displayScene.bind(this);
     this.animate = this.animate.bind(this);
     this.step = this.step.bind(this);
     this.addTextTexture = this.addTextTexture.bind(this);
@@ -109,9 +111,9 @@ export default class Fluid {
     } = this;
 
 
-    window.addEventListener('mousedown', onMouseDown);
-    window.addEventListener('mouseup', onMouseUp);
-    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('pointerdown', onMouseDown);
+    window.addEventListener('pointerup', onMouseUp);
+    window.addEventListener('pointermove', onMouseMove);
     window.addEventListener('resize', onWindowResize);
   }
 
@@ -251,8 +253,8 @@ export default class Fluid {
 
     forces.text.x = x / config.displayWidth;
     forces.text.y = y / config.displayHeight;
-    forces.text.Dx = Math.random() * 2 - 1;
-    forces.text.Dy = Math.random() * 2 - 1;
+    forces.text.Dx = Math.random() * 0.5 - 0.5;
+    forces.text.Dy = Math.random() * 0.5 - 0.5;
     forces.text.active = 1;
   }
 
@@ -460,8 +462,19 @@ export default class Fluid {
    * @memberof Fluid.prototype
    */
   initSim() {
-    this.displayScene();
-    this.animate();
+    const {
+      displayScene,
+      animate,
+      text,
+      time,
+    } = this;
+
+    displayScene();
+    const hours = time.getHours() % 12;
+    let minutes = time.getMinutes();
+    minutes = minutes < 10 ? `0${minutes}` : minutes;
+    text.initialDraw([hours, minutes].join(':'));
+    animate();
   }
 
   /**

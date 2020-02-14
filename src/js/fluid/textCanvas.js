@@ -18,6 +18,28 @@ export default class TextRender {
   }
 
   /**
+   * Initial draw not tied to event.
+   * @function initialDraw
+   * @memberof TextRender.prototype
+   * @param {String} message - String of message to display.
+   */
+  initialDraw(message) {
+    const {
+      ctx,
+    } = this;
+
+    const { width } = ctx.canvas;
+    const { height } = ctx.canvas;
+
+    const fontSize = 250 * (width / 1830);
+    ctx.font = `bold ${fontSize}px Ubuntu`;
+    const length = ctx.measureText(message).width;
+    const x = (width / 2) - (length / 2);
+    const y = (height / 2) + (fontSize / 2);
+    this.drawChar(message, x, y);
+  }
+
+  /**
    * Event handler for keydown event
    * @function handleKeyDown
    * @memberof TextRender.prototype
@@ -35,8 +57,10 @@ export default class TextRender {
    * @function drawChar
    * @memberof TextRender.prototype
    * @param {String} char - single character to be drawn to canvas
+   * @param {Number} initialX - Optional initial X position.
+   * @param {Number} initialY - Optional initial Y position.
    */
-  drawChar(char) {
+  drawChar(char, initialX, initialY) {
     const {
       ctx,
     } = this;
@@ -47,10 +71,6 @@ export default class TextRender {
     const fontSize = 200 * (width / 1830);
     ctx.font = `${fontSize}px Ubuntu`;
     ctx.clearRect(0, 0, width, height);
-    const r = Math.floor(255 * Math.random());
-    const g = Math.floor(255 * Math.random());
-    const b = Math.floor(255 * Math.random());
-    ctx.fillStyle = `rgb(${r}, ${g}, ${b})`;
 
     let x = Math.random();
     let y = Math.random();
@@ -64,9 +84,15 @@ export default class TextRender {
       x = x === 1 ? width - fontSize : fontSize;
       y = y * height + fontSize > height ? height - (2 * fontSize) : y * height + fontSize;
     }
-    ctx.fillText(char, x, y);
 
-    // ctx.fillText(char, x * width, y * height);
+    x = initialX !== undefined ? initialX : x;
+    y = initialY !== undefined ? initialY : y;
+
+    const grad = ctx.createRadialGradient(x, y - (0.5 * fontSize), 5, x, y - (0.5 * fontSize), 100);
+    grad.addColorStop(1, '#01c1b1');
+    grad.addColorStop(0, '#eee291');
+    ctx.fillStyle = grad;
+    ctx.fillText(char.toUpperCase(), x, y);
     this.callback({ x, y });
     ctx.clearRect(0, 0, width, height);
   }
