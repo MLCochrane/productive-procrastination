@@ -1,0 +1,42 @@
+{{#json
+'{
+	"card": {
+    "title": "Fluid",
+    "date": "Jan 2020",
+    "tags": [
+			"2D",
+      "Interaction"
+    ],
+    "description": "2D fluid simulation on the GPU. Uses mouse input and keyboard to update velocity field and dye used in sim.",
+    "references": [
+      {
+        "name": "GPU Gems: Chapter 38",
+        "link": "https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu"
+      },
+      {
+        "name": "Fluid Simulation: SIGGRAPH 2007",
+        "link": "https://www.cs.ubc.ca/~rbridson/fluidsimulation/fluids_notes.pdf"
+      },
+      {
+        "name": "Real-Time Fluid Dynamics for Games: Jos Stam 2003",
+        "link": "https://pdfs.semanticscholar.org/847f/819a4ea14bd789aca8bc88e85e906cfc657c.pdf"
+      },
+      {
+        "name": "GPU-Fluid-Experiments: Github.com/haxmiomic",
+        "link": "https://github.com/haxiomic/GPU-Fluid-Experiments"
+      },
+      {
+        "name": "WebGL-Fluid-Simulation: Github.com/PavelDoGreat",
+        "link": "https://github.com/PavelDoGreat/WebGL-Fluid-Simulation"
+      }
+    ]
+	}
+}'
+}}
+{{#> layout/base title="Fluid" namespace="fluid" }}
+{{#*inline "body"}}
+{{> components/sketches/fluid }}
+{{> components/sketches/card card=this.card }}
+{{/inline}}
+{{/layout/base}}
+{{/json}}

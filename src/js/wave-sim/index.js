@@ -13,7 +13,9 @@ import {
   RepeatWrapping,
 } from 'three';
 
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import {
+  OrbitControls,
+} from 'three/examples/jsm/controls/OrbitControls';
 
 
 /*
@@ -175,34 +177,33 @@ export default class WaterSim {
         },
       },
       pointLights: {
-        value: [
-          {
-            position: new Vector3(-13.0, 2.5, -5.31),
-            ambient: new Vector3(1.0, 1.0, 0.0),
-            diffuse: new Vector3(1.0, 1.0, 0.0),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
-          {
-            position: new Vector3(3.0, 3.5, 0.31),
-            ambient: new Vector3(0.0, 1.0, 1.0),
-            diffuse: new Vector3(0.0, 1.0, 1.0),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
-          {
-            position: new Vector3(12.0, 3.0, 2.0),
-            ambient: new Vector3(1.0, 0.0, 1.0),
-            diffuse: new Vector3(1.0, 0.0, 1.0),
-            specular: specularCol,
-            constant: 1.0,
-            linear: 0.09,
-            quadratic: 0.032,
-          },
+        value: [{
+          position: new Vector3(-13.0, 2.5, -5.31),
+          ambient: new Vector3(1.0, 1.0, 0.0),
+          diffuse: new Vector3(1.0, 1.0, 0.0),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+        },
+        {
+          position: new Vector3(3.0, 3.5, 0.31),
+          ambient: new Vector3(0.0, 1.0, 1.0),
+          diffuse: new Vector3(0.0, 1.0, 1.0),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+        },
+        {
+          position: new Vector3(12.0, 3.0, 2.0),
+          ambient: new Vector3(1.0, 0.0, 1.0),
+          diffuse: new Vector3(1.0, 0.0, 1.0),
+          specular: specularCol,
+          constant: 1.0,
+          linear: 0.09,
+          quadratic: 0.032,
+        },
         ],
       },
       dirLight: {

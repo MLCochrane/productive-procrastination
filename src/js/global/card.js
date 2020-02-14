@@ -17,6 +17,6 @@ export default function Card() {
     toggleClasses(card, toggle) {
       card.classList.toggle('isOpen');
       toggle.classList.toggle('isactive');
-    }
-  }
+    },
+  };
 }
