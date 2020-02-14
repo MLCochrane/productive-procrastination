@@ -30,7 +30,7 @@ import addForce from './addForce';
  */
 export default class Fluid {
   constructor() {
-    this.canvas = document.getElementById('Sandbox');
+    this.canvas = document.getElementById('Fluid');
     this.overlayCanvas = document.getElementById('OverlayCanvas');
     this.input = document.getElementById('LeInput');
     this.sidebarWidth = window.innerWidth > 1024 ? 90 : 50;
@@ -124,6 +124,7 @@ export default class Fluid {
    */
   destroy() {
     const {
+      raf,
       onMouseDown,
       onMouseUp,
       onMouseMove,
@@ -137,6 +138,7 @@ export default class Fluid {
     window.removeEventListener('resize', onWindowResize);
 
     text.destroy();
+    cancelAnimationFrame(raf);
   }
 
   /**
@@ -292,7 +294,6 @@ export default class Fluid {
       context: ctx,
     });
 
-    renderer.extensions.get('EXT_color_buffer_float');
     renderer.setSize(config.displayWidth, config.displayHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     return renderer;
@@ -654,8 +655,7 @@ export default class Fluid {
    * @memberof Fluid.prototype
    */
   animate() {
-    requestAnimationFrame(this.animate);
-
+    this.raf = requestAnimationFrame(this.animate);
     this.render();
   }
 
