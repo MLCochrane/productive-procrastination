@@ -1,14 +1,21 @@
 import './scss/app.scss';
-import barba from '@barba/core';
+import barba, { ISchemaPage } from '@barba/core';
 import { TimelineLite } from 'gsap';
-
+import { SKETCH_PATHS } from './contants';
 import { initMenu, closeMenu, } from './js/global/header';
-import Card from './js/global/card';
+import {
+	Card,
+	createCard,
+} from './js/global/card';
+
+interface Sketch {
+	destroy?: Function;
+}
 
 // Global header logic
 initMenu();
-let card = null;
-let activeSketch = null;
+let card: Card | null = null;
+let activeSketch: Sketch | null = null;
 
 const sketches = SKETCH_PATHS;
 
@@ -18,17 +25,17 @@ barba.init({
 			sync: true,
 			once: data => {
 				// Initial load
-				card = new Card();
+				card = createCard();
 				runSketch(data.next);
 			},
-			enter: ({current, next}) => {
+			enter: ({next}) => {
 				if (next.namespace === 'homepage') activeSketch = null; // REMOVE ONCE HOMEPAGE LOGIC DONE
 				closeMenu();
 				runSketch(next);
 			},
 			leave: async ({ current, next }) => {
 				// Close drawer if open
-				if (current.namespace !== 'homepage') card.unbindEvents(current.container);
+				// if (current.namespace !== 'homepage') card.unbindEvents(current.container);
 
 				/*
 				* Responsibility of each sketch to determine if
@@ -42,18 +49,18 @@ barba.init({
 	]
 });
 
-async function runSketch(route) {
+async function runSketch(route: ISchemaPage) {
 	const curSketch = sketches.find(el => el === route.namespace);
 	if (!curSketch) return;
-	return await import(`./js/${curSketch}/index.js`).then(result => {
-		if (curSketch !== 'homepage') card.bindEvents(route.container);
+	return await import(`./js/${curSketch}/index.ts`).then(result => {
+		if (curSketch !== 'homepage' && card) card.bindEvents(route.container);
 
 		// assigns class instance to variable so we can call destroy method on leave lifecycle hook
 		activeSketch = new result.default();
 	});
 }
 
-function pageTransiton(cur, next) {
+function pageTransiton(cur: HTMLElement, next: HTMLElement) {
 	return new Promise(resolve => {
 		// Animation handles both current and next pages
 		let tl = new TimelineLite();

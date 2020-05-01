@@ -1,3 +1,4 @@
+
 /**
  * Class handling homepage animations.
  *
