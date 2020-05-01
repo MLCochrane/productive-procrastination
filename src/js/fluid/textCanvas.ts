@@ -6,7 +6,9 @@
  * @param {Function} callback - callback function called once text drawn
  */
 export default class TextRender {
-  constructor(canvas, width, height, callback) {
+  callback: Function;
+  ctx: CanvasRenderingContext2D | null;
+  constructor(canvas: HTMLCanvasElement, width: number, height: number, callback: Function) {
     this.callback = callback;
     this.handleKeyDown = this.handleKeyDown.bind(this);
 
@@ -23,13 +25,15 @@ export default class TextRender {
    * @memberof TextRender.prototype
    * @param {String} message - String of message to display.
    */
-  initialDraw(message) {
+  initialDraw(message: string) {
     const {
       ctx,
     } = this;
 
-    const { width } = ctx.canvas;
-    const { height } = ctx.canvas;
+    if (ctx == null) return;
+
+    const { width, height } = ctx.canvas as HTMLCanvasElement;
+
 
     const fontSize = 250 * (width / 1830);
     ctx.font = `bold ${fontSize}px Ubuntu`;
@@ -46,7 +50,7 @@ export default class TextRender {
    * @param {Object} event - Keydown event
    * @param {String} event.key - Keyboard character pressed
    */
-  handleKeyDown({ key }) {
+  handleKeyDown({ key }: { key: string }) {
     // this should filter out control keys
     if (key.length > 1) return;
     this.drawChar(key);
@@ -60,13 +64,14 @@ export default class TextRender {
    * @param {Number} initialX - Optional initial X position.
    * @param {Number} initialY - Optional initial Y position.
    */
-  drawChar(char, initialX, initialY) {
+  drawChar(char: string, initialX?: number, initialY?: number) {
     const {
       ctx,
     } = this;
 
-    const { width } = ctx.canvas;
-    const { height } = ctx.canvas;
+    if (ctx == null) return;
+
+    const { width, height } = ctx.canvas as HTMLCanvasElement;
 
     const fontSize = 200 * (width / 1830);
     ctx.font = `${fontSize}px Ubuntu`;

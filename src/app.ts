@@ -1,7 +1,6 @@
 import './scss/app.scss';
 import barba, { ISchemaPage } from '@barba/core';
 import { TimelineLite } from 'gsap';
-import { SKETCH_PATHS } from './contants';
 import { initMenu, closeMenu, } from './js/global/header';
 import {
 	Card,

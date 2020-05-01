@@ -1,5 +1,4 @@
 import { gsap, CSSPlugin } from 'gsap';
-import { ASSET_PATH } from '../../contants';
 
 gsap.registerPlugin(CSSPlugin);
 /*
@@ -59,7 +58,7 @@ export default class InverseScroll {
       setHeights();
     });
 
-    let scrollEnded: NodeJS.Timeout;
+    let scrollEnded: number;
     container.addEventListener('scroll', (e) => {
       e.preventDefault();
 

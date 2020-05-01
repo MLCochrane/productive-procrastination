@@ -11,6 +11,7 @@ import {
   ShaderMaterial,
   HalfFloatType,
   CanvasTexture,
+  Material,
 } from 'three';
 
 import TextRender from './textCanvas';
@@ -24,14 +25,71 @@ import clearShader from './clearShader';
 import displayShader from './displayDye';
 import addForce from './addForce';
 
+interface FBO {
+  width: number;
+  height: number;
+  texelSizeX: number;
+  texelSizeY: number;
+  scene: Scene;
+  mat: ShaderMaterial;
+  target: WebGLRenderTarget;
+}
+
+interface DFBO {
+  width: number;
+  height: number;
+  texelSizeX: number;
+  texelSizeY: number;
+  scene: Scene;
+  mat: ShaderMaterial;
+  read: WebGLRenderTarget;
+  write: WebGLRenderTarget;
+  swap: Function;
+}
+
+interface Program {
+  mat: ShaderMaterial;
+  scene: Scene;
+}
+
+interface Shader {
+  uniforms: Object;
+  fragmentShader: string;
+  vertexShader: string;
+}
+
 /**
  * Class handling fluid simulation.
  *
  */
 export default class Fluid {
+  canvas: HTMLCanvasElement;
+  overlayCanvas: HTMLCanvasElement;
+  input: HTMLElement | null;
+  sidebarWidth: number;
+  time: Date;
+  startTime: number;
+  config: { simResolution: number; dyeResolution: number; velDissipation: number; dyeDissipation: number; forceMultiplier: number; displayWidth: number; displayHeight: number; aspect: number; geo: PlaneBufferGeometry; useTyping: boolean; };
+  forces: { mouse: { active: number; x: number; y: number; Dx: number; Dy: number; color: Vector3; }; text: { active: number; x: number; y: number; Dx: number; Dy: number; }; };
+  typing!: boolean;
+  text!: TextRender;
+  renderer: WebGLRenderer;
+  mouseDown!: boolean;
+  velocity!: DFBO;
+  divergence!: FBO;
+  pressure!: DFBO;
+  dye!: DFBO;
+  clearProgram!: Program;
+  gradientProgram!: Program;
+  addForceProgram!: Program;
+  addTexProgram!: Program;
+  displayCamera!: OrthographicCamera;
+  displayQuad!: Mesh;
+  raf!: number;
+  displayScene!: Scene;
   constructor() {
-    this.canvas = document.getElementById('Fluid');
-    this.overlayCanvas = document.getElementById('OverlayCanvas');
+    this.canvas = document.getElementById('Fluid') as HTMLCanvasElement;
+    this.overlayCanvas = document.getElementById('OverlayCanvas') as HTMLCanvasElement;
     this.input = document.getElementById('LeInput');
     this.sidebarWidth = window.innerWidth > 1024 ? 90 : 50;
     this.time = new Date();
@@ -72,7 +130,7 @@ export default class Fluid {
     };
 
     this.setUpRenderer = this.setUpRenderer.bind(this);
-    this.displayScene = this.displayScene.bind(this);
+    this.setDisplayScene = this.setDisplayScene.bind(this);
     this.animate = this.animate.bind(this);
     this.step = this.step.bind(this);
     this.addTextTexture = this.addTextTexture.bind(this);
@@ -85,7 +143,7 @@ export default class Fluid {
     if (this.config.useTyping) {
       this.typing = true;
       this.text = new TextRender(
-        this.overlayCanvas,
+        this.overlayCanvas as HTMLCanvasElement,
         displayWidth,
         displayHeight,
         this.addTextTexture,
@@ -167,11 +225,14 @@ export default class Fluid {
    * Callback for mousemove event.
    * @function onMouseMove
    * @memberof Fluid.prototype
-   * @param {Object} e - Event object from mousemove event.
-   * @param {Number} e.clientY - Y component of pixel coordinate of mouse event.
-   * @param {Number} e.clientX - X component of pixel coordinate of mouse event.
    */
-  onMouseMove({ clientX, clientY }) {
+  onMouseMove(
+    {
+      clientX, // - Y component of pixel coordinate of mouse event.
+      clientY // - X component of pixel coordinate of mouse event.
+    }:
+    {clientX: number, clientY: number}
+    ) {
     const x = clientX / window.innerWidth;
     const y = Math.abs((clientY / window.innerHeight) - 1.0);
     if (!this.mouseDown) return;
@@ -214,11 +275,8 @@ export default class Fluid {
    * Callback passed to text render class to add the 2D canvas as a texture to dye.
    * @function addTextTexture
    * @memberof Fluid.prototype
-   * @param {Object} position - Positions of current rendered character
-   * @param {String} position.x - The x position of character in pixels
-   * @param {String} position.y - The y position of character in pixels
    */
-  addTextTexture(position) {
+  addTextTexture(position: Vector2) {
     const {
       dye,
       addTexProgram,
@@ -243,11 +301,8 @@ export default class Fluid {
    * Generate velocity forces to add based on rendered character position.
    * @function generateTextForces
    * @memberof Fluid.prototype
-   * @param {Object} position - Positions of current rendered character
-   * @param {String} position.x - The x position of character in pixels
-   * @param {String} position.y - The y position of character in pixels
    */
-  generateTextForces({ x, y }) {
+  generateTextForces({ x, y }: Vector2) {
     const {
       forces,
       config,
@@ -274,15 +329,14 @@ export default class Fluid {
    * Creates new WebGLRenderer with various options.
    * @function setUpRenderer
    * @memberof Fluid.prototype
-   * @returns {WebGLRenderer} - ThreeJS renderer
    */
-  setUpRenderer() {
+  setUpRenderer(): WebGLRenderer {
     const {
       config,
       canvas,
     } = this;
 
-    const ctx = canvas.getContext('webgl2');
+    // const ctx = canvas.getContext('webgl2');
     // RENDERER
     const renderer = new WebGLRenderer({
       alpha: true,
@@ -291,7 +345,7 @@ export default class Fluid {
       antialias: false,
       preserveDrawingBuffer: false,
       canvas,
-      context: ctx,
+      // context: ctx,
     });
 
     renderer.setSize(config.displayWidth, config.displayHeight);
@@ -354,12 +408,8 @@ export default class Fluid {
    * Generate shader material and scene to use in a render pass.
    * @function programScene
    * @memberof Fluid.prototype
-   * @param {Object} shader - Shader for use in ShaderMaterial
-   * @param {Object} shader.uniforms - Object of uniforms to use in shader program
-   * @param {String} shader.vertexShader - Vertex shader in string
-   * @param {String} shader.fragmentShader - Fragment shader in string
    */
-  programScene(shader) {
+  programScene(shader: Shader) {
     const prgScene = new Scene();
     const prgMat = new ShaderMaterial(shader);
     const prgMesh = new Mesh(this.config.geo, prgMat);
@@ -375,15 +425,13 @@ export default class Fluid {
    * Create object with two render targets used as read/write buffers and method to swap.
    * @function doubleTarget
    * @memberof Fluid.prototype
-   * @param {Number} width - Width in pixels of render target
-   * @param {Number} height - Height in pixels of render target
-   * @param {Object} options - Any options for use in WebGLRenderTarget
-   * @param {Object} shader - Shader for use in ShaderMaterial
-   * @param {Object} shader.uniforms - Object of uniforms to use in shader program
-   * @param {String} shader.vertexShader - Vertex shader in string
-   * @param {String} shader.fragmentShader - Fragment shader in string
    */
-  doubleTarget(width, height, options, shader) {
+  doubleTarget(
+    width: number,
+    height: number,
+    options: Object,
+    shader: Shader
+    ): DFBO {
     let trg1 = new WebGLRenderTarget(width, height, options);
     let trg2 = new WebGLRenderTarget(width, height, options);
 
@@ -425,15 +473,13 @@ export default class Fluid {
    * no need for method to swap between.
    * @function singleTarget
    * @memberof Fluid.prototype
-   * @param {Number} width - Width in pixels of render target
-   * @param {Number} height - Height in pixels of render target
-   * @param {Object} options - Any options for use in WebGLRenderTarget
-   * @param {Object} shader - Shader for use in ShaderMaterial
-   * @param {Object} shader.uniforms - Object of uniforms to use in shader program
-   * @param {String} shader.vertexShader - Vertex shader in string
-   * @param {String} shader.fragmentShader - Fragment shader in string
    */
-  singleTarget(width, height, options, shader) {
+  singleTarget(
+    width: number,
+    height: number,
+    options: Object,
+    shader: Shader
+    ): FBO {
     let trg1 = new WebGLRenderTarget(width, height, options);
 
     const targetScene = new Scene();
@@ -464,26 +510,26 @@ export default class Fluid {
    */
   initSim() {
     const {
-      displayScene,
+      setDisplayScene,
       animate,
       text,
       time,
     } = this;
 
-    displayScene();
+    setDisplayScene();
     const hours = time.getHours() % 12;
     let minutes = time.getMinutes();
-    minutes = minutes < 10 ? `0${minutes}` : minutes;
-    text.initialDraw([hours, minutes].join(':'));
+    const minuteString: string = minutes < 10 ? `0${minutes}` : minutes.toString();
+    text.initialDraw([hours, minuteString].join(':'));
     animate();
   }
 
   /**
    * Sets up display camera for use in sim as well as materal and scene for final render pass.
-   * @function displayScene
+   * @function setDisplayScene
    * @memberof Fluid.prototype
    */
-  displayScene() {
+  setDisplayScene() {
     const {
       config,
     } = this;
@@ -512,7 +558,6 @@ export default class Fluid {
    */
   step() {
     const {
-      useTyping,
       renderer,
       config,
       displayCamera,
@@ -620,7 +665,7 @@ export default class Fluid {
     velocity.swap();
 
     // DYE FORCES
-    if (!useTyping) {
+    if (!config.useTyping) {
       renderer.setRenderTarget(dye.write);
       addForceProgram.mat.uniforms.uDiffuse.value = dye.read.texture;
       addForceProgram.mat.uniforms.uTexelSize.value = new Vector2(dye.texelSizeX, dye.texelSizeY);
@@ -671,14 +716,17 @@ export default class Fluid {
       displayCamera,
       displayScene,
       startTime,
+      displayQuad,
       step,
     } = this;
 
-    const delta = Date.now() - startTime;
+    // const delta = Date.now() - startTime;
+    step();
 
-    step(delta);
-
-    this.displayQuad.material.uniforms.tDiffuse.value = dye.write.texture;
+    if (displayQuad.material) {
+      const mat = <ShaderMaterial>displayQuad.material;
+      mat.uniforms.tDiffuse.value = dye.write.texture;
+    }
     renderer.render(displayScene, displayCamera);
   }
 }
