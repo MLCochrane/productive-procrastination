@@ -59,7 +59,7 @@ export default class GlowProcess {
     this.curY = window.innerHeight;
     this.canvas = document.getElementById('GlowProcess');
     this.dims = this.canvas.getBoundingClientRect();
-    this.bufferFile = `${ASSET_PATH}/assets/neon.glb`;
+    this.bufferFile = `${ASSET_PATH}/assets/glow-process/neon.gltf`;
 
     this.SCENE_LAYER = 0;
     this.GLOW_LAYER = 1;
@@ -172,10 +172,11 @@ export default class GlowProcess {
     const modelLoader = new GLTFLoader();
 
     const dracoLoader = new DRACOLoader();
-    dracoLoader.setDecoderPath('three/examples/js/libs/draco');
+    dracoLoader.setDecoderPath(`${ASSET_PATH}/assets/draco/`);
     modelLoader.setDRACOLoader(dracoLoader);
 
     modelLoader.load(bufferFile, (res) => {
+      console.log(res);
       this.mainTubes = res.scene.children.find((el) => el.name === 'TopTubes');
       this.mainTubes.material = new MeshBasicMaterial({
         color: 0xf23232,
@@ -212,19 +213,19 @@ export default class GlowProcess {
     const texturesToLoad = [
       {
         type: 'map',
-        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_color_map2.jpg`,
+        url: `${ASSET_PATH}/assets/glow-process/CW_color_map2.jpg`,
       },
       {
         type: 'aoMap',
-        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_ao.jpg`,
+        url: `${ASSET_PATH}/assets/glow-process/CW_ao.jpg`,
       },
       {
         type: 'normalMap',
-        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_normal.jpg`,
+        url: `${ASSET_PATH}/assets/glow-process/CW_normal.jpg`,
       },
       {
         type: 'displacementMap',
-        url: `${ASSET_PATH}/assets/Concrete_Wall/CW_roughness.jpg`,
+        url: `${ASSET_PATH}/assets/glow-process/CW_roughness.jpg`,
       },
     ];
 
@@ -236,7 +237,7 @@ export default class GlowProcess {
       const mat2 = new MeshPhongMaterial(loadedTextures);
 
       this.mesh2 = new Mesh(geo2, mat2);
-      this.mesh2.position.z = -2;
+      this.mesh2.position.z = -3;
 
       scene.add(this.mesh2);
 
