@@ -1,4 +1,4 @@
-<script type="x-shader/x-vertex" id="vertexshader">
+const vert = `
 	#define PI 3.141592653589793
 	uniform vec4 scale;
   uniform float time;
@@ -24,10 +24,12 @@
 		v_Uv = uv;
 		vec2 dir = vec2(.8, 0.5);
 		vec2 dir2 = vec2(.5, .7);
-		vec2 dir3 = vec2(1.2, .4);
+    vec2 dir3 = vec2(1.2, .4);
+
      // local space
 		vec4 pos = vec4( position, 1.0 );
     vec4 norm = vec4(normal, 0.0);
+
     // local space to world space
     v_FragPos = vec3(modelMatrix * pos);
     v_viewPos = cameraPosition;
@@ -44,20 +46,17 @@
     v_Norm = cross(newBi, newTan);
     v_Norm += cross(newBi2, newTan2);
     v_Norm += cross(newBi3, newTan3);
+
     // TBN from geometry normals and tangents
     vec3 T = normalize(vec3(modelMatrix * vec4(newTan + newTan2, 0.)));
     vec3 N = normalize(vec3(modelMatrix * vec4(v_Norm, 0.)));
     vec3 B = normalize(vec3(modelMatrix * vec4(newBi + newBi2, 0.)));
-    // TBN from geometry normals and tangents
-    {{!-- vec3 T = normalize(vec3(modelMatrix * tangent));
-    vec3 N = normalize(vec3(modelMatrix * norm));
-    vec3 B = cross(T, N); --}}
     v_TBN = mat3(T, B, N);
 		gl_Position = projectionMatrix * modelViewMatrix * pos;
 	}
-</script>
+`;
 
-<script type="x-shader/x-fragment" id="fragmentshader">
+const frag = `
 struct Material {
     vec3 ambient;
     vec3 diffuse;
@@ -176,6 +175,10 @@ void main() {
   }
   result += CalcSpotLight(spotLight, norm, viewDir, v_FragPos);
   gl_FragColor = vec4(result, 1.0);
-	//gl_FragColor = vec4(v_Norm, 1.0);
 }
-</script>
+`;
+
+export {
+  vert,
+  frag,
+};
