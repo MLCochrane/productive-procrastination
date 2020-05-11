@@ -108,7 +108,7 @@ export default class Fluid {
       displayHeight,
       aspect: displayWidth / displayHeight,
       geo: new PlaneBufferGeometry(2, 2),
-      useTyping: true,
+      useTyping: false,
     };
 
     this.forces = {
@@ -169,9 +169,9 @@ export default class Fluid {
     } = this;
 
 
-    window.addEventListener('pointerdown', onMouseDown);
-    window.addEventListener('pointerup', onMouseUp);
-    window.addEventListener('pointermove', onMouseMove);
+    window.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mouseup', onMouseUp);
+    window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('resize', onWindowResize);
   }
 
@@ -195,7 +195,7 @@ export default class Fluid {
     window.removeEventListener('mousemove', onMouseMove);
     window.removeEventListener('resize', onWindowResize);
 
-    text.destroy();
+    if (text) text.destroy();
     cancelAnimationFrame(raf);
   }
 
@@ -514,13 +514,14 @@ export default class Fluid {
       animate,
       text,
       time,
+      config,
     } = this;
 
     setDisplayScene();
     const hours = time.getHours() % 12;
     let minutes = time.getMinutes();
     const minuteString: string = minutes < 10 ? `0${minutes}` : minutes.toString();
-    text.initialDraw([hours, minuteString].join(':'));
+    if (config.useTyping) text.initialDraw([hours, minuteString].join(':'));
     animate();
   }
 
