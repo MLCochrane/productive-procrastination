@@ -20,7 +20,6 @@ export default class HoverMap {
 		this.width = canvas.width;
 		this.height = canvas.height;
 
-		console.log(canvas);
 		this.gl = (canvas as HTMLCanvasElement).getContext('webgl') as WebGLRenderingContext;
 		this.isHovering = false;
 		this.start = null;
@@ -69,12 +68,10 @@ export default class HoverMap {
 
 	onMouseEnter() {
 		this.isHovering = true;
-		console.log('enter');
 	}
 
 	onMouseLeave() {
 		this.isHovering = false;
-		console.log('leave');
 	}
 
 	initShader(
@@ -182,8 +179,6 @@ export default class HoverMap {
 			gl,
 		} = this;
 
-		console.log(images);
-
 		const imgLocation = gl.getUniformLocation(
 			program as WebGLProgram,
 			'u_texture'
@@ -262,7 +257,6 @@ export default class HoverMap {
 			program,
 			render,
 		} = this;
-		console.log(this.isHovering);
 
 		if (!this.start) this.start = timestamp;
 		const progress = timestamp - this.start;
