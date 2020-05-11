@@ -1,10 +1,30 @@
-import * as THREE from 'three';
+import {
+  WebGLRenderer,
+  Scene,
+  OrthographicCamera,
+  MeshBasicMaterial,
+  Mesh,
+  BufferGeometryLoader,
+}
+from 'three';
 
 /*
  *  Class for loading and rendering 3D text
  */
 
 export default class FloatingText {
+  renderer: WebGLRenderer | null;
+  scene: Scene | null;
+  camera: OrthographicCamera | null;
+  mesh: Mesh | null;
+  xVal: number;
+  yVal: number;
+  curX: number;
+  curY: number;
+  canvas: HTMLCanvasElement | null;
+  dims: any;
+  bufferFile: string;
+  id: number = 0;
   /**
    * Initlaizes variables for class instance.
    */
@@ -17,7 +37,7 @@ export default class FloatingText {
     this.yVal = 0;
     this.curX = window.innerWidth;
     this.curY = window.innerHeight;
-    this.canvas = document.getElementById('FloatingText');
+    this.canvas = document.getElementById('FloatingText') as HTMLCanvasElement;
     this.dims = this.canvas.getBoundingClientRect();
     this.bufferFile = `${ASSET_PATH}/assets/floating-text.json`;
 
@@ -60,7 +80,11 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   handleClick() {
-    this.renderer.setPixelRatio(window.devicePixelRatio);
+    const {
+      renderer,
+    } = this;
+
+    (renderer as WebGLRenderer).setPixelRatio(window.devicePixelRatio);
   }
 
   /**
@@ -68,7 +92,7 @@ export default class FloatingText {
    * @function handleMouseMove
    * @memberof FloatingText.prototype
    */
-  handleMouseMove(e) {
+  handleMouseMove(e: MouseEvent) {
     this.xVal = (e.clientX / window.innerWidth) - 0.5;
     this.yVal = (e.clientY / window.innerHeight) - 0.5;
   }
@@ -99,7 +123,7 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   initScene() {
-    this.scene = new THREE.Scene();
+    this.scene = new Scene();
   }
 
   /**
@@ -108,10 +132,13 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   initCamera() {
+    const {
+      scene,
+    } = this;
     const distance = 3.5;
     const aspect = (window.innerWidth / 2) / (window.innerWidth / 4);
 
-    this.camera = new THREE.OrthographicCamera(
+    this.camera = new OrthographicCamera(
       (distance * aspect) / -2,
       (distance * aspect) / 2,
       distance / 2,
@@ -121,7 +148,7 @@ export default class FloatingText {
     );
 
     this.camera.position.z = 8;
-    this.scene.add(this.camera);
+    (scene as Scene).add(this.camera);
   }
 
   /**
@@ -130,18 +157,23 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    * @param {String} bufferFile - String representing path to buffer geometry file to load
    */
-  initText(bufferFile) {
-    const loader = new THREE.BufferGeometryLoader();
+  initText(bufferFile: string) {
+    const {
+      scene,
+      setup,
+    } = this;
+
+    const loader = new BufferGeometryLoader();
     loader.load(bufferFile, (geo) => {
       // Add the loaded object to the scene
-      const mat1 = new THREE.MeshBasicMaterial({ color: 0xffffff });
-      const mat2 = new THREE.MeshBasicMaterial({ color: 0x000000 });
+      const mat1 = new MeshBasicMaterial({ color: 0xffffff });
+      const mat2 = new MeshBasicMaterial({ color: 0x000000 });
 
       // Materials passed in to group materialIndex
-      const object = new THREE.Mesh(geo, [mat1, mat2]);
+      const object = new Mesh(geo, [mat1, mat2]);
       this.mesh = object;
-      this.scene.add(object);
-      this.setup(object);
+      (scene as Scene).add(object);
+      setup();
     }, (xhr) => {
       // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
     }, (err) => {
@@ -155,9 +187,14 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   onWindowResize() {
-    this.camera.aspect = (window.innerWidth / 2) / (window.innerWidth / 4);
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth / 2, window.innerWidth / 4);
+    const {
+      camera,
+      renderer,
+    } = this;
+
+    // (camera as OrthographicCamera).aspect = (window.innerWidth / 2) / (window.innerWidth / 4);
+    (camera as OrthographicCamera).updateProjectionMatrix();
+    (renderer as WebGLRenderer).setSize(window.innerWidth / 2, window.innerWidth / 4);
   }
 
   /**
@@ -166,10 +203,20 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   setup() {
-    this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this.canvas, alpha: true });
+    const {
+      canvas,
+      animate,
+      dims,
+    } = this;
+
+    this.renderer = new WebGLRenderer({
+      antialias: true,
+      canvas: canvas as HTMLCanvasElement,
+      alpha: true,
+    });
     this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.dims.width, this.dims.height);
-    this.animate();
+    this.renderer.setSize(dims.width, dims.height);
+    animate();
   }
 
   /**
@@ -178,11 +225,21 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   animate() {
-    this.id = requestAnimationFrame(this.animate);
+    const {
+      xVal,
+      yVal,
+      mesh,
+      render,
+      animate,
+    } = this;
 
-    this.mesh.rotation.x = (this.yVal);
-    this.mesh.rotation.y = (this.xVal);
-    this.render();
+    this.id = requestAnimationFrame(animate);
+
+    if (mesh) {
+      mesh.rotation.x = (yVal);
+      mesh.rotation.y = (xVal);
+    }
+    render();
   }
 
   /**
@@ -191,6 +248,15 @@ export default class FloatingText {
    * @memberof FloatingText.prototype
    */
   render() {
-    this.renderer.render(this.scene, this.camera);
+    const {
+      renderer,
+      scene,
+      camera,
+    } = this;
+
+    renderer?.render(
+      scene as Scene,
+      camera as OrthographicCamera
+    );
   }
 }
