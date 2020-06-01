@@ -82,12 +82,3 @@ const PixelShader = {
 export {
   PixelShader
 };
-
-
-"vec2 getRelation(float check) {"
-"if (invert) {"
-"    return vec2(step(0.5, check), step(check, 0.5));"
-"  } else {"
-"    return vec2(step(check, 0.5), step(0.5, check));"
-"  }"
-"}"

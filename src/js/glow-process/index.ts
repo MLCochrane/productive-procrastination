@@ -45,6 +45,29 @@ import {
  */
 
 export default class GlowProcess {
+  renderer: WebGLRenderer | null;
+  scene: Scene | null;
+  camera: PerspectiveCamera | null;
+  mesh: Mesh | null;
+  xVal: number;
+  yVal: number;
+  curX: number;
+  curY: number;
+  canvas: HTMLElement | null;
+  dims: any;
+  bufferFile: string;
+  SCENE_LAYER: number;
+  GLOW_LAYER: number;
+  light: PointLight | null;
+  light2: PointLight | null;
+  light3: AmbientLight | null;
+  mainTubes: any;
+  bottomTubes: any;
+  mesh2: Mesh | null;
+  glowComposer: EffectComposer | null;
+  finalComposer: EffectComposer | null;
+  glowPass: any;
+  raf: number;
   /**
    * Initlaizes variables for class instance.
    */
@@ -57,12 +80,23 @@ export default class GlowProcess {
     this.yVal = 0;
     this.curX = window.innerWidth;
     this.curY = window.innerHeight;
-    this.canvas = document.getElementById('GlowProcess');
+    this.canvas = document.getElementById('GlowProcess') as HTMLCanvasElement;
     this.dims = this.canvas.getBoundingClientRect();
     this.bufferFile = `${ASSET_PATH}/assets/glow-process/neon.gltf`;
 
     this.SCENE_LAYER = 0;
     this.GLOW_LAYER = 1;
+
+    this.glowComposer = null;
+    this.finalComposer = null;
+
+    this.light = null;
+    this.light2 = null;
+    this.light3 = null;
+
+    this.mesh2 = null;
+
+    this.raf = 0;
 
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
@@ -91,7 +125,7 @@ export default class GlowProcess {
    * @function handleMouseMove
    * @memberof GlowProcess.prototype
    */
-  handleMouseMove(e) {
+  handleMouseMove(e: MouseEvent) {
     this.xVal = (e.clientX / window.innerWidth) - 0.5;
     this.yVal = (e.clientY / window.innerHeight) - 0.5;
   }
@@ -120,7 +154,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   initScene() {
-    this.scene = new Scene();
+    this.scene = new Scene() as Scene;
   }
 
   /**
@@ -133,7 +167,7 @@ export default class GlowProcess {
 
     this.camera.position.z = 40;
     this.camera.layers.enable(1);
-    this.scene.add(this.camera);
+    this.scene?.add(this.camera);
   }
 
   /**
@@ -151,11 +185,11 @@ export default class GlowProcess {
     this.light.lookAt(0.5, 0, 0);
     this.light2.lookAt(-0.5, 0, 0);
 
-    this.scene.add(this.light);
-    this.scene.add(this.light2);
+    this.scene?.add(this.light);
+    this.scene?.add(this.light2);
 
     this.light3 = new AmbientLight(0xffffff, 0.3);
-    this.scene.add(this.light3);
+    this.scene?.add(this.light3);
   }
 
   /**
@@ -187,7 +221,7 @@ export default class GlowProcess {
 
       // Need to ensure meshs that should recieve effect are on separate layer
       this.mainTubes.layers.enable(this.GLOW_LAYER);
-      scene.add(this.mainTubes);
+      scene?.add(this.mainTubes);
 
       this.bottomTubes = res.scene.children.find((el) => el.name === 'BottomTubes');
       this.bottomTubes.material = new MeshLambertMaterial({
@@ -196,7 +230,7 @@ export default class GlowProcess {
       });
 
       this.bottomTubes.rotation.x = 1.567;
-      scene.add(this.bottomTubes);
+      scene?.add(this.bottomTubes);
     }, (xhr) => {
       // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
 
@@ -229,7 +263,7 @@ export default class GlowProcess {
       },
     ];
 
-    const loadedTextures = {};
+    const loadedTextures: {[key: string]: any} = {};
     const textureManager = new LoadingManager();
 
     textureManager.onLoad = () => {
@@ -239,7 +273,7 @@ export default class GlowProcess {
       this.mesh2 = new Mesh(geo2, mat2);
       this.mesh2.position.z = -3;
 
-      scene.add(this.mesh2);
+      scene?.add(this.mesh2);
 
       const mat = new MeshLambertMaterial({
         transparent: true,
@@ -250,7 +284,7 @@ export default class GlowProcess {
 
       glass.position.x = -1;
 
-      scene.add(glass);
+      scene?.add(glass);
     };
 
     const texLoader = new TextureLoader(textureManager);
@@ -267,9 +301,9 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   onWindowResize() {
-    this.camera.aspect = window.innerWidth / window.innerHeight;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    if (this.camera) this.camera.aspect = window.innerWidth / window.innerHeight;
+    this.camera?.updateProjectionMatrix();
+    this.renderer?.setSize(window.innerWidth, window.innerHeight);
   }
 
   /**
@@ -280,7 +314,7 @@ export default class GlowProcess {
   setup() {
     this.renderer = new WebGLRenderer({
       antialias: true,
-      canvas: this.canvas,
+      canvas: this.canvas as HTMLCanvasElement,
     });
 
     this.renderer.setPixelRatio(window.devicePixelRatio);
@@ -301,15 +335,15 @@ export default class GlowProcess {
       scene,
     } = this;
 
-    this.glowComposer = new EffectComposer(renderer);
-    const renderPass = new RenderPass(scene, camera);
+    this.glowComposer = new EffectComposer(renderer as WebGLRenderer);
+    const renderPass = new RenderPass(scene as Scene, camera as PerspectiveCamera);
     this.glowComposer.addPass(renderPass);
 
-    const glowPass = new ShaderPass(GlowShaderHori, 'texOne');
+    const glowPass = new ShaderPass(GlowShaderHori, 'texOne') as any;
     glowPass.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight);
     glowPass.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
 
-    const glowPassVert = new ShaderPass(GlowShaderVert, 'texOne');
+    const glowPassVert = new ShaderPass(GlowShaderVert, 'texOne') as any;
     glowPassVert.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight);
     glowPassVert.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
 
@@ -317,13 +351,13 @@ export default class GlowProcess {
     this.glowComposer.addPass(glowPass);
     this.glowComposer.addPass(glowPassVert);
 
-    const finalPass = new ShaderPass(FinalShaderPass, 'texOne');
+    const finalPass = new ShaderPass(FinalShaderPass, 'texOne') as any;
     finalPass.uniforms.glowTexture.value = this.glowComposer.renderTarget2.texture;
     finalPass.needsSwap = true;
 
-    this.finalComposer = new EffectComposer(renderer);
-    this.finalComposer.addPass(renderPass);
-    this.finalComposer.addPass(finalPass);
+    this.finalComposer = new EffectComposer(renderer as WebGLRenderer);
+    this.finalComposer?.addPass(renderPass);
+    this.finalComposer?.addPass(finalPass);
   }
 
   /**
@@ -343,10 +377,12 @@ export default class GlowProcess {
   animate() {
     this.raf = requestAnimationFrame(this.animate);
 
-    this.camera.position.x = 40 * Math.sin(this.xVal / 4);
-    this.camera.position.z = 40 * Math.cos(this.xVal / 4);
-    this.camera.position.y = (10 * this.yVal) / 2;
-    this.camera.lookAt(0, 0, 0);
+    if (this.camera) {
+      this.camera.position.x = 40 * Math.sin(this.xVal / 4);
+      this.camera.position.z = 40 * Math.cos(this.xVal / 4);
+      this.camera.position.y = (10 * this.yVal) / 2;
+      this.camera.lookAt(0, 0, 0);
+    }
 
     this.render();
   }
@@ -357,10 +393,10 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   render() {
-    this.camera.layers.set(this.GLOW_LAYER);
-    this.glowComposer.render();
-    this.camera.layers.set(this.SCENE_LAYER);
-    this.finalComposer.render();
+    this.camera?.layers.set(this.GLOW_LAYER);
+    this.glowComposer?.render();
+    this.camera?.layers.set(this.SCENE_LAYER);
+    this.finalComposer?.render();
   }
 
   /**
