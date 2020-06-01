@@ -1,13 +1,79 @@
 version: 2.1
 orbs:
   cypress: cypress-io/cypress@1.13.0
-workflows:
+jobs:
   build:
-    jobs:
-      - cypress/run:
-          start: 'npm run dev'
-          wait-on: 'http-get://localhost:8080'
-          record: true
-          command: npx cypress run --record --key e5e44a66-f40f-4fa7-97c9-f7942aaafda3
-          executor: cypress/browsers-chrome69
-          browser: chrome
+    # pre-built images: https://circleci.com/docs/2.0/circleci-images/
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      - run:
+          name: Installing
+          command: npm ci
+      - run:
+          name: Creating build
+          command: npm run build
+      - persist_to_workspace:
+          # Must be an absolute path, or relative path from working_directory. This is a directory on the container which is
+          # taken to be the root directory of the workspace.
+          root: .
+          paths:
+            - dist
+  test:
+    docker:
+      - image: circleci/node:10-browsers
+    steps:
+      - checkout
+      - run:
+          name: Installing
+          command: npm ci CYPRESS_INSTALL_BINARY=0
+      - run:
+          name: Running Test suite
+          command: npm run test
+      - run:
+          name: Testing
+          command: |
+            ls -al
+  # deployment:
+  #   machine:
+  #     image: default
+  #   steps:
+  #     - add_ssh_keys:
+  #         fingerprints:
+  #           - "d7:d4:19:35:d0:2b:63:d0:7d:22:84:c5:fe:71:97:8e"
+  #     - attach_workspace:
+  #         at: .
+  #     - run:
+  #         name: Deploy Over SSH
+  #         command: |
+  #           ls -la
+  #           rsync -a -e 'ssh -p 18765' ./dist/ $SSH_USER@$SSH_HOST:www/dev.lukecochrane.ca/public_html
+  #           # ssh $SSH_USER@$SSH_HOST -p 18765 "cd www/dev.lukecochrane.ca/public_html; ls -l"
+workflows:
+  build-test-and-deploy:
+      jobs:
+        - build
+        - test:
+            requires:
+              - build
+        - cypress/run:
+            start: npm run start
+            wait-on: 'http://127.0.0.1:8080'
+            requires:
+              - build
+            filters:
+              branches:
+                only:
+                  - master
+                  - staging
+                  - production
+        # - deployment:
+        #     requires:
+        #       - test
+        #       - cypress/run
+        #     filters:
+        #       branches:
+        #         only:
+        #           - staging
+        #           - production
