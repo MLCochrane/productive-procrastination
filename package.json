@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --watch --config ./config/webpack.dev.js",
     "build": "webpack --config ./config/webpack.prod.js",
+    "start": "npm run build && npx http-server dist",
     "test": "jest ./src/js",
     "watch": "jest --watch --verbose",
     "check-types": "tsc"
