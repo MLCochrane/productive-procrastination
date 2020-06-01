@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "webpack-dev-server --watch --config ./config/webpack.dev.js",
     "build": "webpack --config ./config/webpack.prod.js",
-    "start": "npm run build && npx http-server dist",
+    "start": "npm run build && npx http-server /dist",
     "test": "jest ./src/js",
     "watch": "jest --watch --verbose",
     "check-types": "tsc"
@@ -40,6 +40,7 @@
     "handlebars": "^4.7.6",
     "handlebars-loader": "^1.7.1",
     "html-loader": "^0.5.5",
+    "http-server": "^0.12.3",
     "image-webpack-loader": "^4.6.0",
     "jest": "^25.5.4",
     "lodash": "^4.17.15",
