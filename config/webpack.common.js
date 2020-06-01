@@ -17,7 +17,7 @@ const pages = paths.map((el) => new HtmlWebpackPlugin({ // eslint-disable-line n
 
 module.exports = {
   entry: {
-    app: ['@babel/polyfill', './src/app.js'],
+    app: ['@babel/polyfill', './src/app.ts'],
   },
   output: {
     filename: '[name].bundle.js',
@@ -28,7 +28,7 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.js$/,
+        test: /\.ts$/,
         exclude: /(node_modules | bower_components)/,
         loader: 'babel-loader',
       },
@@ -61,6 +61,9 @@ module.exports = {
         ],
       },
     ],
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
   },
   plugins: [
     new webpack.DefinePlugin({

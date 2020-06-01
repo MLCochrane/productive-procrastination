@@ -1,5 +1,6 @@
 {
   "presets": [
+    "@babel/preset-typescript",
     ["@babel/env", {
       "modules": false,
       "targets": "> 0.25%, not dead"
@@ -12,5 +13,9 @@
       ]
     }
   },
-  "plugins": ["@babel/plugin-syntax-dynamic-import"]
+  "plugins": [
+    "@babel/plugin-syntax-dynamic-import",
+    "@babel/proposal-class-properties",
+    "@babel/proposal-object-rest-spread"
+  ]
 }

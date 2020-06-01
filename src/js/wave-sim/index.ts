@@ -17,6 +17,11 @@ import {
   OrbitControls,
 } from 'three/examples/jsm/controls/OrbitControls';
 
+import {
+  vert,
+  frag,
+} from './lighting-shader';
+
 
 /*
  *  Class for wave simulation
@@ -159,7 +164,7 @@ export default class WaterSim {
           ambient: new Vector3(0.1, 0.55, 1.0),
           diffuse: new Vector3(0.1, 0.55, 1.0),
           specular: specularCol,
-          shininess: 32.0,
+          shininess: 128.0,
         },
       },
       spotLight: {
@@ -221,7 +226,7 @@ export default class WaterSim {
 
 
     const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
-    const geo = new PlaneBufferGeometry(100, 100, 50, 50);
+    const geo = new PlaneBufferGeometry(200, 200, 50, 50);
 
     waterLoader.load(`${ASSET_PATH}/assets/images/wave-normal.jpg`, (res) => {
       uniforms.normalMap.value = res;
@@ -235,8 +240,8 @@ export default class WaterSim {
         USE_TANGENT: true,
       },
       uniforms,
-      vertexShader: document.getElementById('vertexshader').textContent,
-      fragmentShader: document.getElementById('fragmentshader').textContent,
+      vertexShader: vert,
+      fragmentShader: frag,
     });
     this.mesh = new Mesh(box, mat);
 
