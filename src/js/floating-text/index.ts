@@ -46,6 +46,7 @@ export default class FloatingText {
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.handleResize = this.handleResize.bind(this);
     this.handleClick = this.handleClick.bind(this);
+    this.render = this.render.bind(this);
 
     this.bindEvents();
     this.init();

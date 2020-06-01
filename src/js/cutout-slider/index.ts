@@ -1,4 +1,8 @@
-import { gsap, CSSPlugin } from 'gsap';
+import {
+  gsap,
+  CSSPlugin,
+  Power3
+} from 'gsap';
 
 gsap.registerPlugin(CSSPlugin);
 
@@ -33,7 +37,7 @@ export default class CutoutSlider {
       offset: window.innerWidth/3,
     }
 
-    this.tl = new TimelineLite();
+    this.tl = gsap.timeline();
 
     this.init = this.init.bind(this);
     this.bindEvents = this.bindEvents.bind(this);
@@ -85,7 +89,7 @@ export default class CutoutSlider {
     const xPos = e.clientX / window.innerWidth;
     const yPos = e.clientY / window.innerHeight;
 
-    TweenMax.to(this.selectors.circle, 2, {
+    gsap.to(this.selectors.circle, 2, {
       x: 200 * xPos,
       y: 200 * yPos
     });

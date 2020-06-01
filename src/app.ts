@@ -1,11 +1,13 @@
 import './scss/app.scss';
 import barba, { ISchemaPage } from '@barba/core';
-import { TimelineLite } from 'gsap';
+import { gsap, CSSPlugin } from 'gsap';
 import { initMenu, closeMenu, } from './js/global/header';
 import {
 	Card,
 	createCard,
 } from './js/global/card';
+
+gsap.registerPlugin(CSSPlugin);
 
 interface Sketch {
 	destroy?: Function;
@@ -62,7 +64,7 @@ async function runSketch(route: ISchemaPage) {
 function pageTransiton(cur: HTMLElement, next: HTMLElement) {
 	return new Promise(resolve => {
 		// Animation handles both current and next pages
-		let tl = new TimelineLite();
+		let tl = gsap.timeline();
 		tl
 		.set(next, {immediateRender: true, autoAlpha: 0, y: -5}, 0)
 		.to(cur, .5, {autoAlpha: 0, y: -5}, 0)
