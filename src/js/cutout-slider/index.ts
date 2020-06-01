@@ -1,13 +1,19 @@
-import { TimelineLite } from "gsap";
+import { gsap, CSSPlugin } from 'gsap';
+
+gsap.registerPlugin(CSSPlugin);
 
 /*
  *  Class for cutout slider sketch
  */
 export default class CutoutSlider {
-  constructor() {
+  selectors: {[key: string]: any};
+  dims: { offset: number; };
+  tl: GSAPTimeline | null;
+
     /**
-     * Initlaizes variables for class instance and binds methods
-     */
+   * Initlaizes variables for class instance and binds methods
+   */
+  constructor() {
     this.selectors = {
       box: document.getElementsByClassName('wrap')[0],
       title: document.getElementsByClassName('item'),
@@ -57,7 +63,7 @@ export default class CutoutSlider {
    * @memberof CutoutSlider.prototype
    */
   handleAdvance() {
-    this.tl.play();
+    this.tl?.play();
   }
 
   /**
@@ -66,8 +72,8 @@ export default class CutoutSlider {
    * @memberof CutoutSlider.prototype
    */
   handleReset() {
-    this.tl.time(0);
-    this.tl.pause();
+    this.tl?.time(0);
+    this.tl?.pause();
   }
 
   /**
@@ -75,9 +81,9 @@ export default class CutoutSlider {
    * @function handleMouseMove
    * @memberof CutoutSlider.prototype
    */
-  handleMouseMove() {
-    const xPos = event.clientX / window.innerWidth;
-    const yPos = event.clientY / window.innerHeight;
+  handleMouseMove(e: MouseEvent) {
+    const xPos = e.clientX / window.innerWidth;
+    const yPos = e.clientY / window.innerHeight;
 
     TweenMax.to(this.selectors.circle, 2, {
       x: 200 * xPos,
@@ -107,8 +113,7 @@ export default class CutoutSlider {
    * @memberof CutoutSlider.prototype
    */
   initTimeline() {
-    this.tl
-      .set(this.selectors.title, {x: this.dims.offset})
+    this.tl?.set(this.selectors.title, {x: this.dims.offset})
       .set(this.selectors.box, {backgroundColor: "rgb(190,254,251)"})
       .set(this.selectors.border, {fill: "rgb(190,254,251)"})
       .addPause()
