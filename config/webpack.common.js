@@ -67,7 +67,7 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      SKETCH_PATHS: JSON.stringify(paths.concat('homepage')),
+      SKETCH_PATHS: JSON.stringify(paths),
     }),
     new HtmlWebpackPlugin({
       inject: {},
