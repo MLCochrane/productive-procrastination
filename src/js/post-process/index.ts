@@ -24,6 +24,30 @@ import { PixelShader } from './pixel-toon-shader';
  */
 
 export default class PostProcess {
+  renderer: WebGLRenderer | null;
+  scene: Scene | null;
+  camera: PerspectiveCamera | null;
+  mesh: Mesh | null;
+  xVal: number;
+  yVal: number;
+  curX: number;
+  curY: number;
+  canvas: HTMLElement | null;
+  dims: any;
+  bufferFile: string;
+  textureFileOne: string;
+  textureFileTwo: string;
+  textureFileThree: string;
+  textureFileFour: string;
+  imageFile: string;
+  buttons: { smaller: HTMLElement | null; bigger: HTMLElement | null; invert: HTMLElement | null; texture: HTMLElement | null; toggle: HTMLElement | null; };
+  params: { pixelSize: number; invert: boolean; textureIndex: number; enabled: boolean; };
+  texturesLoaded: boolean;
+  light: PointLight | null;
+  textures: any;
+  composer: EffectComposer | null;
+  pixelPass: any | null;
+  raf: number | null;
   /**
    * Initlaizes variables for class instance.
    */
@@ -36,7 +60,7 @@ export default class PostProcess {
     this.yVal = 0;
     this.curX = window.innerWidth;
     this.curY = window.innerHeight;
-    this.canvas = document.getElementById('PostProcess');
+    this.canvas = document.getElementById('PostProcess') as HTMLCanvasElement;
     this.dims = this.canvas.getBoundingClientRect();
     this.bufferFile = `${ASSET_PATH}/assets/skull.obj `;
     this.textureFileOne = `${ASSET_PATH}/assets/images/dot-2.jpg`;
@@ -71,6 +95,11 @@ export default class PostProcess {
       enabled: true,
     };
 
+    this.light = null;
+    this.raf = null;
+    this.composer = null;
+    this.pixelPass = null;
+
     this.texturesLoaded = false;
 
     this.bindEvents();
@@ -84,18 +113,23 @@ export default class PostProcess {
    */
   bindEvents() {
     window.addEventListener('resize', this.onWindowResize);
-
     window.addEventListener('mousemove', this.handleMouseMove);
 
-    this.buttons.smaller.addEventListener('click', this.handleButtonPress('smaller'));
-
-    this.buttons.bigger.addEventListener('click', this.handleButtonPress('bigger'));
-
-    this.buttons.invert.addEventListener('click', this.handleButtonPress('invert'));
-
-    this.buttons.texture.addEventListener('click', this.handleButtonPress('texture'));
-
-    this.buttons.toggle.addEventListener('click', this.handleButtonPress('toggle'));
+    if (this.buttons.smaller) {
+      this.buttons.smaller.removeEventListener('click', this.handleButtonPress('smaller'));
+    }
+    if (this.buttons.bigger) {
+      this.buttons.bigger.removeEventListener('click', this.handleButtonPress('bigger'));
+    }
+    if (this.buttons.invert) {
+      this.buttons.invert.removeEventListener('click', this.handleButtonPress('invert'));
+    }
+    if (this.buttons.texture) {
+      this.buttons.texture.removeEventListener('click', this.handleButtonPress('texture'));
+    }
+    if (this.buttons.toggle) {
+      this.buttons.toggle.removeEventListener('click', this.handleButtonPress('toggle'));
+	  }
   }
 
   /**
@@ -103,7 +137,7 @@ export default class PostProcess {
    * @function handleMouseMove
    * @memberof PostProcess.prototype
    */
-  handleMouseMove(e) {
+  handleMouseMove(e: MouseEvent) {
     this.xVal = (e.clientX / window.innerWidth) - 0.5;
     this.yVal = (e.clientY / window.innerHeight) - 0.5;
   }
@@ -114,7 +148,7 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    * @param {String} type - Button type to pick which param should be changed
    */
-  handleButtonPress(type) {
+  handleButtonPress(type: string) {
     return () => {
       switch (type) {
         case 'smaller':
@@ -172,7 +206,7 @@ export default class PostProcess {
     this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 50);
 
     this.camera.position.z = 10;
-    this.scene.add(this.camera);
+    this.scene?.add(this.camera);
   }
 
   /**
@@ -184,7 +218,7 @@ export default class PostProcess {
     this.light = new PointLight(0xffffff, 10, 10, 2);
     this.light.position.set(-5, 5, 5);
     this.light.lookAt(0, 0, 0);
-    this.scene.add(this.light);
+    this.scene?.add(this.light);
   }
 
   /**
@@ -193,15 +227,15 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    * @param {String} bufferFile - String representing path to buffer geometry file to load
    */
-  initModel(bufferFile) {
+  initModel(bufferFile: string) {
     const loader = new OBJLoader();
     loader.load(bufferFile, (res) => {
-      [this.mesh] = res.children;
+      [this.mesh] = res.children as Mesh[];
       this.mesh.material = new MeshLambertMaterial({
         color: 0xeeeeee,
       });
       this.mesh.position.set(0, -2, 0);
-      this.scene.add(this.mesh);
+      this.scene?.add(this.mesh);
       this.setup();
     }, (xhr) => {
       // console.log((xhr.loaded / xhr.total * 100) + '% loaded');
@@ -222,7 +256,7 @@ export default class PostProcess {
     });
     const mesh = new Mesh(geo, mat);
     mesh.position.z = -2;
-    this.scene.add(mesh);
+    this.scene?.add(mesh);
   }
 
   /**
@@ -231,8 +265,8 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   onWindowResize() {
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(this.curX, this.curY);
+    this.camera?.updateProjectionMatrix();
+    this.renderer?.setSize(this.curX, this.curY);
   }
 
   /**
@@ -247,11 +281,11 @@ export default class PostProcess {
 
     this.renderer = new WebGLRenderer({
       antialias: true,
-      canvas: this.canvas,
+      canvas: this.canvas as HTMLCanvasElement,
       alpha: true,
     });
-    this.renderer.setPixelRatio(window.devicePixelRatio);
-    this.renderer.setSize(this.curX, this.curY);
+    this.renderer?.setPixelRatio(window.devicePixelRatio);
+    this.renderer?.setSize(this.curX, this.curY);
     this.processing();
     this.animate();
   }
@@ -269,10 +303,14 @@ export default class PostProcess {
       loader.load(this.textureFileThree),
       loader.load(this.textureFileFour),
     ];
-    this.composer = new EffectComposer(this.renderer);
-    this.composer.addPass(new RenderPass(this.scene, this.camera));
+    this.composer = new EffectComposer(this.renderer as WebGLRenderer);
+    this.composer.addPass(new RenderPass(this.scene as Scene, this.camera as PerspectiveCamera));
     this.pixelPass = new ShaderPass(PixelShader, 'texOne');
-    this.pixelPass.uniforms.resolution.value = new Vector2(window.innerWidth, window.innerHeight);
+    if (this.pixelPass.uniforms.resolution)
+		this.pixelPass.uniforms.resolution.value = new Vector2(
+			window.innerWidth,
+			window.innerHeight
+		);
     this.pixelPass.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
 
     this.updateShader();
@@ -292,7 +330,7 @@ export default class PostProcess {
       texturesLoaded,
     } = this;
 
-    if (!texturesLoaded) return;
+    if (!texturesLoaded || !pixelPass) return;
     pixelPass.enabled = params.enabled;
     pixelPass.uniforms.pixelSize.value = params.pixelSize;
     pixelPass.uniforms.innerRepeatLength.value = params.textureIndex === 3 ? 5 : 1;
@@ -312,8 +350,8 @@ export default class PostProcess {
   animate() {
     this.raf = requestAnimationFrame(this.animate);
 
-    this.mesh.rotation.x = (this.yVal);
-    this.mesh.rotation.y = (this.xVal) - 1.574;
+    if (this.mesh) this.mesh.rotation.x = (this.yVal);
+    if (this.mesh) this.mesh.rotation.y = (this.xVal) - 1.574;
     this.updateShader();
     this.render();
   }
@@ -324,7 +362,7 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   render() {
-    this.composer.render();
+    this.composer?.render();
   }
 
   /**
@@ -341,13 +379,23 @@ export default class PostProcess {
       onWindowResize,
     } = this;
 
-    cancelAnimationFrame(raf);
+    cancelAnimationFrame(raf as number);
     window.addEventListener('mousemove', handleMouseMove);
     window.removeEventListener('resize', onWindowResize);
-    buttons.smaller.removeEventListener('click', handleButtonPress);
-    buttons.bigger.removeEventListener('click', handleButtonPress);
-    buttons.invert.removeEventListener('click', handleButtonPress);
-    buttons.texture.removeEventListener('click', handleButtonPress);
-    buttons.toggle.removeEventListener('click', handleButtonPress);
+    if (buttons.smaller) {
+      buttons.smaller.removeEventListener('click', handleButtonPress('smaller'));
+    }
+    if (buttons.bigger) {
+      buttons.bigger.removeEventListener('click', handleButtonPress('bigger'));
+    }
+    if (buttons.invert) {
+    buttons.invert.removeEventListener('click', handleButtonPress('invert'));
+    }
+    if (buttons.texture) {
+      buttons.texture.removeEventListener('click', handleButtonPress('texture'));
+    }
+    if (buttons.toggle) {
+      buttons.toggle.removeEventListener('click', handleButtonPress('toggle'));
+	  }
   }
 }

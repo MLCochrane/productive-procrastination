@@ -1,4 +1,4 @@
-import { gsap, CSSPlugin } from 'gsap';
+import { gsap, CSSPlugin, Power0 } from 'gsap';
 
 gsap.registerPlugin(CSSPlugin);
 
@@ -69,7 +69,6 @@ export default class ScrollingProjects {
       this.tl.kill();
       this.tl = null;
     }
-    //console.log('Destroy has been called');
   }
 
   /**
@@ -94,28 +93,27 @@ export default class ScrollingProjects {
   handleWheel(e: WheelEvent) {
     const {
       tl,
-      currentOffset,
       maxHeight,
     } = this;
 
     this.currentOffset = this.getYTranslate(this.current);
-    const percentOffset = +((currentOffset / maxHeight) * 100).toFixed(4);
+    const percentOffset = +((this.currentOffset / maxHeight) * 100).toFixed(4);
 
     // Will pause timeline if currently running to handle next steps
     if (tl?.isActive()) {
       tl.pause();
     }
 
-    if (e.deltaY < 0) {
+    if (e.deltaY > 0) {
       // scrolling down
-      this.container.style.transform = (currentOffset > (maxHeight * -0.75))
-        ? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
-        : 'translate(-50%, -25%)';
+      this.container.style.transform = (this.currentOffset > (maxHeight * -.5))
+        ? `translate3d(0px, ${percentOffset - (e.deltaY * 0.01)}%, 0px)`
+        : 'translate3d(0px, 0%, 0px)';
     } else {
       // scrolling up
-      this.container.style.transform = (currentOffset < (maxHeight * -0.25))
-        ? `translate(-50%, ${percentOffset - (e.deltaY * 0.01)}%)`
-        : 'translate(-50%, -75%)';
+      this.container.style.transform = (this.currentOffset < 0)
+        ? `translate3d(0px, ${percentOffset - (e.deltaY * 0.01)}%, 0px)`
+        : 'translate3d(0px, -50%, 0px)';
     }
 
     /*
@@ -134,8 +132,8 @@ export default class ScrollingProjects {
       *  and mulitply it by the loop time to get a value in seconds
       */
       const timelinePosition = (
-        this.loopLength * (((((percentOffset - (e.deltaY * 0.01)) * -1) - 25) / 0.5))) / 100;
-      if (e.deltaY < 0) {
+        this.loopLength * (((((percentOffset - (e.deltaY * 0.01)) * -1) - 0) / 0.5))) / 100;
+      if (e.deltaY > 0) {
         tl?.play(timelinePosition);
       } else {
         tl?.reverse(timelinePosition);
@@ -157,8 +155,8 @@ export default class ScrollingProjects {
     this.tl = gsap.timeline();
     this.tl.fromTo(
       container,
-      { x: '-50%', y: '-25%' },
-      { x: '-50%', y: '-75%', ease: Power0.easeNone, duration: loopLength },
+      { y: '0%' },
+      { y: '-50%', ease: Power0.easeNone, duration: loopLength },
       0,
     );
     this.tl.repeat(5);
