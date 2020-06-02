@@ -27,6 +27,14 @@ import {
  *  Class for wave simulation
  */
 export default class WaterSim {
+  renderer: WebGLRenderer | null;
+  scene: Scene | null;
+  camera: PerspectiveCamera | null;
+  canvas: HTMLElement | null;
+  startTime: number;
+  mesh: Mesh | null;
+  controls: OrbitControls | null;
+  raf: number;
   constructor() {
     /**
      * Initlaizes variables for class instance.
@@ -37,6 +45,10 @@ export default class WaterSim {
 
     this.canvas = document.getElementById('Sandbox');
     this.startTime = Date.now();
+
+    this.mesh = null;
+    this.controls = null;
+    this.raf = 0;
 
     this.init = this.init.bind(this);
     this.initWaves = this.initWaves.bind(this);
@@ -72,9 +84,9 @@ export default class WaterSim {
       renderer,
     } = this;
 
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+    if (camera) camera.aspect = window.innerWidth / window.innerHeight;
+    camera?.updateProjectionMatrix();
+    renderer?.setSize(window.innerWidth, window.innerHeight);
   }
 
   /**
@@ -122,7 +134,7 @@ export default class WaterSim {
 
     this.camera.position.set(3, 30, -60);
     this.camera.lookAt(0, 0, 0);
-    scene.add(this.camera);
+    scene?.add(this.camera);
   }
 
   /**
@@ -140,89 +152,88 @@ export default class WaterSim {
     const waterLoader = new TextureLoader();
     // copies direction camera is looking in world space
     const lightDir = new Vector3(0, 0, 0);
-    camera.getWorldDirection(lightDir);
+    camera?.getWorldDirection(lightDir);
 
-    // const ambientCol = new Vector3(1.0, 0.5, 0.1);
-    // const diffuseCol = new Vector3(1.0, 0.5, 0.1);
     const specularCol = new Vector3(0.5, 0.5, 0.5);
 
     const uniforms = {
-      u_resolution: {
-        value: new Vector2(window.innerWidth, window.innerHeight),
-      },
-      scale: {
-        value: new Vector4(1, 1, 1, 1), // x, y, z, scale
-      },
-      time: {
-        value: 1.2,
-      },
-      ambientStrength: {
-        value: 0.3,
-      },
-      material: {
-        value: {
-          ambient: new Vector3(0.1, 0.55, 1.0),
-          diffuse: new Vector3(0.1, 0.55, 1.0),
-          specular: specularCol,
-          shininess: 128.0,
-        },
-      },
-      spotLight: {
-        value: {
-          position: new Vector3(camera.position),
-          direction: lightDir,
-          ambient: new Vector3(0.13, 0.375, 0.61),
-          diffuse: new Vector3(0.13, 0.375, 0.61),
-          specular: specularCol,
-          constant: 1.0,
-          linear: 0.09,
-          quadratic: 0.032,
-          innerCutOff: Math.cos(Math.PI / 12),
-          outerCutOff: Math.cos(Math.PI / 7),
-        },
-      },
-      pointLights: {
-        value: [{
-          position: new Vector3(-13.0, 2.5, -5.31),
-          ambient: new Vector3(1.0, 1.0, 0.0),
-          diffuse: new Vector3(1.0, 1.0, 0.0),
-          specular: specularCol,
-          constant: 1.0,
-          linear: 0.09,
-          quadratic: 0.032,
-        },
-        {
-          position: new Vector3(3.0, 3.5, 0.31),
-          ambient: new Vector3(0.0, 1.0, 1.0),
-          diffuse: new Vector3(0.0, 1.0, 1.0),
-          specular: specularCol,
-          constant: 1.0,
-          linear: 0.09,
-          quadratic: 0.032,
-        },
-        {
-          position: new Vector3(12.0, 3.0, 2.0),
-          ambient: new Vector3(1.0, 0.0, 1.0),
-          diffuse: new Vector3(1.0, 0.0, 1.0),
-          specular: specularCol,
-          constant: 1.0,
-          linear: 0.09,
-          quadratic: 0.032,
-        },
-        ],
-      },
-      dirLight: {
-        value: {
-          direction: new Vector3(0.2, -5.0, 0.5),
-          ambient: new Vector3(0.0, 0.33, 0.29),
-          diffuse: new Vector3(0.0, 0.33, 0.29),
-          specular: new Vector3(0.5, 0.5, 0.5),
-        },
-      },
-      normalMap: {
-        value: null,
-      },
-    };
+			u_resolution: {
+				value: new Vector2(window.innerWidth, window.innerHeight),
+			},
+			scale: {
+				value: new Vector4(1, 1, 1, 1), // x, y, z, scale
+			},
+			time: {
+				value: 1.2,
+			},
+			ambientStrength: {
+				value: 0.3,
+			},
+			material: {
+				value: {
+					ambient: new Vector3(0.1, 0.55, 1.0),
+					diffuse: new Vector3(0.1, 0.55, 1.0),
+					specular: specularCol,
+					shininess: 128.0,
+				},
+			},
+			spotLight: {
+				value: {
+					position: camera?.position,
+					direction: lightDir,
+					ambient: new Vector3(0.13, 0.375, 0.61),
+					diffuse: new Vector3(0.13, 0.375, 0.61),
+					specular: specularCol,
+					constant: 1.0,
+					linear: 0.09,
+					quadratic: 0.032,
+					innerCutOff: Math.cos(Math.PI / 12),
+					outerCutOff: Math.cos(Math.PI / 7),
+				},
+			},
+			pointLights: {
+				value: [
+					{
+						position: new Vector3(-13.0, 2.5, -5.31),
+						ambient: new Vector3(1.0, 1.0, 0.0),
+						diffuse: new Vector3(1.0, 1.0, 0.0),
+						specular: specularCol,
+						constant: 1.0,
+						linear: 0.09,
+						quadratic: 0.032,
+					},
+					{
+						position: new Vector3(3.0, 3.5, 0.31),
+						ambient: new Vector3(0.0, 1.0, 1.0),
+						diffuse: new Vector3(0.0, 1.0, 1.0),
+						specular: specularCol,
+						constant: 1.0,
+						linear: 0.09,
+						quadratic: 0.032,
+					},
+					{
+						position: new Vector3(12.0, 3.0, 2.0),
+						ambient: new Vector3(1.0, 0.0, 1.0),
+						diffuse: new Vector3(1.0, 0.0, 1.0),
+						specular: specularCol,
+						constant: 1.0,
+						linear: 0.09,
+						quadratic: 0.032,
+					},
+				],
+			},
+			dirLight: {
+				value: {
+					direction: new Vector3(0.2, -5.0, 0.5),
+					ambient: new Vector3(0.0, 0.33, 0.29),
+					diffuse: new Vector3(0.0, 0.33, 0.29),
+					specular: new Vector3(0.5, 0.5, 0.5),
+				},
+			},
+			normalMap: {
+				value: null as any,
+			},
+		};
 
 
     const box = new BoxBufferGeometry(2, 2, 2, 3, 3, 3);
@@ -255,7 +266,7 @@ export default class WaterSim {
     const floorMesh = new Mesh(geo, mat);
     floorMesh.rotation.x = -1.567;
     floorMesh.position.set(-2, 0, 0);
-    scene.add(floorMesh);
+    scene?.add(floorMesh);
     setup();
   }
 
@@ -273,12 +284,12 @@ export default class WaterSim {
 
     this.renderer = new WebGLRenderer({
       antialias: true,
-      canvas,
+      canvas: canvas as HTMLCanvasElement,
     });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     this.renderer.setPixelRatio(window.devicePixelRatio);
 
-    this.controls = new OrbitControls(camera, this.renderer.domElement);
+    this.controls = new OrbitControls(camera as PerspectiveCamera, this.renderer.domElement);
     this.controls.minDistance = 10;
     this.controls.maxDistance = 100;
     animate();
@@ -298,7 +309,7 @@ export default class WaterSim {
 
     this.raf = requestAnimationFrame(animate);
 
-    controls.update();
+    controls?.update();
 
     render();
   }
@@ -321,16 +332,18 @@ export default class WaterSim {
     const x = -10 * Math.cos(delta * 0.0005);
 
     const lightDir = new Vector3(0, 0, 0);
-    camera.getWorldDirection(lightDir);
+    camera?.getWorldDirection(lightDir);
 
-    mesh.material.uniforms.time.value = delta * 0.001;
-    mesh.material.uniforms.spotLight.value.position = camera.position;
-    mesh.material.uniforms.spotLight.value.direction = lightDir;
-    mesh.material.uniforms.pointLights.value[0].position = new Vector3(x, 3.0, z);
-    mesh.material.uniforms.pointLights.value[1].position = new Vector3(x * 2, 3.0, x * 2);
-    mesh.material.uniforms.pointLights.value[2].position = new Vector3(x * 4, 3.0, z * 4);
+    if (!mesh) return;
+    const mat = mesh.material as ShaderMaterial;
+    mat.uniforms.time.value = delta * 0.001;
+    mat.uniforms.spotLight.value.position = camera?.position;
+    mat.uniforms.spotLight.value.direction = lightDir;
+    mat.uniforms.pointLights.value[0].position = new Vector3(x, 3.0, z);
+    mat.uniforms.pointLights.value[1].position = new Vector3(x * 2, 3.0, x * 2);
+    mat.uniforms.pointLights.value[2].position = new Vector3(x * 4, 3.0, z * 4);
 
-    renderer.render(scene, camera);
+    renderer?.render(scene as Scene, camera as PerspectiveCamera);
   }
 
   /**
