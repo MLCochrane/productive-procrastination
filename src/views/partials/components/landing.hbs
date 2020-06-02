@@ -7,19 +7,22 @@
 						<div class="grid-item__content">
 								<div class="grid-item__image-wrap" data-key={{@index}}>
 									<img
-										srcset="
+										{{!-- width="{{ this.width }}"
+										height="{{ this.height }}" --}}
+										data-srcset="
 										{{#each this.imgs.wide.srcs }}
 											{{../../asset_path}}{{this.path}} {{ this.w }}w,
 										{{/each}}
 										"
-										sizes="
+										data-sizes="
 										(max-width: 699px) 458px,
 										(max-width: 1200px) 915px,
 										(max-width: 1500px) 1373px,
 										(min-width: 3000px) 3660px
 										1830px"
-										src="{{../asset_path}}{{ this.imgs.wide.img }}"
+										data-src="{{../asset_path}}{{ this.imgs.wide.img }}"
 										alt="{{ this.imgs.wide.alt }}"
+										data-im-lazy="solazy"
 										class="grid-item__image grid-item__image--wide">
 									<div class="grid-item__image-border"></div>
 								</div>

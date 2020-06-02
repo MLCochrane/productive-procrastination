@@ -6,6 +6,8 @@ import {
 	Card,
 	createCard,
 } from './js/global/card';
+import Casper from './js/global/casper';
+import LazyBoi from './js/global/lazyboi';
 
 gsap.registerPlugin(CSSPlugin);
 
@@ -15,6 +17,8 @@ interface Sketch {
 
 // Global header logic
 initMenu();
+const casper = new Casper(null, 0);
+const lazyBoi = LazyBoi();
 let card: Card | null = null;
 let activeSketch: Sketch | null = null;
 
@@ -24,19 +28,32 @@ barba.init({
 	transitions: [
 		{
 			sync: true,
-			once: data => {
+			once: ({ next }) => {
 				// Initial load
 				card = createCard();
-				runSketch(data.next);
+				runSketch(next);
+				if (next.namespace === 'homepage') {
+					casper.init();
+					lazyBoi.fillImages();
+				}
 			},
 			enter: ({next}) => {
-				if (next.namespace === 'homepage') activeSketch = null; // REMOVE ONCE HOMEPAGE LOGIC DONE
+				if (next.namespace === 'homepage') {
+					casper.init();
+					lazyBoi.fillImages();
+					activeSketch = null; // REMOVE ONCE HOMEPAGE LOGIC DONE
+				}
 				closeMenu();
 				runSketch(next);
 			},
 			leave: async ({ current, next }) => {
 				// Close drawer if open
 				// if (current.namespace !== 'homepage') card.unbindEvents(current.container);
+
+				if (casper.watchList.length !== 0) {
+          casper.clearList();
+          lazy.clearImages();
+        }
 
 				/*
 				* Responsibility of each sketch to determine if
