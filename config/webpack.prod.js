@@ -6,15 +6,13 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const CopyPlugin = require('copy-webpack-plugin');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
   mode: 'production',
   optimization: {
-    minimizer: [
-      new TerserJSPlugin({}),
-      new OptimizeCSSAssetsPlugin({}),
-    ],
+    moduleIds: 'hashed',
     runtimeChunk: 'single',
     splitChunks: {
       cacheGroups: {
@@ -25,6 +23,10 @@ module.exports = merge(common, {
         },
       },
     },
+    minimizer: [
+      new TerserJSPlugin({}),
+      new OptimizeCSSAssetsPlugin({}),
+    ],
   },
   module: {
     rules: [
@@ -67,5 +69,9 @@ module.exports = merge(common, {
       ASSET_PATH: JSON.stringify(''),
     }),
     new webpack.HashedModuleIdsPlugin(),
+    new CopyPlugin([
+      { from: 'src/assets/', to: 'assets/' },
+      { from: 'src/seo/', to: '.' },
+    ]),
   ],
 });
