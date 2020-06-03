@@ -21,7 +21,7 @@ export function createCard(): Card {
     // },
 
     toggleClasses(card: HTMLElement, toggle: HTMLElement) : void {
-      card.classList.toggle('isOpen');
+      card.classList.toggle('isClosed');
       toggle.classList.toggle('isactive');
     },
   };

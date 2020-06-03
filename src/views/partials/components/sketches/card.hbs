@@ -1,4 +1,11 @@
 <div class="card">
+	<div class="card__toggle isactive">
+		<svg x="0px" y="0px" viewBox="0 0 24 24" width="24" height="24">
+			<circle class="st0" cx="12.1" cy="12.1" r="11" />
+			<polygon
+				points="18.1,7.5 16.7,6.1 12.1,10.7 7.5,6.1 6.1,7.5 10.7,12.1 6.1,16.7 7.5,18.1 12.1,13.5 16.7,18.1 18.1,16.7 13.5,12.1 	" />
+		</svg>
+	</div>
 	<div class="card__content">
 		<h1 class="card__title">{{ card.title }}</h1>
 		<p class="card__date">{{ card.date }}</p>
@@ -18,11 +25,4 @@
 			</ul>
 		{{/if}}
 	</div>
-</div>
-<div class="card__toggle">
-	<svg x="0px" y="0px" viewBox="0 0 24 24" width="24" height="24">
-		<circle class="st0" cx="12.1" cy="12.1" r="11" />
-		<polygon
-			points="18.1,7.5 16.7,6.1 12.1,10.7 7.5,6.1 6.1,7.5 10.7,12.1 6.1,16.7 7.5,18.1 12.1,13.5 16.7,18.1 18.1,16.7 13.5,12.1 	" />
-	</svg>
 </div>

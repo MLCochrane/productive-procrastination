@@ -24,7 +24,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      ASSET_PATH: JSON.stringify('./src'),
+      ASSET_PATH: JSON.stringify('/src'),
     }),
   ],
 });
