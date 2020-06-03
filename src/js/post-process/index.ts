@@ -116,19 +116,19 @@ export default class PostProcess {
     window.addEventListener('mousemove', this.handleMouseMove);
 
     if (this.buttons.smaller) {
-      this.buttons.smaller.removeEventListener('click', this.handleButtonPress('smaller'));
+      this.buttons.smaller.addEventListener('click', this.handleButtonPress('smaller'));
     }
     if (this.buttons.bigger) {
-      this.buttons.bigger.removeEventListener('click', this.handleButtonPress('bigger'));
+      this.buttons.bigger.addEventListener('click', this.handleButtonPress('bigger'));
     }
     if (this.buttons.invert) {
-      this.buttons.invert.removeEventListener('click', this.handleButtonPress('invert'));
+      this.buttons.invert.addEventListener('click', this.handleButtonPress('invert'));
     }
     if (this.buttons.texture) {
-      this.buttons.texture.removeEventListener('click', this.handleButtonPress('texture'));
+      this.buttons.texture.addEventListener('click', this.handleButtonPress('texture'));
     }
     if (this.buttons.toggle) {
-      this.buttons.toggle.removeEventListener('click', this.handleButtonPress('toggle'));
+      this.buttons.toggle.addEventListener('click', this.handleButtonPress('toggle'));
 	  }
   }
 

@@ -1,17 +1,26 @@
 .card	{
 	position: absolute;
-	transform: translateY(-50%) translateX(-20px);
-	top: 50%;
-	right: 50px;
-	width: 70vw;
-	max-width: 300px;
+	bottom: 0%;
+	right: 0%;
+	width: 50vw;
+	// height: 50vh;
 	padding: 20px;
 	border: 1px solid $dark-grey;
-	opacity: 0;
 	background: white;
-	visibility: hidden;
-	&.isOpen {
-		animation: showCard 300ms 1 forwards;
+	transition: height 300ms;
+	@include media-query($big) {
+		height: 50vh;
+	}
+	&.isClosed {
+		height: 0px;
+		transform: translateY(50px);
+		.card__content {
+			visibility: hidden;
+		}
+		.card__toggle {
+    	transform: translate(-50%, calc(-50% - 25px));
+		}
+		// animation: hideCard 300ms 1 forwards;
 	}
 	&__title {
 		font-size: 20px;
@@ -50,8 +59,9 @@
 		cursor: pointer;
 		position: absolute;
     transform: translate(-50%,-50%);
-    top: 50%;
-		right: 0px;
+    top: 0px;
+		left: 0px;
+		transition: transform 300ms;
 		&.isactive {
 			svg {
 				transform: rotate(0deg);
@@ -65,13 +75,5 @@
 			fill: #fff;
 			stroke: $dark-grey;
 		}
-	}
-}
-
-@keyframes showCard {
-	to {
-		visibility: visible;
-		opacity: 1;
-		transform: translateY(-50%) translateX(0);
 	}
 }
