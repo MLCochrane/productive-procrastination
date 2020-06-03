@@ -52,7 +52,7 @@ barba.init({
 
 				if (casper.watchList.length !== 0) {
           casper.clearList();
-          lazy.clearImages();
+          lazyBoi.clearImages();
         }
 
 				/*

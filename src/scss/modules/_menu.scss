@@ -162,18 +162,15 @@
 		}
 		&-item {
 			font-family: $mainFont;
-			a {
-				text-decoration: none;
-				color: $light-grey;
-				transition: color 300ms;
-				&:hover {
-					color: $brand-yellow;
-				}
-			}
-			&.active {
-				a {
-					color: #000;
-				}
+		}
+		&-link {
+			display: block;
+			text-decoration: none;
+			color: $light-grey;
+			transition: color 300ms;
+
+			&:hover {
+				color: $brand-yellow;
 			}
 		}
 	}
@@ -211,14 +208,6 @@
 		}
 		@include media-query($large) {
 			font-size: 42px;
-		}
-	}
-
-	&__link {
-		transition: color 300ms;
-
-		&:hover {
-			color: $brand-yellow;
 		}
 	}
 }

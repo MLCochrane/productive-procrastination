@@ -69,9 +69,9 @@ module.exports = merge(common, {
       ASSET_PATH: JSON.stringify(''),
     }),
     new webpack.HashedModuleIdsPlugin(),
-    new CopyPlugin([{
-      from: 'src/assets/',
-      to: 'assets/',
-    }]),
+    new CopyPlugin([
+      { from: 'src/assets/', to: 'assets/' },
+      { from: 'src/seo/', to: '.' },
+    ]),
   ],
 });
