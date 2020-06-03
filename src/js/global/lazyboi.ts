@@ -10,8 +10,8 @@ export default function lazyBoi() {
 				lazyImage.sizes = lazyImage.dataset.sizes as string;
 				lazyImage.setAttribute('data-im-lazy', 'notlazy');
 				lazyImageObserver.unobserve(lazyImage);
-				// lazyImage.removeAttribute('height');
-				// lazyImage.removeAttribute('width');
+				lazyImage.removeAttribute('data-sizes');
+				lazyImage.removeAttribute('data-srcset');
 			}
 		});
 	});
