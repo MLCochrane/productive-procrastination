@@ -11,7 +11,7 @@
 										height="{{ this.height }}" --}}
 										data-srcset="
 										{{#each this.imgs.wide.srcs }}
-											{{../../asset_path}}{{this.path}} {{ this.w }}w,
+											{{~../../asset_path}}{{this.path}} {{ this.w }}w,
 										{{/each}}
 										"
 										data-sizes="
@@ -27,10 +27,10 @@
 									<div class="grid-item__image-border"></div>
 								</div>
 								<p class="grid-item__title">
-									{{this.title}}
+									{{~this.title~}}
 								</p>
 								<p class="grid-item__date">
-									{{this.date}}
+									{{~this.date~}}
 								</p>
 						</div>
 					</a>
