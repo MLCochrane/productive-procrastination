@@ -43,7 +43,7 @@
     "http-server": "^0.12.3",
     "image-webpack-loader": "^4.6.0",
     "jest": "^25.5.4",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "lodash-es": "^4.17.15",
     "mini-css-extract-plugin": "^0.6.0",
     "node-sass": "^4.14.1",
