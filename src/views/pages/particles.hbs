@@ -1,0 +1,25 @@
+{{#json
+'{
+	"card": {
+    "title": "Particles",
+    "date": "Sept 2020",
+    "tags": [
+			"3D",
+      "Interaction"
+    ],
+    "description": "Recreation of a neat 3D text effect I came across. Model is generated from a font converted to geometry in Blender, rendered here with ThreeJS."
+	}
+}'
+}}
+{{#> layout/base title='Particles' namespace="particles" }}
+	{{#*inline "body"}}
+		{{!-- {{> components/sketches/particles }} --}}
+    <div class="wrapper">
+      <div class="canvas-container">
+        <canvas class="full-canvas" id="Particles"></canvas>
+      </div>
+    </div>
+		{{> components/sketches/card card=this.card }}
+	{{/inline}}
+{{/layout/base}}
+{{/json}}
