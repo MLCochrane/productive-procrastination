@@ -9,6 +9,7 @@ import {
   DefaultLoadingManager,
   PointsMaterial,
   Points,
+  Clock,
 } from 'three';
 
 import ParticleSystem from './particleSystem';
@@ -27,7 +28,7 @@ export default class Particles {
   curX: number;
   curY: number;
   canvas: HTMLElement | null;
-  particles: ParticleSystem;
+  particles: ParticleSystem | null;
   dims: any;
   bufferFile: string;
   texturesLoaded: boolean;
@@ -35,6 +36,7 @@ export default class Particles {
   textures: any;
   pixelPass: any | null;
   raf: number | null;
+  clock: Clock;
   /**
    * Initlaizes variables for class instance.
    */
@@ -52,6 +54,7 @@ export default class Particles {
     this.bufferFile = `${ASSET_PATH}/assets/skull.obj `;
 
     this.animate = this.animate.bind(this);
+    this.render = this.render.bind(this);
     this.setup = this.setup.bind(this);
     this.initLights = this.initLights.bind(this);
     this.initParticles = this.initParticles.bind(this);
@@ -61,12 +64,10 @@ export default class Particles {
 
     this.light = null;
     this.raf = null;
+    this.particles = null;
 
     this.texturesLoaded = false;
-
-    this.particles = new ParticleSystem({
-      count: 100,
-    })
+    this.clock = new Clock(true);
 
     this.bindEvents();
     this.init();
@@ -130,8 +131,28 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   initParticles() {
-    this.mesh = this.particles.mesh as Points;
-    this.scene?.add(this.mesh);
+    const initialPositions = []
+    const velocities = []
+    const accelerations = []
+    for(let i=0; i<100; i++) {
+      const theta = Math.random() * 360;
+      initialPositions.push(Math.cos(theta));
+      initialPositions.push(Math.sin(theta));
+      initialPositions.push(0);
+      velocities.push(0);
+      velocities.push(10.0);
+      velocities.push(0);
+      accelerations.push(0);
+      accelerations.push(-9.8);
+      accelerations.push(0);
+    };
+    this.particles = new ParticleSystem({
+      count: 1000,
+      positions: initialPositions,
+      velocities,
+      accelerations,
+    });
+    this.scene?.add(this.particles.mesh as Points);
     this.setup();
   }
 
@@ -167,6 +188,8 @@ export default class Particles {
       if (itemsLoaded === itemsTotal) this.texturesLoaded = true;
     };
 
+    console.log(this.particles);
+
     this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas as HTMLCanvasElement,
@@ -183,11 +206,17 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   animate() {
-    this.raf = requestAnimationFrame(this.animate);
+    const {
+      animate,
+      particles,
+      clock,
+      render,
+    } = this;
+    this.raf = requestAnimationFrame(animate);
 
-    this.particles.updateTick();
+    particles?.updateTick(clock.getElapsedTime());
 
-    this.render();
+    render();
   }
 
   /**
@@ -196,7 +225,12 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   render() {
-    this.renderer?.render(this.scene as Scene, this.camera as PerspectiveCamera);
+    const {
+      scene,
+      camera,
+    } = this;
+
+    this.renderer?.render(scene as Scene, camera as PerspectiveCamera);
   }
 
   /**
@@ -206,7 +240,6 @@ export default class Particles {
    */
   destroy() {
     const {
-      buttons,
       raf,
       handleMouseMove,
       onWindowResize,

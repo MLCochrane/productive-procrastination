@@ -2,13 +2,14 @@ import {
   Scene,
   PerspectiveCamera,
   Mesh,
-  Geometry,
+  BufferGeometry,
   WebGLRenderer,
   Vector3,
-  PointLight,
-  DefaultLoadingManager,
-  PointsMaterial,
+  AdditiveBlending,
+  Float32BufferAttribute,
+  ShaderMaterial,
   Points,
+  Object3D,
 } from 'three';
 
 interface ParticleAttribs {
@@ -20,18 +21,48 @@ interface ParticleAttribs {
 
 interface ParticleOptions {
   count: number;
+  positions: number[];
+  velocities: number[];
+  accelerations: number[];
 }
+
+const vertShader = `
+uniform float time;
+attribute vec3 velocity;
+attribute vec3 acceleration;
+void main() {
+    vec3 acc = acceleration * 0.5 * time * time;
+    vec3 vel = velocity * time;
+    gl_Position = projectionMatrix
+        * modelViewMatrix
+        * vec4(acc + vel + position, 1.0);
+    gl_PointSize = 10.0;
+}
+`;
+
+const fragShader = `
+void main() {
+  gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+}
+`;
 
 /**
  * Particle System
  */
-export default class ParticleSytem {
+export default class ParticleSytem extends Object3D {
+  particles: Array<ParticleAttribs>;
   mesh: Points | null;
   count: number;
-  particles: Array<ParticleAttribs>;
+  positions: number[];
+  velocities: number[];
+  accelerations: number[];
   constructor(options: ParticleOptions) {
+    super();
     this.mesh = null;
     this.count = options.count || 100;
+    this.positions = options.positions;
+    this.velocities = options.velocities;
+    this.accelerations = options.accelerations;
     this.particles = [];
 
     this.init = this.init.bind(this);
@@ -44,29 +75,26 @@ export default class ParticleSytem {
     const {
       count,
       particles,
+      positions,
+      velocities,
+      accelerations,
     } = this;
 
-    const geo = new Geometry();
-    for(let i = 0; i < count; i++) {
-      const particle = {
-        position: new Vector3(
-          (Math.random() * 2) - 1,
-          (Math.random() * 2) - 1,
-          (Math.random() * 2) - 3),
-        velocity: new Vector3(
-          ((Math.random() * 2) - 1) * 0.001,
-            0.06,
-          ((Math.random() * 2) - 1) * 0.001,
-        ),
-        acceleration: new Vector3(0, -0.001, 0),
-      }
-      particles.push(particle);
-      geo.vertices.push(particle.position)
-    }
-    const mat = new PointsMaterial({
-      color:0x000000,
-      size: 0.1,
-    });
+    const geo = new BufferGeometry();
+    geo.setAttribute('position', new Float32BufferAttribute(positions, 3));
+    geo.setAttribute('velocity', new Float32BufferAttribute(velocities, 3));
+    geo.setAttribute('acceleration', new Float32BufferAttribute(accelerations, 3));
+    const mat = new ShaderMaterial( {
+      uniforms: {
+        time: { value: 12.0}
+      },
+      vertexShader: vertShader,
+      fragmentShader: fragShader,
+      blending: AdditiveBlending,
+      depthTest: false,
+      transparent: true,
+      vertexColors: true,
+   });
     this.mesh = new Points(geo, mat);
     this.mesh.position.z = -4
   }
@@ -74,13 +102,10 @@ export default class ParticleSytem {
   /**
    * To be called on each render tick.
    */
-  updateTick() {
-    this.particles.forEach(p => {
-      p.velocity.add(p.acceleration)
-      p.position.add(p.velocity)
-   });
+  updateTick(time: number) {
+    if (!this.mesh) return;
+    console.log(this.mesh);
 
-   if (!this.mesh) return;
-   (this.mesh.geometry as Geometry).verticesNeedUpdate = true;
+    (this.mesh.material as ShaderMaterial).uniforms.time.value = time;
   }
 }
