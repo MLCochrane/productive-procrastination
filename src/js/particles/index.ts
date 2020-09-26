@@ -89,7 +89,7 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   handleMouseMove(e: MouseEvent) {
-    console.log(e);
+    // console.log(e);
   }
 
   /**
@@ -121,7 +121,7 @@ export default class Particles {
   initCamera() {
     this.camera = new PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 50);
 
-    this.camera.position.z = 1;
+    this.camera.position.z = 5;
     this.scene?.add(this.camera);
   }
 
@@ -131,28 +131,8 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   initParticles() {
-    const initialPositions = []
-    const velocities = []
-    const accelerations = []
-    for(let i=0; i<100; i++) {
-      const theta = Math.random() * 360;
-      initialPositions.push(Math.cos(theta));
-      initialPositions.push(Math.sin(theta));
-      initialPositions.push(0);
-      velocities.push(0);
-      velocities.push(10.0);
-      velocities.push(0);
-      accelerations.push(0);
-      accelerations.push(-9.8);
-      accelerations.push(0);
-    };
-    this.particles = new ParticleSystem({
-      count: 1000,
-      positions: initialPositions,
-      velocities,
-      accelerations,
-    });
-    this.scene?.add(this.particles.mesh as Points);
+    this.particles = new ParticleSystem({});
+    this.scene?.add(this.particles);
     this.setup();
   }
 
@@ -213,6 +193,32 @@ export default class Particles {
       render,
     } = this;
     this.raf = requestAnimationFrame(animate);
+
+    const spawnerOptions = {
+      spawnRate: 10000,
+      timeScale: 1,
+    };
+
+    const delta = clock.getDelta() * spawnerOptions.timeScale;
+    // console.log(delta);
+    const theta = Math.random() * 360;
+    const phi = Math.random() * 360;
+    const emission = {
+      position: new Vector3(
+        Math.cos(theta) * Math.sin(phi),
+        Math.sin(theta) * Math.sin(phi),
+        Math.sin(phi),
+      ),
+      velocity: new Vector3(0, -0.2, 0),
+      acceleration: new Vector3(0, 0.1, 0),
+    };
+
+    if (delta > 0) {
+      //spawn the correct number of particles for this frame based on the spawn rate
+      for ( let x = 0; x < spawnerOptions.spawnRate * delta; x++ ) {
+        particles?.spawnParticle(emission);
+      }
+    }
 
     particles?.updateTick(clock.getElapsedTime());
 
