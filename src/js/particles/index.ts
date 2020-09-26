@@ -1,15 +1,14 @@
 import {
   Scene,
   PerspectiveCamera,
-  Mesh,
-  Geometry,
   WebGLRenderer,
   Vector3,
   PointLight,
   DefaultLoadingManager,
-  PointsMaterial,
   Points,
   Clock,
+  Color,
+  AdditiveBlending,
 } from 'three';
 
 import ParticleSystem from './particleSystem';
@@ -37,6 +36,7 @@ export default class Particles {
   pixelPass: any | null;
   raf: number | null;
   clock: Clock;
+  tick: number;
   /**
    * Initlaizes variables for class instance.
    */
@@ -65,6 +65,7 @@ export default class Particles {
     this.light = null;
     this.raf = null;
     this.particles = null;
+    this.tick = 0;
 
     this.texturesLoaded = false;
     this.clock = new Clock(true);
@@ -131,7 +132,11 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   initParticles() {
-    this.particles = new ParticleSystem({});
+    this.particles = new ParticleSystem({
+      maxParticles: 300000,
+      // blending: AdditiveBlending,
+    });
+    this.particles.position.z = -2;
     this.scene?.add(this.particles);
     this.setup();
   }
@@ -168,12 +173,10 @@ export default class Particles {
       if (itemsLoaded === itemsTotal) this.texturesLoaded = true;
     };
 
-    console.log(this.particles);
-
     this.renderer = new WebGLRenderer({
       antialias: true,
       canvas: this.canvas as HTMLCanvasElement,
-      alpha: true,
+      // alpha: true,
     });
     this.renderer?.setPixelRatio(window.devicePixelRatio);
     this.renderer?.setSize(this.curX, this.curY);
@@ -195,32 +198,53 @@ export default class Particles {
     this.raf = requestAnimationFrame(animate);
 
     const spawnerOptions = {
-      spawnRate: 10000,
-      timeScale: 1,
+      spawnRate: 1000,
+      timeScale: 1.,
     };
 
     const delta = clock.getDelta() * spawnerOptions.timeScale;
     // console.log(delta);
-    const theta = Math.random() * 360;
-    const phi = Math.random() * 360;
-    const emission = {
-      position: new Vector3(
-        Math.cos(theta) * Math.sin(phi),
-        Math.sin(theta) * Math.sin(phi),
-        Math.sin(phi),
-      ),
-      velocity: new Vector3(0, -0.2, 0),
-      acceleration: new Vector3(0, 0.1, 0),
-    };
+    this.tick += delta;
+
+			if ( this.tick < 0 ) this.tick = 0;
 
     if (delta > 0) {
-      //spawn the correct number of particles for this frame based on the spawn rate
-      for ( let x = 0; x < spawnerOptions.spawnRate * delta; x++ ) {
+      /**
+       * Spawns particles based on the spawn rate and delta. So in theory
+       * it should spawn our number in spawnRate over 1 second.
+       *
+       * Note that with this current logic it will spawn at a MINIMUM
+       * one particle every frame. Because of this, particles will be
+       * overwritten if the MAX_PARTICLES is less than the spawn rate * life.
+       *
+       * Perhaps adding in a check with this.tick could skip the spawning
+       *
+       */
+      for ( let x = 0; x < spawnerOptions.spawnRate; x++ ) {
+        const theta = (particles as ParticleSystem).lookup() * 360;
+        const phi = (particles as ParticleSystem).lookup() * 360;
+        const radius = 2.0;
+        const emission = {
+          position: new Vector3(
+            Math.cos(theta) * Math.sin(phi) * radius,
+            Math.sin(theta) * Math.sin(phi) * radius,
+            Math.sin(phi) * radius,
+          ),
+          velocity: new Vector3((particles as ParticleSystem).lookup(), -0.2, 0),
+          acceleration: new Vector3((particles as ParticleSystem).lookup(), 1.0 * ((particles as ParticleSystem).lookup() + 0.5), 0),
+          color: new Color(
+            (particles as ParticleSystem).lookup() + 0.5,
+            1.0,
+            (particles as ParticleSystem).lookup() + 0.5,
+          ),
+          lifeTime: 4.,
+          size: 10 * ((particles as ParticleSystem).lookup() + 0.5),
+        };
         particles?.spawnParticle(emission);
       }
     }
 
-    particles?.updateTick(clock.getElapsedTime());
+    particles?.updateTick(this.tick);
 
     render();
   }

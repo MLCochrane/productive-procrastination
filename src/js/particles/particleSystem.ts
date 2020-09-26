@@ -71,30 +71,28 @@ const vertexShader = `
     vEndColor = vec4( endColor, 1.0);
     vec3 newPosition;
     float timeElapsed = uTime - startTime;
-    //if(reverseTime) timeElapsed = lifeTime - timeElapsed;
-    if(timeElapsed < fadeIn) {
-      alpha = timeElapsed/fadeIn;
-    }
-    if(timeElapsed >= fadeIn && timeElapsed <= (lifeTime - fadeOut)) {
-      alpha = 1.0;
-    }
-    if(timeElapsed > (lifeTime - fadeOut)) {
-      alpha = 1.0 - (timeElapsed - (lifeTime-fadeOut))/fadeOut;
-    }
+    // if(timeElapsed < fadeIn) {
+    //   alpha = timeElapsed/fadeIn;
+    // }
+    // if(timeElapsed >= fadeIn && timeElapsed <= (lifeTime - fadeOut)) {
+    //   alpha = 1.0;
+    // }
+    // if(timeElapsed > (lifeTime - fadeOut)) {
+    //   alpha = 1.0 - (timeElapsed - (lifeTime-fadeOut))/fadeOut;
+    // }
 
     lifeLeft = 1.0 - ( timeElapsed / lifeTime );
-    gl_PointSize = ( uScale * size );// * lifeLeft;
-    newPosition = positionStart
-      + (velocity * timeElapsed)
-      + (acceleration * 0.5 * timeElapsed * timeElapsed);
+    gl_PointSize = ( uScale * size ) * lifeLeft;
+
+    newPosition = positionStart + (velocity * timeElapsed) + (acceleration * 0.5 * timeElapsed * timeElapsed);
+
     if (lifeLeft < 0.0) {
       lifeLeft = 0.0;
       gl_PointSize = 0.;
     }
     //while active use the new position
-    if( timeElapsed > 0.0 ) {
+    if( timeElapsed < lifeTime ) {
       gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
-      // vColor.rgb -= newPosition.z;
     } else {
       //if dead use the initial position and set point size to 0
       gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
@@ -114,7 +112,7 @@ const fragmentShader = `
     // if lifeLeft is 0 then make invisible
     // vec4 tex = texture2D( tSprite, gl_PointCoord );
     vec4 color = mix(vColor, vEndColor, 1.0-lifeLeft);
-    gl_FragColor = vec4( color.rgb, alpha);
+    gl_FragColor = vec4( color.rgb, 1.0);
   }
 `;
 
