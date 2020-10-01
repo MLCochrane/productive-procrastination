@@ -32,6 +32,7 @@ interface SpawnOptions {
 interface ParticleOptions {
   maxParticles?: number;
   noiseTextureUrl?: string;
+  spriteTextureUrl?: string;
   blending?: BlendingOptions;
   fadeIn?: number;
   fadeOut?: number;
@@ -72,7 +73,7 @@ const vertexShader = `
   varying float alpha;
 
   void main() {
-    float turbulence = 50.0;
+    float turbulence = 20.0;
     vColor = vec4( color, 1.0 );
     vEndColor = vec4( endColor, 1.0);
     vec3 newPosition;
@@ -80,7 +81,7 @@ const vertexShader = `
     lifeLeft = 1.0 - ( timeElapsed / lifeTime );
 
     newPosition = positionStart + (velocity * timeElapsed) + (acceleration * 0.5 * timeElapsed * timeElapsed);
-    gl_PointSize = ( uScale * size * (newPosition.z * 10.));
+    gl_PointSize = ( uScale * size );
 
 
     // Noise field
@@ -109,12 +110,15 @@ const fragmentShader = `
   varying vec4 vEndColor;
   varying float lifeLeft;
   varying float alpha;
+
+  uniform sampler2D tSprite;
+
   void main() {
     // color based on particle texture and the lifeLeft.
     // if lifeLeft is 0 then make invisible
-    // vec4 tex = texture2D( tSprite, gl_PointCoord );
+    vec4 tex = texture2D( tSprite, gl_PointCoord );
     vec4 color = mix(vColor, vEndColor, 1.0-lifeLeft);
-    gl_FragColor = vec4( color.rgb, 1.0 * lifeLeft);
+    gl_FragColor = vec4( color.rgb * tex.rgb, 1.0 * tex.a * lifeLeft);
   }
 `;
 
@@ -130,6 +134,8 @@ export default class ParticleSytem extends Object3D {
   mesh: Points | null;
   noiseTextureUrl: string | null;
   noiseTexture: Texture | null;
+  spriteTextureUrl: string | null;
+  spriteTexture: Texture | null;
   fadeIn: number;
   fadeOut: number;
   particleUpdate: boolean;
@@ -147,7 +153,8 @@ export default class ParticleSytem extends Object3D {
     this.particleIndex = 0;
     this.blending = options.blending || NormalBlending;
     this.onTick = options.onTick || null;
-    this.noiseTextureUrl = options.noiseTextureUrl || `${ASSET_PATH}/assets/perlin.png`;;
+    this.noiseTextureUrl = options.noiseTextureUrl || `${ASSET_PATH}/assets/perlin.png`;
+    this.spriteTextureUrl = options.spriteTextureUrl || `${ASSET_PATH}/assets/flare_01.png`;
     this.DPR = window.devicePixelRatio;
 
     this.fadeIn = options.fadeIn || 1;
@@ -165,11 +172,14 @@ export default class ParticleSytem extends Object3D {
     this.internalTime = 0;
     this.rangeCount = 0;
     this.rangeOffset = 0;
-    this.noiseTexture = null;
+
     this.mesh = null;
     this.material = null;
     this.geometry = null;
     this.particleUpdate = false;
+
+    this.noiseTexture = null;
+    this.spriteTexture = null;
 
     this.init = this.init.bind(this);
     this.initMaterial = this.initMaterial.bind(this);
@@ -201,16 +211,18 @@ export default class ParticleSytem extends Object3D {
       fadeOut,
       blending,
       noiseTextureUrl,
+      spriteTextureUrl,
     } = this;
-    // setup the texture
-    // this.sprite = options.particleSpriteTex || null;
-    // if (!this.sprite) throw new Error('No particle sprite texture specified');
-    // this.sprite.wrapS = this.sprite.wrapT = RepeatWrapping;
 
+    // load our textures
     const textureLoader = new TextureLoader();
     this.noiseTexture = textureLoader.load(noiseTextureUrl as string);
     this.noiseTexture.wrapS = RepeatWrapping;
     this.noiseTexture.wrapT = RepeatWrapping;
+
+    this.spriteTexture = textureLoader.load(spriteTextureUrl as string);
+    this.spriteTexture.wrapS = RepeatWrapping;
+    this.spriteTexture.wrapT = RepeatWrapping;
 
     // setup the shader material
     this.material = new ShaderMaterial({
@@ -225,6 +237,9 @@ export default class ParticleSytem extends Object3D {
         },
         tNoise: {
           value: this.noiseTexture,
+        },
+        tSprite: {
+          value: this.spriteTexture,
         },
         fadeIn: {
           value: fadeIn,
