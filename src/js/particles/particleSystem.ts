@@ -11,6 +11,9 @@ import {
   AdditiveBlending,
   SubtractiveBlending,
   MultiplyBlending,
+  Texture,
+  TextureLoader,
+  RepeatWrapping,
 } from 'three';
 
 type BlendingOptions = typeof NoBlending | typeof NormalBlending | typeof AdditiveBlending | typeof SubtractiveBlending | typeof MultiplyBlending;
@@ -28,6 +31,7 @@ interface SpawnOptions {
 
 interface ParticleOptions {
   maxParticles?: number;
+  noiseTextureUrl?: string;
   blending?: BlendingOptions;
   fadeIn?: number;
   fadeOut?: number;
@@ -48,6 +52,7 @@ const UPDATEABLE_ATTRIBUTES = [
 const vertexShader = `
   uniform float uTime;
   uniform float uScale;
+  uniform sampler2D tNoise;
   uniform bool reverseTime;
   uniform float fadeIn;
   uniform float fadeOut;
@@ -67,24 +72,21 @@ const vertexShader = `
   varying float alpha;
 
   void main() {
+    float turbulence = 50.0;
     vColor = vec4( color, 1.0 );
     vEndColor = vec4( endColor, 1.0);
     vec3 newPosition;
     float timeElapsed = uTime - startTime;
-    // if(timeElapsed < fadeIn) {
-    //   alpha = timeElapsed/fadeIn;
-    // }
-    // if(timeElapsed >= fadeIn && timeElapsed <= (lifeTime - fadeOut)) {
-    //   alpha = 1.0;
-    // }
-    // if(timeElapsed > (lifeTime - fadeOut)) {
-    //   alpha = 1.0 - (timeElapsed - (lifeTime-fadeOut))/fadeOut;
-    // }
-
     lifeLeft = 1.0 - ( timeElapsed / lifeTime );
-    gl_PointSize = ( uScale * size ) * lifeLeft;
 
     newPosition = positionStart + (velocity * timeElapsed) + (acceleration * 0.5 * timeElapsed * timeElapsed);
+    gl_PointSize = ( uScale * size * (newPosition.z * 10.));
+
+
+    // Noise field
+    vec3 noise = texture2D( tNoise, vec2( newPosition.x * 0.015 + ( uTime * 0.05 ), newPosition.y * 0.05 + ( uTime * 0.015 ) ) ).rgb;
+    vec3 noiseVel = ( noise.rgb - 0.5 );
+    newPosition = mix( newPosition, newPosition + vec3( noiseVel * turbulence ), ( timeElapsed / lifeTime ) );
 
     if (lifeLeft < 0.0) {
       lifeLeft = 0.0;
@@ -112,7 +114,7 @@ const fragmentShader = `
     // if lifeLeft is 0 then make invisible
     // vec4 tex = texture2D( tSprite, gl_PointCoord );
     vec4 color = mix(vColor, vEndColor, 1.0-lifeLeft);
-    gl_FragColor = vec4( color.rgb, 1.0);
+    gl_FragColor = vec4( color.rgb, 1.0 * lifeLeft);
   }
 `;
 
@@ -126,6 +128,8 @@ export default class ParticleSytem extends Object3D {
   geometry: BufferGeometry | null;
   material: ShaderMaterial | null;
   mesh: Points | null;
+  noiseTextureUrl: string | null;
+  noiseTexture: Texture | null;
   fadeIn: number;
   fadeOut: number;
   particleUpdate: boolean;
@@ -143,6 +147,7 @@ export default class ParticleSytem extends Object3D {
     this.particleIndex = 0;
     this.blending = options.blending || NormalBlending;
     this.onTick = options.onTick || null;
+    this.noiseTextureUrl = options.noiseTextureUrl || `${ASSET_PATH}/assets/perlin.png`;;
     this.DPR = window.devicePixelRatio;
 
     this.fadeIn = options.fadeIn || 1;
@@ -160,6 +165,7 @@ export default class ParticleSytem extends Object3D {
     this.internalTime = 0;
     this.rangeCount = 0;
     this.rangeOffset = 0;
+    this.noiseTexture = null;
     this.mesh = null;
     this.material = null;
     this.geometry = null;
@@ -194,11 +200,17 @@ export default class ParticleSytem extends Object3D {
       fadeIn,
       fadeOut,
       blending,
+      noiseTextureUrl,
     } = this;
     // setup the texture
     // this.sprite = options.particleSpriteTex || null;
     // if (!this.sprite) throw new Error('No particle sprite texture specified');
     // this.sprite.wrapS = this.sprite.wrapT = RepeatWrapping;
+
+    const textureLoader = new TextureLoader();
+    this.noiseTexture = textureLoader.load(noiseTextureUrl as string);
+    this.noiseTexture.wrapS = RepeatWrapping;
+    this.noiseTexture.wrapT = RepeatWrapping;
 
     // setup the shader material
     this.material = new ShaderMaterial({
@@ -210,6 +222,9 @@ export default class ParticleSytem extends Object3D {
         },
         uScale: {
           value: 1.0,
+        },
+        tNoise: {
+          value: this.noiseTexture,
         },
         fadeIn: {
           value: fadeIn,

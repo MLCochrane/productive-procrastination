@@ -9,8 +9,14 @@ import {
   Clock,
   Color,
   AdditiveBlending,
+  Vector2,
 } from 'three';
 
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
+import { BloomShader } from './bloom-shader';
+import { BlendShader } from './blend-shader';
 import ParticleSystem from './particleSystem';
 
 /*
@@ -19,6 +25,8 @@ import ParticleSystem from './particleSystem';
 
 export default class Particles {
   renderer: WebGLRenderer | null;
+  composer: EffectComposer | null;
+  finalComposer: EffectComposer | null;
   scene: Scene | null;
   camera: PerspectiveCamera | null;
   mesh: Points | null;
@@ -42,6 +50,8 @@ export default class Particles {
    */
   constructor() {
     this.renderer = null;
+    this.composer = null;
+    this.finalComposer = null;
     this.scene = null;
     this.camera = null;
     this.mesh = null;
@@ -134,9 +144,9 @@ export default class Particles {
   initParticles() {
     this.particles = new ParticleSystem({
       maxParticles: 300000,
-      // blending: AdditiveBlending,
+      blending: AdditiveBlending,
     });
-    this.particles.position.z = -2;
+    this.particles.position.z = 2;
     this.scene?.add(this.particles);
     this.setup();
   }
@@ -169,17 +179,57 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   setup() {
+    const {
+      scene,
+      camera,
+      canvas,
+    } = this;
+
     DefaultLoadingManager.onProgress = (url, itemsLoaded, itemsTotal) => {
       if (itemsLoaded === itemsTotal) this.texturesLoaded = true;
     };
 
     this.renderer = new WebGLRenderer({
       antialias: true,
-      canvas: this.canvas as HTMLCanvasElement,
+      canvas: canvas as HTMLCanvasElement,
       // alpha: true,
     });
     this.renderer?.setPixelRatio(window.devicePixelRatio);
     this.renderer?.setSize(this.curX, this.curY);
+
+    this.composer = new EffectComposer(this.renderer as WebGLRenderer);
+    this.composer.addPass(new RenderPass(scene as Scene, camera as PerspectiveCamera));
+
+    // First pass...
+    const horizontalPass = new ShaderPass(BloomShader, 'texOne');
+		(horizontalPass.uniforms as any).resolution.value = new Vector2(
+			window.innerWidth,
+			window.innerHeight
+		);
+    (horizontalPass.uniforms as any).resolution.value.multiplyScalar(window.devicePixelRatio);
+    (horizontalPass.uniforms as any).direction.value = 0;
+
+    // Second pass...
+    const verticalPass = new ShaderPass(BloomShader, 'texOne');
+		(verticalPass.uniforms as any).resolution.value = new Vector2(
+			window.innerWidth,
+			window.innerHeight
+		);
+    (verticalPass.uniforms as any).resolution.value.multiplyScalar(window.devicePixelRatio);
+    (verticalPass.uniforms as any).direction.value = 1;
+
+    this.composer.renderToScreen = false;
+    this.composer.addPass(horizontalPass);
+    this.composer.addPass(verticalPass);
+
+    const finalPass = new ShaderPass(BlendShader, 'texOne') as any;
+    finalPass.uniforms.glowTexture.value = this.composer.renderTarget2.texture;
+    finalPass.needsSwap = true;
+
+    this.finalComposer = new EffectComposer(this.renderer as WebGLRenderer);
+    this.finalComposer?.addPass(new RenderPass(scene as Scene, camera as PerspectiveCamera));
+    this.finalComposer?.addPass(finalPass);
+
     this.animate();
   }
 
@@ -197,16 +247,19 @@ export default class Particles {
     } = this;
     this.raf = requestAnimationFrame(animate);
 
+    (particles as ParticleSystem).rotation.y += 0.004;
+    (particles as ParticleSystem).rotation.x += 0.004;
+    (particles as ParticleSystem).rotation.z += 0.004;
+
     const spawnerOptions = {
-      spawnRate: 1000,
-      timeScale: 1.,
+      spawnRate: 3000,
+      timeScale: 1.0,
     };
 
     const delta = clock.getDelta() * spawnerOptions.timeScale;
-    // console.log(delta);
     this.tick += delta;
 
-			if ( this.tick < 0 ) this.tick = 0;
+    if ( this.tick < 0 ) this.tick = 0;
 
     if (delta > 0) {
       /**
@@ -223,29 +276,35 @@ export default class Particles {
       for ( let x = 0; x < spawnerOptions.spawnRate; x++ ) {
         const theta = (particles as ParticleSystem).lookup() * 360;
         const phi = (particles as ParticleSystem).lookup() * 360;
-        const radius = 2.0;
+        const radius = .5;
+        const position = new Vector3(
+          Math.cos(theta) * radius,
+          Math.sin(theta) * radius,
+          0,
+        );
         const emission = {
-          position: new Vector3(
-            Math.cos(theta) * Math.sin(phi) * radius,
-            Math.sin(theta) * Math.sin(phi) * radius,
-            Math.sin(phi) * radius,
-          ),
-          velocity: new Vector3((particles as ParticleSystem).lookup(), -0.2, 0),
-          acceleration: new Vector3((particles as ParticleSystem).lookup(), 1.0 * ((particles as ParticleSystem).lookup() + 0.5), 0),
+          position,
+          // velocity: new Vector3(position.x, position.y, position.z),
+          velocity: new Vector3((particles as ParticleSystem).lookup(), 0.2, 0),
+          acceleration: new Vector3((particles as ParticleSystem).lookup(), (particles as ParticleSystem).lookup(), -((particles as ParticleSystem).lookup() + 0.5)),
           color: new Color(
-            (particles as ParticleSystem).lookup() + 0.5,
-            1.0,
-            (particles as ParticleSystem).lookup() + 0.5,
+            position.y * 0.5 + 0.5,
+            position.x * 0.5 + 0.5,
+            1.0
           ),
-          lifeTime: 4.,
-          size: 10 * ((particles as ParticleSystem).lookup() + 0.5),
+          endColor: new Color(
+            1.0,
+            1.0,
+            1.0,
+          ),
+          lifeTime: 10,
+          size: 4,
         };
         particles?.spawnParticle(emission);
       }
     }
 
     particles?.updateTick(this.tick);
-
     render();
   }
 
@@ -255,12 +314,8 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   render() {
-    const {
-      scene,
-      camera,
-    } = this;
-
-    this.renderer?.render(scene as Scene, camera as PerspectiveCamera);
+    this.composer?.render();
+    this.finalComposer?.render();
   }
 
   /**
