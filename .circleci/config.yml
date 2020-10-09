@@ -1,6 +1,4 @@
 version: 2.1
-orbs:
-  cypress: cypress-io/cypress@1.13.0
 jobs:
   build:
     # pre-built images: https://circleci.com/docs/2.0/circleci-images/
@@ -52,21 +50,9 @@ workflows:
         - test:
             requires:
               - build
-        - cypress/run:
-            start: npm run start
-            wait-on: 'http://127.0.0.1:8080'
-            requires:
-              - build
-            filters:
-              branches:
-                only:
-                  - master
-                  - staging
-                  - production
         - deployment:
             requires:
               - test
-              - cypress/run
             filters:
               branches:
                 only:
