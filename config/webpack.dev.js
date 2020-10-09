@@ -1,5 +1,5 @@
 const webpack = require('webpack');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const common = require('./webpack.common.js');
 
 module.exports = merge(common, {
@@ -24,7 +24,7 @@ module.exports = merge(common, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      ASSET_PATH: JSON.stringify('./src'),
+      ASSET_PATH: JSON.stringify('/src'),
     }),
   ],
 });

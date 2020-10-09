@@ -13,17 +13,13 @@ import {
   PointLight,
   DefaultLoadingManager,
 } from 'three';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass';
-import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
-import { PixelShader } from './pixel-toon-shader';
 
 /*
  *  Class for loading and rendering 3D text
  */
 
-export default class PostProcess {
+export default class Sample {
   renderer: WebGLRenderer | null;
   scene: Scene | null;
   camera: PerspectiveCamera | null;
@@ -35,17 +31,11 @@ export default class PostProcess {
   canvas: HTMLElement | null;
   dims: any;
   bufferFile: string;
-  textureFileOne: string;
-  textureFileTwo: string;
-  textureFileThree: string;
-  textureFileFour: string;
-  imageFile: string;
   buttons: { smaller: HTMLElement | null; bigger: HTMLElement | null; invert: HTMLElement | null; texture: HTMLElement | null; toggle: HTMLElement | null; };
   params: { pixelSize: number; invert: boolean; textureIndex: number; enabled: boolean; };
   texturesLoaded: boolean;
   light: PointLight | null;
   textures: any;
-  composer: EffectComposer | null;
   pixelPass: any | null;
   raf: number | null;
   /**
@@ -60,23 +50,15 @@ export default class PostProcess {
     this.yVal = 0;
     this.curX = window.innerWidth;
     this.curY = window.innerHeight;
-    this.canvas = document.getElementById('PostProcess') as HTMLCanvasElement;
+    this.canvas = document.getElementById('') as HTMLCanvasElement;
     this.dims = this.canvas.getBoundingClientRect();
     this.bufferFile = `${ASSET_PATH}/assets/skull.obj `;
-    this.textureFileOne = `${ASSET_PATH}/assets/images/dot-2.jpg`;
-    this.textureFileTwo = `${ASSET_PATH}/assets/images/bolt.jpg`;
-    this.textureFileThree = `${ASSET_PATH}/assets/images/dot-3.jpg`;
-    this.textureFileFour = `${ASSET_PATH}/assets/images/skull-tex.jpg`;
-    this.imageFile = `${ASSET_PATH}/assets/images/tex-ice.jpg`;
 
     this.animate = this.animate.bind(this);
     this.setup = this.setup.bind(this);
-    this.processing = this.processing.bind(this);
     this.initBackground = this.initBackground.bind(this);
     this.initLights = this.initLights.bind(this);
-    this.updateShader = this.updateShader.bind(this);
     this.onWindowResize = this.onWindowResize.bind(this);
-    this.handleButtonPress = this.handleButtonPress.bind(this);
     this.handleMouseMove = this.handleMouseMove.bind(this);
     this.destroy = this.destroy.bind(this);
 
@@ -97,8 +79,6 @@ export default class PostProcess {
 
     this.light = null;
     this.raf = null;
-    this.composer = null;
-    this.pixelPass = null;
 
     this.texturesLoaded = false;
 
@@ -114,22 +94,6 @@ export default class PostProcess {
   bindEvents() {
     window.addEventListener('resize', this.onWindowResize);
     window.addEventListener('mousemove', this.handleMouseMove);
-
-    if (this.buttons.smaller) {
-      this.buttons.smaller.addEventListener('click', this.handleButtonPress('smaller'));
-    }
-    if (this.buttons.bigger) {
-      this.buttons.bigger.addEventListener('click', this.handleButtonPress('bigger'));
-    }
-    if (this.buttons.invert) {
-      this.buttons.invert.addEventListener('click', this.handleButtonPress('invert'));
-    }
-    if (this.buttons.texture) {
-      this.buttons.texture.addEventListener('click', this.handleButtonPress('texture'));
-    }
-    if (this.buttons.toggle) {
-      this.buttons.toggle.addEventListener('click', this.handleButtonPress('toggle'));
-	  }
   }
 
   /**
@@ -138,42 +102,8 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   handleMouseMove(e: MouseEvent) {
-    this.xVal = (e.clientX / window.innerWidth) - 0.5;
-    this.yVal = (e.clientY / window.innerHeight) - 0.5;
+    console.log(e);
   }
-
-  /**
-   * Callback for click events
-   * @function handleButtonPress
-   * @memberof PostProcess.prototype
-   * @param {String} type - Button type to pick which param should be changed
-   */
-  handleButtonPress(type: string) {
-    return () => {
-      switch (type) {
-        case 'smaller':
-          if (this.params.pixelSize > 10) this.params.pixelSize -= 5;
-          break;
-        case 'bigger':
-          if (this.params.pixelSize < 50) this.params.pixelSize += 5;
-          break;
-        case 'invert':
-          this.params.invert = !this.params.invert;
-          break;
-        case 'texture':
-          this.params.textureIndex = this.params.textureIndex === 3
-            ? 0
-            : this.params.textureIndex += 1;
-          break;
-        case 'toggle':
-          this.params.enabled = !this.params.enabled;
-          break;
-        default:
-          break;
-      }
-    };
-  }
-
 
   /**
    * Orders the methods calls for setting up and then rendering scene.
@@ -286,60 +216,7 @@ export default class PostProcess {
     });
     this.renderer?.setPixelRatio(window.devicePixelRatio);
     this.renderer?.setSize(this.curX, this.curY);
-    this.processing();
     this.animate();
-  }
-
-  /**
-   * Sets up post processing of scene
-   * @function processing
-   * @memberof PostProcess.prototype
-   */
-  processing() {
-    const loader = new TextureLoader();
-    this.textures = [
-      loader.load(this.textureFileOne),
-      loader.load(this.textureFileTwo),
-      loader.load(this.textureFileThree),
-      loader.load(this.textureFileFour),
-    ];
-    this.composer = new EffectComposer(this.renderer as WebGLRenderer);
-    this.composer.addPass(new RenderPass(this.scene as Scene, this.camera as PerspectiveCamera));
-    this.pixelPass = new ShaderPass(PixelShader, 'texOne');
-    if (this.pixelPass.uniforms.resolution)
-		this.pixelPass.uniforms.resolution.value = new Vector2(
-			window.innerWidth,
-			window.innerHeight
-		);
-    this.pixelPass.uniforms.resolution.value.multiplyScalar(window.devicePixelRatio);
-
-    this.updateShader();
-
-    this.composer.addPass(this.pixelPass);
-  }
-
-  /**
-   * Updates shader with relevant uniforms
-   * @function updateShader
-   * @memberof PostProcess.prototype
-   */
-  updateShader() {
-    const {
-      pixelPass,
-      params,
-      texturesLoaded,
-    } = this;
-
-    if (!texturesLoaded || !pixelPass) return;
-    pixelPass.enabled = params.enabled;
-    pixelPass.uniforms.pixelSize.value = params.pixelSize;
-    pixelPass.uniforms.innerRepeatLength.value = params.textureIndex === 3 ? 5 : 1;
-    pixelPass.uniforms.invert.value = params.invert;
-    pixelPass.uniforms.texTwo.value = this.textures[params.textureIndex];
-    pixelPass.uniforms.texTwo.value.needsUpdate = true;
-    pixelPass.uniforms.texTwo.value.wrapS = RepeatWrapping;
-    pixelPass.uniforms.texTwo.value.wrapT = RepeatWrapping;
-    pixelPass.uniforms.texTwo.value.magFilter = NearestFilter;
   }
 
   /**
@@ -352,7 +229,6 @@ export default class PostProcess {
 
     if (this.mesh) this.mesh.rotation.x = (this.yVal);
     if (this.mesh) this.mesh.rotation.y = (this.xVal) - 1.574;
-    this.updateShader();
     this.render();
   }
 
@@ -362,7 +238,7 @@ export default class PostProcess {
    * @memberof PostProcess.prototype
    */
   render() {
-    this.composer?.render();
+    this.renderer?.render(this.scene as Scene, this.camera as PerspectiveCamera);
   }
 
   /**
@@ -374,7 +250,6 @@ export default class PostProcess {
     const {
       buttons,
       raf,
-      handleButtonPress,
       handleMouseMove,
       onWindowResize,
     } = this;
@@ -382,20 +257,5 @@ export default class PostProcess {
     cancelAnimationFrame(raf as number);
     window.addEventListener('mousemove', handleMouseMove);
     window.removeEventListener('resize', onWindowResize);
-    if (buttons.smaller) {
-      buttons.smaller.removeEventListener('click', handleButtonPress('smaller'));
-    }
-    if (buttons.bigger) {
-      buttons.bigger.removeEventListener('click', handleButtonPress('bigger'));
-    }
-    if (buttons.invert) {
-    buttons.invert.removeEventListener('click', handleButtonPress('invert'));
-    }
-    if (buttons.texture) {
-      buttons.texture.removeEventListener('click', handleButtonPress('texture'));
-    }
-    if (buttons.toggle) {
-      buttons.toggle.removeEventListener('click', handleButtonPress('toggle'));
-	  }
   }
 }

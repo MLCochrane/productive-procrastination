@@ -139,6 +139,9 @@ export default class Fluid {
     this.onMouseMove = this.onMouseMove.bind(this);
     this.onMouseDown = this.onMouseDown.bind(this);
     this.onMouseUp = this.onMouseUp.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchMove = this.onTouchMove.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
 
     if (this.config.useTyping) {
       this.typing = true;
@@ -165,6 +168,9 @@ export default class Fluid {
       onMouseDown,
       onMouseUp,
       onMouseMove,
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
       onWindowResize,
     } = this;
 
@@ -172,6 +178,9 @@ export default class Fluid {
     window.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mouseup', onMouseUp);
     window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('touchstart', onTouchStart);
+    window.addEventListener('touchmove', onTouchMove);
+    window.addEventListener('touchend', onTouchEnd);
     window.addEventListener('resize', onWindowResize);
   }
 
@@ -186,6 +195,9 @@ export default class Fluid {
       onMouseDown,
       onMouseUp,
       onMouseMove,
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
       onWindowResize,
       text,
     } = this;
@@ -193,10 +205,60 @@ export default class Fluid {
     window.removeEventListener('mousedown', onMouseDown);
     window.removeEventListener('mouseup', onMouseUp);
     window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('touchstart', onTouchStart);
+    window.removeEventListener('touchmove', onTouchMove);
+    window.removeEventListener('touchend', onTouchEnd);
     window.removeEventListener('resize', onWindowResize);
 
     if (text) text.destroy();
     cancelAnimationFrame(raf);
+  }
+
+  /**
+   * Callback for touchstart event.
+   * @function onTouchStart
+   * @memberof Fluid.prototype
+   */
+  onTouchStart() {
+    this.mouseDown = true;
+  }
+
+  /**
+   * Callback for mouseup event.
+   * @function onTouchEnd
+   * @memberof Fluid.prototype
+   */
+  onTouchEnd() {
+    this.mouseDown = false;
+
+    this.forces.mouse.color = new Vector3(Math.random(), Math.random(), Math.random());
+    this.forces.mouse.Dx = 0.0;
+    this.forces.mouse.Dy = 0.0;
+  }
+
+  /**
+   * Callback for touchmove event
+   * @function onTouchMove
+   * @memberof Fluid.prototype
+   */
+  onTouchMove(e: TouchEvent) {
+    const {
+      clientX,
+      clientY,
+    } = e.touches[0];
+    const x = clientX / window.innerWidth;
+    const y = Math.abs((clientY / window.innerHeight) - 1.0);
+    if (!this.mouseDown) return;
+    const curMouse = {
+      active: 1,
+      x,
+      y,
+      Dx: x - this.forces.mouse.x,
+      Dy: y - this.forces.mouse.y,
+      color: this.forces.mouse.color,
+    };
+
+    this.forces.mouse = curMouse;
   }
 
   /**

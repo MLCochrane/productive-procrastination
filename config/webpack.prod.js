@@ -1,5 +1,5 @@
 const path = require('path');
-const merge = require('webpack-merge');
+const { merge } = require('webpack-merge');
 const webpack = require('webpack');
 
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
@@ -35,12 +35,6 @@ module.exports = merge(common, {
         use: [
           {
             loader: MiniCssExtractPlugin.loader,
-            options: {
-              // you can specify a publicPath here
-              // by default it uses publicPath in webpackOptions.output
-              // publicPath: '../',
-              // hmr: process.env.NODE_ENV === 'development',
-            },
           },
           {
             loader: 'css-loader',
@@ -48,8 +42,8 @@ module.exports = merge(common, {
           {
             loader: 'postcss-loader',
             options: {
-              config: {
-                path: `${__dirname}/config/postcss.config.js`,
+              postcssOptions: {
+                config: path.resolve(__dirname, 'postcss.config.js'),
               },
             },
           },
@@ -64,14 +58,18 @@ module.exports = merge(common, {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: ['**/*', '!/assets/*'],
     }),
-    new MiniCssExtractPlugin('/css/style.css'),
+    new MiniCssExtractPlugin({
+      filename: 'css/style.css',
+    }),
     new webpack.DefinePlugin({
       ASSET_PATH: JSON.stringify(''),
     }),
     new webpack.HashedModuleIdsPlugin(),
-    new CopyPlugin([
-      { from: 'src/assets/', to: 'assets/' },
-      { from: 'src/seo/', to: '.' },
-    ]),
+    new CopyPlugin({
+      patterns: [
+        { from: 'src/assets/', to: 'assets/' },
+        { from: 'src/seo/' },
+      ],
+    }),
   ],
 });
