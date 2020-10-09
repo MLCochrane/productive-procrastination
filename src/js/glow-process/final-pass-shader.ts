@@ -34,7 +34,6 @@ const FinalShaderPass = {
 
     "void main(){",
       "gl_FragColor = (getTexture(texOne) + vec4(1.0) * getTexture(glowTexture));",
-      //"gl_FragColor = (texture2D(texOne, vUv));",
     "}"
 
   ].join("\n")
