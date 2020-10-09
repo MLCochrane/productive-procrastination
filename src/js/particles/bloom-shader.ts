@@ -1,4 +1,4 @@
-const GlowShaderVert = {
+const BloomShader = {
 
   uniforms: {
     texOne: {
@@ -6,6 +6,9 @@ const GlowShaderVert = {
     },
     resolution: {
       value: null
+    },
+    direction: {
+      value: 0,
     },
   },
 
@@ -23,8 +26,10 @@ const GlowShaderVert = {
   fragmentShader:`
     #define PI 3.141592653589793
     #define E 2.718281828459045
+    #define NR_ITERATIONS 20.0
     uniform sampler2D texOne;
     uniform vec2 resolution;
+    uniform int direction;
 
     varying highp vec2 vUv;
     float calcGauss(in float x, in float std) {
@@ -40,9 +45,14 @@ const GlowShaderVert = {
 
     float sum = 0.;
 
-    for (float index = 0.; index < 50.; index++) {
-    float offset = (index/50. - 0.5);
-    vec2 theUv = vUv + vec2(0., offset * 0.1 * (resolution.y / resolution.x));
+    for (float index = 0.; index < NR_ITERATIONS; index++) {
+      float offset = (index/NR_ITERATIONS - 0.5);
+      vec2 theUv = vUv + vec2(0., offset * 0.1 * (resolution.y / resolution.x));
+      if (direction == 0) {
+        theUv = vUv + vec2(offset * 0.1 * (resolution.y / resolution.x), 0.);
+      } else {
+        theUv = vUv + vec2(0., offset * 0.1 * (resolution.y / resolution.x));
+      }
       float spot = offset - 25.;
       float gauss = calcGauss(offset, 0.3);
       col += texture2D(texOne, theUv) * gauss;
@@ -53,5 +63,5 @@ const GlowShaderVert = {
 };
 
 export {
-  GlowShaderVert
+  BloomShader
 };
