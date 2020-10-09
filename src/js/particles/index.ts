@@ -100,7 +100,8 @@ export default class Particles {
    * @memberof Particles.prototype
    */
   handleMouseMove(e: MouseEvent) {
-    // console.log(e);
+    this.xVal = e.pageX / this.curX;
+    this.yVal = e.pageY / this.curY;
   }
 
   /**
@@ -146,7 +147,7 @@ export default class Particles {
       maxParticles: 300000,
       blending: AdditiveBlending,
     });
-    this.particles.position.z = 2;
+    // this.particles.position.z = ;
     this.scene?.add(this.particles);
     this.setup();
   }
@@ -244,16 +245,14 @@ export default class Particles {
       particles,
       clock,
       render,
+      xVal,
+      yVal,
     } = this;
     this.raf = requestAnimationFrame(animate);
 
-    (particles as ParticleSystem).rotation.y += 0.004;
-    (particles as ParticleSystem).rotation.x += 0.004;
-    (particles as ParticleSystem).rotation.z += 0.004;
-
     const spawnerOptions = {
-      spawnRate: 3000,
-      timeScale: 1.0,
+      spawnRate: 100,
+      timeScale: 0.5,
     };
 
     const delta = clock.getDelta() * spawnerOptions.timeScale;
@@ -277,16 +276,20 @@ export default class Particles {
         const theta = (particles as ParticleSystem).lookup() * 360;
         const phi = (particles as ParticleSystem).lookup() * 360;
         const radius = .5;
+
         const position = new Vector3(
           Math.cos(theta) * radius,
           Math.sin(theta) * radius,
-          0,
+          Math.sin(phi) * radius,
         );
         const emission = {
           position,
-          // velocity: new Vector3(position.x, position.y, position.z),
-          velocity: new Vector3((particles as ParticleSystem).lookup(), 0.2, 0),
-          acceleration: new Vector3((particles as ParticleSystem).lookup(), (particles as ParticleSystem).lookup(), -((particles as ParticleSystem).lookup() + 0.5)),
+          velocity: new Vector3(position.x, position.y, position.z),
+          acceleration: new Vector3(
+            (particles as ParticleSystem).lookup(),
+            (particles as ParticleSystem).lookup(),
+            (particles as ParticleSystem).lookup(),
+          ),
           color: new Color(
             position.y * 0.5 + 0.5,
             position.x * 0.5 + 0.5,
@@ -297,8 +300,8 @@ export default class Particles {
             1.0,
             1.0,
           ),
-          lifeTime: 10,
-          size: 4,
+          lifeTime: 3.,
+          size: 40,
         };
         particles?.spawnParticle(emission);
       }

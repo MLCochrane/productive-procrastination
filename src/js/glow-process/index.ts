@@ -4,7 +4,7 @@ import {
   MeshBasicMaterial,
   Mesh,
   PlaneBufferGeometry,
-  WebGLRenderer,
+  WebGL1Renderer,
   Vector2,
   MeshLambertMaterial,
   PointLight,
@@ -45,7 +45,7 @@ import {
  */
 
 export default class GlowProcess {
-  renderer: WebGLRenderer | null;
+  renderer: WebGL1Renderer | null;
   scene: Scene | null;
   camera: PerspectiveCamera | null;
   mesh: Mesh | null;
@@ -210,7 +210,6 @@ export default class GlowProcess {
     modelLoader.setDRACOLoader(dracoLoader);
 
     modelLoader.load(bufferFile, (res) => {
-      console.log(res);
       this.mainTubes = res.scene.children.find((el) => el.name === 'TopTubes');
       this.mainTubes.material = new MeshBasicMaterial({
         color: 0xf23232,
@@ -312,7 +311,7 @@ export default class GlowProcess {
    * @memberof GlowProcess.prototype
    */
   setup() {
-    this.renderer = new WebGLRenderer({
+    this.renderer = new WebGL1Renderer({
       antialias: true,
       canvas: this.canvas as HTMLCanvasElement,
     });
@@ -335,7 +334,7 @@ export default class GlowProcess {
       scene,
     } = this;
 
-    this.glowComposer = new EffectComposer(renderer as WebGLRenderer);
+    this.glowComposer = new EffectComposer(renderer as WebGL1Renderer);
     const renderPass = new RenderPass(scene as Scene, camera as PerspectiveCamera);
     this.glowComposer.addPass(renderPass);
 
@@ -355,7 +354,7 @@ export default class GlowProcess {
     finalPass.uniforms.glowTexture.value = this.glowComposer.renderTarget2.texture;
     finalPass.needsSwap = true;
 
-    this.finalComposer = new EffectComposer(renderer as WebGLRenderer);
+    this.finalComposer = new EffectComposer(renderer as WebGL1Renderer);
     this.finalComposer?.addPass(renderPass);
     this.finalComposer?.addPass(finalPass);
   }

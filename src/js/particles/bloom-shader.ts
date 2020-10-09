@@ -26,7 +26,7 @@ const BloomShader = {
   fragmentShader:`
     #define PI 3.141592653589793
     #define E 2.718281828459045
-    #define NR_ITERATIONS 5.0
+    #define NR_ITERATIONS 20.0
     uniform sampler2D texOne;
     uniform vec2 resolution;
     uniform int direction;

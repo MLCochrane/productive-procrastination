@@ -29,7 +29,7 @@ const FinalShaderPass = {
     "varying highp vec2 vUv;",
 
     "vec4 getTexture(sampler2D texelToLinearTexture) {",
-      "return mapTexelToLinear(texture2D(texelToLinearTexture , vUv));",
+      "return linearToOutputTexel(texture2D(texelToLinearTexture , vUv));",
     "}",
 
     "void main(){",
