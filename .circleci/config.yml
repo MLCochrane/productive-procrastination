@@ -42,7 +42,7 @@ jobs:
           name: Deploy Over SSH
           command: |
             ls -la
-            rsync -a -e 'ssh' ./dist/ $SSH_USER@$SSH_HOST:/var/www/sketches.lukecochrane.com
+            rsync -r ./dist/ $SSH_USER@$SSH_HOST:/var/www/sketches.lukecochrane.com/public_html
 workflows:
   build-test-and-deploy:
       jobs:
