@@ -60,6 +60,6 @@
   "dependencies": {
     "gsap": "^3.5.1",
     "html-webpack-plugin": "^4.5.0",
-    "three": "^0.121.1"
+    "three": "^0.125.0"
   }
 }
