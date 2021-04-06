@@ -3,13 +3,12 @@
 	bottom: 0%;
 	right: 0%;
 	width: 50vw;
-	// height: 50vh;
 	padding: 20px;
 	border: 1px solid $dark-grey;
 	background: white;
 	transition: height 300ms;
 	@include media-query($big) {
-		height: 50vh;
+		height: 40vh;
 	}
 	&.isClosed {
 		height: 0px;
