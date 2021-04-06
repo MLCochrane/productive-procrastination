@@ -1,3 +1,7 @@
+/**
+ * Main logic from https://blog.mozvr.com/threejs-particles-recycling/
+ */
+
 import {
   BufferGeometry,
   Color,

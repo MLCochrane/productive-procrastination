@@ -167,11 +167,12 @@ export default class Particles {
   /**
    * Callback passed to resize event to handle updating camera and renderer size
    * @function onWindowResize
-   * @memberof Particles.prototype
+   * @memberof GlowProcess.prototype
    */
   onWindowResize() {
+    if (this.camera) this.camera.aspect = window.innerWidth / window.innerHeight;
     this.camera?.updateProjectionMatrix();
-    // this.renderer?.setSize(this.curX, this.curY);
+    this.renderer?.setSize(window.innerWidth, window.innerHeight);
   }
 
   /**
@@ -256,6 +257,7 @@ export default class Particles {
     };
 
     const delta = clock.getDelta() * spawnerOptions.timeScale;
+    const elapsed = clock.getElapsedTime();
     this.tick += delta;
 
     if ( this.tick < 0 ) this.tick = 0;
@@ -291,17 +293,17 @@ export default class Particles {
             (particles as ParticleSystem).lookup(),
           ),
           color: new Color(
-            position.y * 0.5 + 0.5,
-            position.x * 0.5 + 0.5,
-            1.0
+            position.y * Math.sin(elapsed / 5.) + 0.9,
+            position.x * Math.cos(elapsed / 5.) + 0.5,
+            Math.sin(elapsed / 5.)
           ),
           endColor: new Color(
             1.0,
             1.0,
             1.0,
           ),
-          lifeTime: 3.,
-          size: 40,
+          lifeTime: 5.,
+          size: 20,
         };
         particles?.spawnParticle(emission);
       }
