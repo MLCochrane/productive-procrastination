@@ -8,7 +8,7 @@ const paths = fs.readdirSync(path.join(__dirname, '../', 'src/js')).filter((el) 
 
 const pages = paths.map((el) => new HtmlWebpackPlugin({ // eslint-disable-line no-new
   filename: `${el}/index.html`, // specify filename or else will overwrite default index.html
-  inject: {},
+  inject: true,
   template: `src/views/pages/${el}.hbs`,
   templateParameters: {
     asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
@@ -70,7 +70,7 @@ module.exports = {
       SKETCH_PATHS: JSON.stringify(paths),
     }),
     new HtmlWebpackPlugin({
-      inject: {},
+      inject: true,
       template: 'src/views/pages/index.hbs',
       templateParameters: {
         asset_path: process.env.npm_lifecycle_event === 'dev' ? './src' : '',
