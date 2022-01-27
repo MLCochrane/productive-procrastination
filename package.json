@@ -62,6 +62,6 @@
     "@types/three": "^0.127.0",
     "gsap": "^3.6.1",
     "html-webpack-plugin": "^4.5.2",
-    "three": "^0.127.0"
+    "three": "^0.137.0"
   }
 }
